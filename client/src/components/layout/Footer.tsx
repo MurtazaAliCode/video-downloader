@@ -31,29 +31,29 @@ export function Footer() {
             <h3 className="font-semibold text-card-foreground mb-4">Features</h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li>
-                <a href="#" className="hover:text-primary transition-colors">
-                  Video Compression
-                </a>
+                <Link href="/features/compression">
+                  <a className="hover:text-primary transition-colors">Video Compression</a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="hover:text-primary transition-colors">
-                  Format Conversion
-                </a>
+                <Link href="/features/conversion">
+                  <a className="hover:text-primary transition-colors">Format Conversion</a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="hover:text-primary transition-colors">
-                  Video Trimming
-                </a>
+                <Link href="/features/trimming">
+                  <a className="hover:text-primary transition-colors">Video Trimming</a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="hover:text-primary transition-colors">
-                  Audio Extraction
-                </a>
+                <Link href="/features/audio">
+                  <a className="hover:text-primary transition-colors">Audio Extraction</a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="hover:text-primary transition-colors">
-                  Add Watermarks
-                </a>
+                <Link href="/features/watermarks">
+                  <a className="hover:text-primary transition-colors">Add Watermarks</a>
+                </Link>
               </li>
             </ul>
           </div>
@@ -78,14 +78,14 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <a href="#" className="hover:text-primary transition-colors">
-                  Feature Requests
-                </a>
+                <Link href="/feature-requests">
+                  <a className="hover:text-primary transition-colors">Feature Requests</a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="hover:text-primary transition-colors">
-                  Status Page
-                </a>
+                <Link href="/status">
+                  <a className="hover:text-primary transition-colors">Status Page</a>
+                </Link>
               </li>
             </ul>
           </div>
@@ -105,19 +105,19 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <a href="#" className="hover:text-primary transition-colors">
-                  DMCA Notice
-                </a>
+                <Link href="/dmca">
+                  <a className="hover:text-primary transition-colors">DMCA Notice</a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="hover:text-primary transition-colors">
-                  Cookie Policy
-                </a>
+                <Link href="/cookie-policy">
+                  <a className="hover:text-primary transition-colors">Cookie Policy</a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="hover:text-primary transition-colors">
-                  Disclaimer
-                </a>
+                <Link href="/disclaimer">
+                  <a className="hover:text-primary transition-colors">Disclaimer</a>
+                </Link>
               </li>
             </ul>
           </div>

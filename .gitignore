@@ -5,3 +5,11 @@ server/public
 vite.config.ts.*
 *.tar.gz
 .vercel
+downloads
+temp_downloads
+tmp
+.replit
+*.mp4
+*.mp3
+.gemini
+.env

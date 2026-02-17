@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Download, CheckCircle } from "lucide-react";
@@ -10,22 +10,8 @@ interface DownloadLinkProps {
 }
 
 export function DownloadLink({ jobId, fileName, onProcessAnother }: DownloadLinkProps) {
-  const [timeLeft, setTimeLeft] = useState(24 * 60 * 60); // 24 hours in seconds
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setTimeLeft((prev) => Math.max(0, prev - 1));
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, []);
-
-  const formatTime = (seconds: number) => {
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    const secs = seconds % 60;
-    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-  };
+  const [downloadStarted, setDownloadStarted] = useState(false);
+  const downloadTriggered = useRef(false);
 
   const handleDownload = () => {
     const downloadUrl = `/api/download/${jobId}`;
@@ -35,44 +21,58 @@ export function DownloadLink({ jobId, fileName, onProcessAnother }: DownloadLink
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    setDownloadStarted(true);
   };
 
+  // Auto-download on mount
+  useEffect(() => {
+    if (!downloadTriggered.current) {
+      handleDownload();
+      downloadTriggered.current = true;
+    }
+  }, [jobId]);
+
   return (
-    <Card>
+    <Card className="border-green-500/50 shadow-lg shadow-green-500/10">
       <CardHeader>
         <div className="text-center">
-          <div className="w-16 h-16 mx-auto mb-4 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
+          <div className="w-16 h-16 mx-auto mb-4 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
             <CheckCircle className="w-8 h-8 text-green-600 dark:text-green-400" />
           </div>
-          <CardTitle className="text-xl mb-2">Processing Complete!</CardTitle>
-          <p className="text-muted-foreground">Your video has been processed successfully.</p>
+          <CardTitle className="text-2xl mb-2 text-green-600 dark:text-green-400">Saved to your device!</CardTitle>
+          <p className="text-muted-foreground">Download has started automatically. If it didn't, click the button below.</p>
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Download Button */}
         <Button
           onClick={handleDownload}
-          className="w-full bg-green-600 hover:bg-green-700 text-white py-4 text-lg font-semibold transition-all"
+          className="w-full bg-green-600 hover:bg-green-700 text-white py-6 text-lg font-semibold transition-all hover:scale-[1.02]"
           data-testid="download-button"
         >
           <Download className="w-5 h-5 mr-2" />
-          Download Processed Video
+          Download Again
         </Button>
 
-        {/* Timer */}
-        <p className="text-xs text-muted-foreground text-center" data-testid="expiry-timer">
-          Download link expires in {formatTime(timeLeft)} • File will be automatically deleted after 24 hours
-        </p>
+        {/* Messaging */}
+        <div className="bg-muted/30 rounded-lg p-4 text-center">
+          <p className="text-sm font-medium text-green-600 dark:text-green-400">
+            ✓ Your video is now in your device's gallery/downloads.
+          </p>
+          <p className="text-[10px] text-muted-foreground mt-2">
+            The temporary file on our server will be cleared in 24 hours for security.
+          </p>
+        </div>
 
         {/* Process Another Video */}
         <div className="pt-4">
           <Button
             onClick={onProcessAnother}
             variant="outline"
-            className="w-full py-3 font-medium"
+            className="w-full py-3 font-medium border-primary/20 hover:bg-primary/5"
             data-testid="process-another-button"
           >
-            Process Another Video
+            Download Another Video
           </Button>
         </div>
       </CardContent>

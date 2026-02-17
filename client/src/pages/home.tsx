@@ -6,12 +6,14 @@ import { AdBanner, AdSidebar } from "@/components/layout/AdSlots";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { CheckCircle, Download, Link } from "lucide-react";
+import { CheckCircle, Download, Link, Monitor, Tablet, Smartphone, Sparkles } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import youtubeLogo from "@/assets/youtube.jpg";
 import facebookLogo from "@/assets/facebook.png";
 import instagramLogo from "@/assets/instagram.jpg";
+import tiktokLogo from "@/assets/tiktok.png";
 
 export default function Home() {
   const [, setLocation] = useLocation();
@@ -19,18 +21,21 @@ export default function Home() {
   const [videoUrl, setVideoUrl] = useState("");
   const [isDownloading, setIsDownloading] = useState(false);
   const [downloadFormat, setDownloadFormat] = useState("mp4");
+  const [isQualityDialogOpen, setIsQualityDialogOpen] = useState(false);
+  const [detectedPlatform, setDetectedPlatform] = useState<string>("");
 
   const detectPlatform = (url: string) => {
     if (url.includes('youtube.com') || url.includes('youtu.be')) return 'youtube';
     if (url.includes('facebook.com') || url.includes('fb.watch')) return 'facebook';
     if (url.includes('instagram.com')) return 'instagram';
+    if (url.includes('tiktok.com')) return 'tiktok';
     return 'unknown';
   };
 
   const validateUrl = (url: string) => {
     const platform = detectPlatform(url);
     if (platform === 'unknown') {
-      return { valid: false, message: 'Please enter a valid YouTube, Facebook, or Instagram video URL' };
+      return { valid: false, message: 'Please enter a valid YouTube, Facebook, Instagram, or TikTok video URL' };
     }
     try {
       new URL(url);
@@ -40,7 +45,7 @@ export default function Home() {
     }
   };
 
-  const handleDownload = async () => {
+  const handleInitialClick = () => {
     if (!videoUrl.trim()) {
       toast({
         variant: "destructive",
@@ -60,20 +65,25 @@ export default function Home() {
       return;
     }
 
+    setDetectedPlatform(validation.platform);
+    setIsQualityDialogOpen(true);
+  };
+
+  const startDownload = async (selectedQuality: string) => {
+    setIsQualityDialogOpen(false);
     setIsDownloading(true);
-    
+
     try {
       const response = await apiRequest('POST', '/api/download-video', {
         url: videoUrl,
         format: downloadFormat,
-        platform: validation.platform,
+        platform: detectedPlatform,
+        options: { quality: selectedQuality }
       });
-      
+
       const result = await response.json();
-      
-      // Redirect to processing page
       setLocation(`/processing/${result.jobId}`);
-      
+
     } catch (error) {
       console.error('Download error:', error);
       toast({
@@ -86,11 +96,40 @@ export default function Home() {
     }
   };
 
+  const qualityOptions = [
+    {
+      id: 'highest',
+      label: 'Ultra High (1080p)',
+      desc: 'Best for TV and desktop',
+      icon: <Monitor className="w-5 h-5" />,
+      tag: 'Recommended'
+    },
+    {
+      id: 'high',
+      label: 'High (720p)',
+      desc: 'Great for all devices',
+      icon: <Tablet className="w-5 h-5" />,
+      tag: 'Fast'
+    },
+    {
+      id: 'medium',
+      label: 'Standard (480p)',
+      desc: 'Good for mobile viewing',
+      icon: <Smartphone className="w-5 h-5" />,
+    },
+    {
+      id: 'low',
+      label: 'Low (360p)',
+      desc: 'Smallest file size',
+      icon: <Smartphone className="w-5 h-5" />,
+    },
+  ];
+
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background text-foreground">
       <Header />
       <AdBanner />
-      
+
       {/* Hero Section */}
       <section className="min-h-screen dark:gradient-bg-dark gradient-bg relative overflow-hidden">
         <div className="absolute inset-0 bg-background/5"></div>
@@ -103,7 +142,7 @@ export default function Home() {
               </span>
             </h1>
             <p className="text-xl text-white/90 max-w-2xl mx-auto mb-8">
-              Download videos from YouTube, Facebook, and Instagram in MP4 format. Fast, free, and easy to use.
+              Download videos from YouTube, Facebook, Instagram, and TikTok in MP4 format. Fast, free, and easy to use.
             </p>
           </div>
 
@@ -135,7 +174,7 @@ export default function Home() {
                         className="text-lg py-6"
                         data-testid="video-url-input"
                       />
-                      
+
                       {/* Platform Logos */}
                       <div className="text-center">
                         <p className="text-sm text-muted-foreground mb-3">Supported platforms:</p>
@@ -152,11 +191,15 @@ export default function Home() {
                             <img src={instagramLogo} alt="Instagram" className="w-12 h-12 rounded-lg" />
                             <span className="text-xs text-muted-foreground">Instagram</span>
                           </div>
+                          <div className="flex flex-col items-center space-y-2">
+                            <img src={tiktokLogo} alt="TikTok" className="w-12 h-12 rounded-lg object-contain bg-white p-1" />
+                            <span className="text-xs text-muted-foreground">TikTok</span>
+                          </div>
                         </div>
                       </div>
 
                       <Button
-                        onClick={handleDownload}
+                        onClick={handleInitialClick}
                         disabled={isDownloading || !videoUrl.trim()}
                         className="w-full btn-gradient text-primary-foreground py-6 text-lg font-semibold hover:scale-[1.02] transition-all"
                         data-testid="download-button"
@@ -172,10 +215,8 @@ export default function Home() {
 
             {/* Sidebar with Ads and Features */}
             <div className="lg:col-span-1 space-y-6">
-              {/* AdSense Sidebar */}
               <AdSidebar />
 
-              {/* Features List */}
               <Card>
                 <CardHeader>
                   <CardTitle className="text-lg">Key Features</CardTitle>
@@ -200,7 +241,6 @@ export default function Home() {
                 </CardContent>
               </Card>
 
-              {/* Quick Stats */}
               <Card>
                 <CardHeader>
                   <CardTitle className="text-lg">Quick Stats</CardTitle>
@@ -223,6 +263,42 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Quality Selection Dialog */}
+      <Dialog open={isQualityDialogOpen} onOpenChange={setIsQualityDialogOpen}>
+        <DialogContent className="sm:max-w-md bg-card/95 backdrop-blur-xl border-primary/20">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold flex items-center gap-2 text-card-foreground">
+              <Sparkles className="w-6 h-6 text-yellow-500" />
+              Select Video Quality
+            </DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            {qualityOptions.map((opt) => (
+              <button
+                key={opt.id}
+                onClick={() => startDownload(opt.id)}
+                className="flex items-center justify-between p-4 rounded-xl border border-primary/10 hover:border-primary/40 hover:bg-primary/5 transition-all group text-left"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+                    {opt.icon}
+                  </div>
+                  <div>
+                    <p className="font-bold text-card-foreground">{opt.label}</p>
+                    <p className="text-xs text-muted-foreground">{opt.desc}</p>
+                  </div>
+                </div>
+                {opt.tag && (
+                  <span className="text-[10px] font-bold uppercase tracking-wider bg-primary/20 text-primary px-2 py-1 rounded-md">
+                    {opt.tag}
+                  </span>
+                )}
+              </button>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* Features Section */}
       <section className="py-20 bg-background">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -231,7 +307,7 @@ export default function Home() {
               Download Videos from Popular Platforms
             </h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Easily download videos from YouTube, Facebook, and Instagram in MP4 format
+              Easily download videos from YouTube, Facebook, Instagram, and TikTok in MP4 format
             </p>
           </div>
 
@@ -244,7 +320,7 @@ export default function Home() {
                 color: "red",
               },
               {
-                title: "Facebook Videos", 
+                title: "Facebook Videos",
                 desc: "Download videos from Facebook posts and pages. Get your favorite videos offline.",
                 features: ["Public videos", "Page content", "Story downloads"],
                 color: "blue",
@@ -254,6 +330,12 @@ export default function Home() {
                 desc: "Download Instagram videos, reels, and IGTV content in original quality.",
                 features: ["Reels & IGTV", "Stories & posts", "Original quality"],
                 color: "pink",
+              },
+              {
+                title: "TikTok Videos",
+                desc: "Download TikTok videos without watermark in high quality MP4 format. Direct and fast download.",
+                features: ["Watermark free", "Viral content", "Easy sharing"],
+                color: "cyan",
               },
               {
                 title: "High Quality",
