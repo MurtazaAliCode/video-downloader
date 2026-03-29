@@ -1,5 +1,7 @@
-import { type Job, type InsertJob, type BlogPost, type InsertBlogPost, type ContactMessage, type InsertContactMessage } from "./shared/schema.js";
+import { jobs, blogPosts, contactMessages, type Job, type InsertJob, type BlogPost, type InsertBlogPost, type ContactMessage, type InsertContactMessage } from "../shared/schema.js";
 import { randomUUID } from "crypto";
+import { db } from "./db.js";
+import { eq, lt, desc } from "drizzle-orm";
 
 export interface IStorage {
   // Jobs
@@ -23,16 +25,12 @@ export interface IStorage {
   getContactMessages(): Promise<ContactMessage[]>;
 }
 
-export class MemStorage implements IStorage {
-  private jobs: Map<string, Job> = new Map();
-  private blogPosts: Map<string, BlogPost> = new Map();
-  private contactMessages: Map<string, ContactMessage> = new Map();
-
+export class DatabaseStorage implements IStorage {
   constructor() {
-    this.seedBlogPosts();
+    this.seedBlogPosts().catch(console.error);
   }
 
-  private seedBlogPosts() {
+  private async seedBlogPosts() {
     const posts: InsertBlogPost[] = [
       {
         slug: 'how-to-compress-video-online',
@@ -535,147 +533,98 @@ Start protecting your video content with professional watermarks using VidDonloa
       }
     ];
 
-    posts.forEach(post => {
-      const id = randomUUID();
-      const blogPost: BlogPost = {
+    const existing = await db.select().from(blogPosts).limit(1);
+    if (existing.length > 0) return;
+
+    for (const post of posts) {
+      await db.insert(blogPosts).values({
         ...post,
-        id,
         author: post.author || 'VidDonloader Team',
         published: post.published ?? true,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-      this.blogPosts.set(id, blogPost);
-    });
+      });
+    }
   }
 
   // Job methods
   async createJob(insertJob: InsertJob): Promise<Job> {
-    const id = randomUUID();
-    const job: Job = {
+    const [job] = await db.insert(jobs).values({
       ...insertJob,
-      id,
-      title: null,
       downloadFormat: insertJob.downloadFormat || 'mp4',
       status: 'pending',
       progress: 0,
-      outputPath: null,
-      downloadUrl: null,
-      errorMessage: null,
-      createdAt: new Date(),
-      completedAt: null,
-      expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours from now
-    };
-    this.jobs.set(id, job);
+    }).returning();
     return job;
   }
 
   async getJob(id: string): Promise<Job | undefined> {
-    return this.jobs.get(id);
+    const [job] = await db.select().from(jobs).where(eq(jobs.id, id));
+    return job;
   }
 
   async updateJobStatus(id: string, status: string, progress?: number): Promise<void> {
-    const job = this.jobs.get(id);
-    if (job) {
-      job.status = status;
-      if (progress !== undefined) {
-        job.progress = progress;
-      }
-      if (status === 'completed' || status === 'failed') {
-        job.completedAt = new Date();
-      }
-      this.jobs.set(id, job);
-    }
+    const updates: Partial<Job> = { status };
+    if (progress !== undefined) updates.progress = progress;
+    if (status === 'completed' || status === 'failed') updates.completedAt = new Date();
+    
+    await db.update(jobs).set(updates).where(eq(jobs.id, id));
   }
 
   async updateJobOutput(id: string, outputPath: string): Promise<void> {
-    const job = this.jobs.get(id);
-    if (job) {
-      job.outputPath = outputPath;
-      this.jobs.set(id, job);
-    }
+    await db.update(jobs).set({ outputPath }).where(eq(jobs.id, id));
   }
 
   async updateJobDownloadUrl(id: string, downloadUrl: string): Promise<void> {
-    const job = this.jobs.get(id);
-    if (job) {
-      job.downloadUrl = downloadUrl;
-      this.jobs.set(id, job);
-    }
+    await db.update(jobs).set({ downloadUrl }).where(eq(jobs.id, id));
   }
 
   async updateJobError(id: string, errorMessage: string): Promise<void> {
-    const job = this.jobs.get(id);
-    if (job) {
-      job.errorMessage = errorMessage;
-      job.status = 'failed';
-      job.completedAt = new Date();
-      this.jobs.set(id, job);
-    }
+    await db.update(jobs).set({ errorMessage, status: 'failed', completedAt: new Date() }).where(eq(jobs.id, id));
   }
 
   async getExpiredJobs(): Promise<Job[]> {
     const now = new Date();
-    return Array.from(this.jobs.values()).filter(job => job.expiresAt < now);
+    return await db.select().from(jobs).where(lt(jobs.expiresAt, now));
   }
 
   async deleteJob(id: string): Promise<void> {
-    this.jobs.delete(id);
+    await db.delete(jobs).where(eq(jobs.id, id));
   }
 
   // Blog Post methods
   async getBlogPosts(): Promise<BlogPost[]> {
-    return Array.from(this.blogPosts.values())
-      .filter(post => post.published)
-      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+    return await db.select().from(blogPosts).where(eq(blogPosts.published, true)).orderBy(desc(blogPosts.createdAt));
   }
 
   async getBlogPost(slug: string): Promise<BlogPost | undefined> {
-    return Array.from(this.blogPosts.values()).find(
-      post => post.slug === slug && post.published
-    );
+    const [post] = await db.select().from(blogPosts).where(eq(blogPosts.slug, slug));
+    if (post && post.published) return post;
+    return undefined;
   }
 
   async createBlogPost(insertPost: InsertBlogPost): Promise<BlogPost> {
-    const id = randomUUID();
-    const post: BlogPost = {
+    const [post] = await db.insert(blogPosts).values({
       ...insertPost,
-      id,
       author: insertPost.author || 'VidDonloader Team',
       published: insertPost.published ?? true,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-    this.blogPosts.set(id, post);
+    }).returning();
     return post;
   }
 
   async updateBlogPost(id: string, updates: Partial<InsertBlogPost>): Promise<BlogPost> {
-    const post = this.blogPosts.get(id);
-    if (!post) {
-      throw new Error('Blog post not found');
-    }
-    const updatedPost = { ...post, ...updates, updatedAt: new Date() };
-    this.blogPosts.set(id, updatedPost);
-    return updatedPost;
+    const [post] = await db.update(blogPosts).set({ ...updates, updatedAt: new Date() }).where(eq(blogPosts.id, id)).returning();
+    if (!post) throw new Error('Blog post not found');
+    return post;
   }
 
   // Contact Message methods
   async createContactMessage(insertMessage: InsertContactMessage): Promise<ContactMessage> {
-    const id = randomUUID();
-    const message: ContactMessage = {
-      ...insertMessage,
-      id,
-      createdAt: new Date(),
-    };
-    this.contactMessages.set(id, message);
+    const [message] = await db.insert(contactMessages).values(insertMessage).returning();
     return message;
   }
 
   async getContactMessages(): Promise<ContactMessage[]> {
-    return Array.from(this.contactMessages.values())
-      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+    return await db.select().from(contactMessages).orderBy(desc(contactMessages.createdAt));
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();

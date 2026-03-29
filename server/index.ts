@@ -1,3 +1,4 @@
+import "dotenv/config";
 import express, { type Request, Response, NextFunction } from "express";
 import http from "http"; // Import http module
 import cors from "cors"; // CORS middleware import
@@ -91,4 +92,23 @@ app.use((req, res, next) => {
   }, () => {
     log(`serving on port ${port}`);
   });
+  // Periodic Cleanup: Runs every hour to delete jobs older than 24 hours (from database and disk)
+  setInterval(async () => {
+    try {
+      const { storage } = await import("./storage.js");
+      const fs = await import("fs/promises");
+      
+      const expiredJobs = await storage.getExpiredJobs();
+      for (const job of expiredJobs) {
+        if (job.outputPath) {
+          await fs.unlink(job.outputPath).catch(() => {});
+        }
+        await storage.deleteJob(job.id);
+        log(`Cleaned up expired job: ${job.id}`);
+      }
+    } catch (error) {
+      log(`Cleanup error: ${error}`);
+    }
+  }, 1000 * 60 * 60);
+
 })();
