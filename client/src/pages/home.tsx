@@ -10,10 +10,30 @@ import { CheckCircle, Download, Link, Monitor, Tablet, Smartphone, Sparkles } fr
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { motion } from "framer-motion";
 import youtubeLogo from "@/assets/youtube.jpg";
 import facebookLogo from "@/assets/facebook.png";
 import instagramLogo from "@/assets/instagram.jpg";
 import tiktokLogo from "@/assets/tiktok.png";
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { y: 20, opacity: 0 },
+  visible: {
+    y: 0,
+    opacity: 1,
+    transition: { duration: 0.5, ease: "easeOut" }
+  },
+};
 
 export default function Home() {
   const [, setLocation] = useLocation();
@@ -126,33 +146,40 @@ export default function Home() {
   ];
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-background text-foreground selection:bg-primary selection:text-white">
       <Header />
       <AdBanner />
 
       {/* Hero Section */}
-      <section className="min-h-screen dark:gradient-bg-dark gradient-bg relative overflow-hidden">
-        <div className="absolute inset-0 bg-background/5"></div>
+      <section className="min-h-screen dark:gradient-bg-dark gradient-bg relative overflow-hidden flex items-center">
+        {/* Animated Background Blobs */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl animate-blob"></div>
+          <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-blob animation-delay-2000"></div>
+          <div className="absolute bottom-1/4 left-1/2 w-96 h-96 bg-pink-500/20 rounded-full blur-3xl animate-blob animation-delay-4000"></div>
+        </div>
+
+        <div className="absolute inset-0 bg-background/10 backdrop-blur-[2px]"></div>
+
         <div className="relative container mx-auto px-4 sm:px-6 lg:px-8 py-20">
-          <div className="text-center mb-12">
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-white mb-6">
+          <div className="text-center mb-16">
+            <h1 className="text-5xl sm:text-6xl md:text-7xl font-bold text-white mb-6 tracking-tight">
               Download Videos
-              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-pink-300">
+              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-pink-300 to-primary-foreground drop-shadow-sm">
                 in MP4 Format
               </span>
             </h1>
-            <p className="text-xl text-white/90 max-w-2xl mx-auto mb-8">
-              Download videos from YouTube, Facebook, Instagram, and TikTok in MP4 format. Fast, free, and easy to use.
+            <p className="text-xl md:text-2xl text-white/90 max-w-2xl mx-auto mb-8 font-medium">
+              Download videos from YouTube, Facebook, Instagram, and TikTok. Fast, free, and designed for your privacy.
             </p>
           </div>
 
-          {/* Main Content Area */}
           <div className="max-w-6xl mx-auto grid lg:grid-cols-4 gap-8">
             {/* URL Input and Download Area */}
             <div className="lg:col-span-3 space-y-8">
               {/* URL Input Box */}
-              <Card>
-                <CardContent className="p-8">
+              <Card className="glass-card shadow-2xl border-white/30">
+                <CardContent className="p-8 md:p-12">
                   <div className="space-y-6">
                     <div className="text-center">
                       <div className="w-16 h-16 mx-auto bg-primary/10 rounded-full flex items-center justify-center mb-4">
@@ -217,23 +244,23 @@ export default function Home() {
             <div className="lg:col-span-1 space-y-6">
               <AdSidebar />
 
-              <Card>
+              <Card className="glass-card border-white/20">
                 <CardHeader>
                   <CardTitle className="text-lg">Key Features</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   {[
-                    { title: "100% Free", desc: "No registration required" },
-                    { title: "High Quality", desc: "Download in MP4 format" },
-                    { title: "Fast Downloads", desc: "Direct download links" },
-                    { title: "Safe & Secure", desc: "No malware or ads" },
+                    { title: "100% Free", desc: "No registration required", iconColor: "bg-green-500" },
+                    { title: "High Quality", desc: "Download in MP4 format", iconColor: "bg-blue-500" },
+                    { title: "Fast Downloads", desc: "Direct download links", iconColor: "bg-purple-500" },
+                    { title: "Safe & Secure", desc: "No malware or ads", iconColor: "bg-yellow-500" },
                   ].map((feature, index) => (
-                    <div key={index} className="flex items-start space-x-3">
-                      <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center mt-0.5">
-                        <CheckCircle className="w-3 h-3 text-white" />
+                    <div key={index} className="flex items-start space-x-3 group">
+                      <div className={`w-6 h-6 ${feature.iconColor} rounded-full flex items-center justify-center mt-0.5 shadow-sm group-hover:scale-110 transition-transform`}>
+                        <CheckCircle className="w-3.5 h-3.5 text-white" />
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-card-foreground">{feature.title}</p>
+                        <p className="text-sm font-semibold text-card-foreground">{feature.title}</p>
                         <p className="text-xs text-muted-foreground">{feature.desc}</p>
                       </div>
                     </div>
@@ -241,19 +268,21 @@ export default function Home() {
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="glass-card border-white/20 overflow-hidden">
                 <CardHeader>
                   <CardTitle className="text-lg">Quick Stats</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-6">
                   {[
-                    { value: "100,000+", label: "Videos Downloaded" },
-                    { value: "25,000+", label: "Happy Users" },
-                    { value: "MP4", label: "Output Format" },
+                    { value: "100,000+", label: "Videos Downloaded", sub: "Global users" },
+                    { value: "25,000+", label: "Happy Users", sub: "Daily active" },
+                    { value: "MP4", label: "Output Format", sub: "High compatibility" },
                   ].map((stat, index) => (
-                    <div key={index} className="text-center">
-                      <div className="text-2xl font-bold text-primary">{stat.value}</div>
-                      <div className="text-sm text-muted-foreground">{stat.label}</div>
+                    <div key={index} className="text-center relative">
+                      <div className="text-3xl font-extrabold text-white drop-shadow-md">{stat.value}</div>
+                      <div className="text-sm font-semibold text-white/80">{stat.label}</div>
+                      <div className="text-[10px] text-white/40 uppercase tracking-tighter">{stat.sub}</div>
+                      {index < 2 && <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-12 h-px bg-white/10"></div>}
                     </div>
                   ))}
                 </CardContent>
@@ -265,10 +294,10 @@ export default function Home() {
 
       {/* Quality Selection Dialog */}
       <Dialog open={isQualityDialogOpen} onOpenChange={setIsQualityDialogOpen}>
-        <DialogContent className="sm:max-w-md bg-card/95 backdrop-blur-xl border-primary/20">
+        <DialogContent className="sm:max-w-md glass-card backdrop-blur-2xl border-white/20 shadow-2xl">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-bold flex items-center gap-2 text-card-foreground">
-              <Sparkles className="w-6 h-6 text-yellow-500" />
+            <DialogTitle className="text-2xl font-bold flex items-center gap-2 text-white">
+              <Sparkles className="w-6 h-6 text-yellow-400 animate-pulse" />
               Select Video Quality
             </DialogTitle>
           </DialogHeader>
@@ -277,19 +306,19 @@ export default function Home() {
               <button
                 key={opt.id}
                 onClick={() => startDownload(opt.id)}
-                className="flex items-center justify-between p-4 rounded-xl border border-primary/10 hover:border-primary/40 hover:bg-primary/5 transition-all group text-left"
+                className="flex items-center justify-between p-4 rounded-2xl border border-white/10 hover:border-white/40 hover:bg-white/10 transition-all group text-left"
               >
                 <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+                  <div className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center text-white group-hover:scale-110 transition-transform">
                     {opt.icon}
                   </div>
                   <div>
-                    <p className="font-bold text-card-foreground">{opt.label}</p>
-                    <p className="text-xs text-muted-foreground">{opt.desc}</p>
+                    <p className="font-bold text-white">{opt.label}</p>
+                    <p className="text-xs text-white/60">{opt.desc}</p>
                   </div>
                 </div>
                 {opt.tag && (
-                  <span className="text-[10px] font-bold uppercase tracking-wider bg-primary/20 text-primary px-2 py-1 rounded-md">
+                  <span className="text-[10px] font-bold uppercase tracking-wider bg-yellow-500/20 text-yellow-400 px-3 py-1.5 rounded-full border border-yellow-500/30">
                     {opt.tag}
                   </span>
                 )}
@@ -300,14 +329,14 @@ export default function Home() {
       </Dialog>
 
       {/* Features Section */}
-      <section className="py-20 bg-background">
+      <section className="py-24 bg-background relative">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              Download Videos from Popular Platforms
+          <div className="text-center mb-20">
+            <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-6 tracking-tight">
+              Powerful Video Downloading
             </h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Easily download videos from YouTube, Facebook, Instagram, and TikTok in MP4 format
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto font-medium">
+              Everything you need to save your favorite content from any major platform.
             </p>
           </div>
 
@@ -356,22 +385,27 @@ export default function Home() {
                 color: "yellow",
               },
             ].map((feature, index) => (
-              <Card key={index} className="card-hover">
-                <CardContent className="p-6">
-                  <div className={`w-12 h-12 bg-${feature.color}-500/10 rounded-lg flex items-center justify-center mb-4`}>
-                    <div className={`w-6 h-6 text-${feature.color}-500`}>
-                      <CheckCircle />
+              <div key={index}>
+                <Card className="card-hover border-border/50 group h-full">
+                  <CardContent className="p-8">
+                    <div className={`w-14 h-14 bg-${feature.color}-500/10 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
+                      <div className={`w-7 h-7 text-${feature.color}-500`}>
+                        <CheckCircle />
+                      </div>
                     </div>
-                  </div>
-                  <h3 className="text-xl font-semibold text-card-foreground mb-3">{feature.title}</h3>
-                  <p className="text-muted-foreground mb-4">{feature.desc}</p>
-                  <ul className="text-sm text-muted-foreground space-y-1">
-                    {feature.features.map((item, i) => (
-                      <li key={i}>• {item}</li>
-                    ))}
-                  </ul>
-                </CardContent>
-              </Card>
+                    <h3 className="text-2xl font-bold text-card-foreground mb-4">{feature.title}</h3>
+                    <p className="text-muted-foreground mb-6 leading-relaxed">{feature.desc}</p>
+                    <ul className="text-sm text-muted-foreground space-y-2">
+                      {feature.features.map((item, i) => (
+                        <li key={i} className="flex items-center gap-2">
+                          <div className={`w-1.5 h-1.5 rounded-full bg-${feature.color}-500`} />
+                          {item}
+                        </li>
+                      ))}
+                    </ul>
+                  </CardContent>
+                </Card>
+              </div>
             ))}
           </div>
         </div>
