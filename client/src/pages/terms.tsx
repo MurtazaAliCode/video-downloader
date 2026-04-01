@@ -108,13 +108,13 @@ export default function Terms() {
                 <p>
                   By uploading content, you grant VidDonloader a limited, temporary, non-exclusive license to process your 
                   videos solely for the purpose of providing our service. This license expires when your files are 
-                  automatically deleted after 24 hours.
+                  automatically deleted after 12 hours.
                 </p>
 
                 <h3>Processed Content</h3>
                 <p>
                   You own the processed output files. We do not claim any ownership rights to your original or processed content. 
-                  You are responsible for downloading your processed files within the 24-hour retention period.
+                  You are responsible for downloading your processed files within the 12-hour retention period.
                 </p>
               </CardContent>
             </Card>
@@ -129,7 +129,7 @@ export default function Terms() {
                   Key points include:
                 </p>
                 <ul>
-                  <li>All uploaded files are automatically deleted after 24 hours</li>
+                  <li>All uploaded files are automatically deleted after 12 hours</li>
                   <li>We do not store, analyze, or share your video content</li>
                   <li>We do not collect personal information except as necessary for service operation</li>
                   <li>We implement security measures to protect your data during processing</li>

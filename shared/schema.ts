@@ -17,7 +17,7 @@ export const jobs = pgTable("jobs", {
   errorMessage: text("error_message"),
   createdAt: timestamp("created_at").notNull().default(sql`now()`),
   completedAt: timestamp("completed_at"),
-  expiresAt: timestamp("expires_at").notNull().default(sql`now() + interval '24 hours'`),
+  expiresAt: timestamp("expires_at").notNull().default(sql`now() + interval '12 hours'`),
 });
 
 export const blogPosts = pgTable("blog_posts", {

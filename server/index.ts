@@ -92,7 +92,7 @@ app.use((req, res, next) => {
   }, () => {
     log(`serving on port ${port}`);
   });
-  // Periodic Cleanup: Runs every hour to delete jobs older than 24 hours (from database and disk)
+  // Periodic Cleanup: Runs every hour to delete jobs older than 12 hours (from database and disk)
   setInterval(async () => {
     try {
       const { storage } = await import("./storage.js");

@@ -75,7 +75,7 @@ export function useProcessing(): UseProcessingReturn {
         size: file.size,
         type: file.type,
         uploadedAt: new Date(),
-        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
+        expiresAt: new Date(Date.now() + 12 * 60 * 60 * 1000), // 12 hours
       });
       
       toast({

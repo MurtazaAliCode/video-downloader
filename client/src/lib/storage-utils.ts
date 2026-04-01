@@ -191,10 +191,10 @@ export function generateFileId(): string {
   return `${timestamp}_${random}`;
 }
 
-// Calculate file expiration (24 hours from now)
+// Calculate file expiration (12 hours from now)
 export function calculateExpirationTime(): Date {
   const now = new Date();
-  return new Date(now.getTime() + 24 * 60 * 60 * 1000); // 24 hours
+  return new Date(now.getTime() + 12 * 60 * 60 * 1000); // 12 hours
 }
 
 // Check if file has expired
@@ -294,7 +294,7 @@ export function cleanupExpiredFiles(): void {
     
     Object.entries(jobs).forEach(([jobId, job]) => {
       const createdAt = new Date(job.createdAt);
-      const expiresAt = new Date(createdAt.getTime() + 24 * 60 * 60 * 1000);
+      const expiresAt = new Date(createdAt.getTime() + 12 * 60 * 60 * 1000);
       
       if (!isFileExpired(expiresAt)) {
         validJobs[jobId] = job;

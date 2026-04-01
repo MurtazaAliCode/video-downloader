@@ -2,7 +2,7 @@
 
 ## Overview
 
-VidDonloader is a modern, AdSense-friendly video processing web application built for personal use. The application allows users to upload videos and perform various operations like compression, format conversion, trimming, audio extraction, and watermarking. Built with a focus on privacy and security, all files are automatically deleted after 24 hours, and the tool is designed exclusively for personal, non-commercial use.
+VidDonloader is a modern, AdSense-friendly video processing web application built for personal use. The application allows users to upload videos and perform various operations like compression, format conversion, trimming, audio extraction, and watermarking. Built with a focus on privacy and security, all files are automatically deleted after 12 hours, and the tool is designed exclusively for personal, non-commercial use.
 
 The project follows a full-stack architecture with React/TypeScript frontend, Express backend, and PostgreSQL database with Drizzle ORM. It's optimized for deployment on Vercel with serverless functions and includes a blog system for SEO purposes.
 
@@ -39,7 +39,7 @@ Preferred communication style: Simple, everyday language.
 - **Supported Formats**: MP4, AVI, MOV input files
 - **Operations**: Compression, format conversion, trimming, audio extraction, watermarking
 - **Job Management**: Asynchronous processing with progress tracking and status updates
-- **File Lifecycle**: 24-hour automatic expiration with cleanup mechanisms
+- **File Lifecycle**: 12-hour automatic expiration with cleanup mechanisms
 
 ### Content Management
 - **Blog System**: Markdown-based content with in-memory storage (designed for database integration)

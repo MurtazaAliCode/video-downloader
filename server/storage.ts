@@ -284,7 +284,7 @@ Need to extract audio from your videos? Whether it's for podcasts, music, or voi
 
 4. **Download Your Audio**
    - Download link appears when ready
-   - Files automatically deleted after 24 hours
+   - Files automatically deleted after 12 hours
    - Keep your extracted audio safe
 
 ## Quality Considerations

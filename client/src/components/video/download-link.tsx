@@ -60,7 +60,7 @@ export function DownloadLink({ jobId, fileName, onProcessAnother }: DownloadLink
             ✓ Your video is now in your device's gallery/downloads.
           </p>
           <p className="text-[10px] text-muted-foreground mt-2">
-            The temporary file on our server will be cleared in 24 hours for security.
+            The temporary file on our server will be cleared in 12 hours for security.
           </p>
         </div>
 

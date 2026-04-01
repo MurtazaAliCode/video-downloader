@@ -162,17 +162,28 @@ export default function Home() {
         <div className="absolute inset-0 bg-background/10 backdrop-blur-[2px]"></div>
 
         <div className="relative container mx-auto px-4 sm:px-6 lg:px-8 py-20">
-          <div className="text-center mb-16">
-            <h1 className="text-5xl sm:text-6xl md:text-7xl font-bold text-white mb-6 tracking-tight">
+          <motion.div 
+            initial="hidden"
+            animate="visible"
+            variants={containerVariants}
+            className="text-center mb-16"
+          >
+            <motion.h1 
+              variants={itemVariants}
+              className="text-5xl sm:text-6xl md:text-7xl font-bold text-white mb-6 tracking-tight"
+            >
               Download Videos
               <span className="block text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-pink-300 to-primary-foreground drop-shadow-sm">
                 in MP4 Format
               </span>
-            </h1>
-            <p className="text-xl md:text-2xl text-white/90 max-w-2xl mx-auto mb-8 font-medium">
+            </motion.h1>
+            <motion.p 
+              variants={itemVariants}
+              className="text-xl md:text-2xl text-white/90 max-w-2xl mx-auto mb-8 font-medium"
+            >
               Download videos from YouTube, Facebook, Instagram, and TikTok. Fast, free, and designed for your privacy.
-            </p>
-          </div>
+            </motion.p>
+          </motion.div>
 
           <div className="max-w-6xl mx-auto grid lg:grid-cols-4 gap-8">
             {/* URL Input and Download Area */}

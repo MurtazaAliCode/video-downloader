@@ -51,7 +51,7 @@ export default function About() {
                   },
                   {
                     title: "Privacy First",
-                    desc: "Your files are automatically deleted after 24 hours"
+                    desc: "Your files are automatically deleted after 12 hours"
                   },
                   {
                     title: "Legal & Compliant",
@@ -104,7 +104,7 @@ export default function About() {
                 },
                 {
                   title: "Privacy Protection",
-                  desc: "Secure processing with automatic file deletion after 24 hours.",
+                  desc: "Secure processing with automatic file deletion after 12 hours.",
                   icon: "Privacy"
                 }
               ].map((feature, index) => (
@@ -131,7 +131,7 @@ export default function About() {
                 { value: "50,000+", label: "Videos Processed" },
                 { value: "15,000+", label: "Happy Users" },
                 { value: "500MB", label: "Max File Size" },
-                { value: "24 Hours", label: "File Retention" },
+                { value: "12 Hours", label: "File Retention" },
               ].map((stat, index) => (
                 <div key={index}>
                   <div className="text-3xl font-bold text-primary mb-2">{stat.value}</div>

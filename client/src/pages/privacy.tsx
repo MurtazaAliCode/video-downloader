@@ -80,7 +80,7 @@ export default function Privacy() {
                 
                 <p><strong>We do not:</strong></p>
                 <ul>
-                  <li>Store or share your videos beyond the 24-hour processing period</li>
+                  <li>Store or share your videos beyond the 12-hour processing period</li>
                   <li>Use your videos for any purpose other than processing</li>
                   <li>Sell, rent, or share your personal information with third parties</li>
                   <li>Track your browsing behavior across other websites</li>
@@ -95,7 +95,7 @@ export default function Privacy() {
               <CardContent className="prose dark:prose-invert max-w-none">
                 <h3>Automatic File Deletion</h3>
                 <p>
-                  All uploaded and processed video files are automatically deleted from our servers after 24 hours. 
+                  All uploaded and processed video files are automatically deleted from our servers after 12 hours. 
                   This ensures your content remains private and doesn't accumulate on our systems.
                 </p>
                 
