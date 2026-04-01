@@ -37,7 +37,8 @@ export async function downloadVideoWithYtDlp(
             'add-header': [
                 'Accept-Language: en-US,en;q=0.9',
                 'Referer: https://www.google.com/'
-            ]
+            ],
+            'ffmpeg-location': './ffmpeg'
         };
 
         // Run download
