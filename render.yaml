@@ -1,3 +1,4 @@
+version: 1
 services:
   - type: web
     name: vid-downloader-pro
@@ -9,6 +10,6 @@ services:
       - key: NODE_ENV
         value: production
       - key: DATABASE_URL
-        sync: false # This will prompt you to enter the URL manually during setup
+        generateValue: false # This tells Render to ask for it if missing
       - key: PORT
         value: 10000
