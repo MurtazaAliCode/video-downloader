@@ -9,8 +9,6 @@ services:
       - key: NODE_ENV
         value: production
       - key: DATABASE_URL
-        fromDatabase:
-          name: video-downloader-db # Change this if you create a database on Render, otherwise provide manually
-          property: connectionString
+        sync: false # This will prompt you to enter the URL manually during setup
       - key: PORT
         value: 10000
