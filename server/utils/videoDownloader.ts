@@ -34,13 +34,18 @@ export async function downloadVideoWithYtDlp(
             'ignore-errors': false,
             'no-check-certificates': true,
             'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-            'extractor-args': 'youtube:player_client=android,web',
-            'concurrent-fragments': 5, // Download multiple fragments at once
-            'buffer-size': '1024K',   // Larger buffer for better throughput
-            'hls-prefer-native': true, // Use native HLS downloader for better speed
+            'extractor-args': 'youtube:player_client=ios,android,web',
+            'concurrent-fragments': 5, 
+            'buffer-size': '1024K',
+            'hls-prefer-native': true,
             'add-header': [
+                'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
                 'Accept-Language: en-US,en;q=0.9',
-                'Referer: https://www.google.com/'
+                'Sec-Ch-Ua: "Not_A Brand";v="8", "Chromium";v="120", "Google Chrome";v="120"',
+                'Sec-Ch-Ua-Mobile: ?0',
+                'Sec-Ch-Ua-Platform: "Windows"',
+                'Referer: https://www.youtube.com/',
+                'Origin: https://www.youtube.com'
             ],
             'ffmpeg-location': './ffmpeg'
         };
