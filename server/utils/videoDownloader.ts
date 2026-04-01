@@ -5,6 +5,7 @@ import fs from 'fs/promises';
 
 // Production mein hum ./yt-dl-p manual binary use karenge (Render rate limit bypass karne ke liye)
 const binPath = path.resolve(process.cwd(), 'yt-dlp');
+const cookiesPath = path.resolve(process.cwd(), 'cookies.txt');
 const ytdlp = process.env.NODE_ENV === 'production' ? create(binPath) : youtubedl;
 
 /**
@@ -47,7 +48,8 @@ export async function downloadVideoWithYtDlp(
                 'Referer: https://www.youtube.com/',
                 'Origin: https://www.youtube.com'
             ],
-            'ffmpeg-location': './ffmpeg'
+            'ffmpeg-location': './ffmpeg',
+            'cookie': cookiesPath
         };
 
         // Run download
@@ -94,6 +96,7 @@ export async function getTitleFromYtDlp(videoUrl: string): Promise<string | null
             // @ts-ignore
             'no-check-certificates': true,
             'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'cookie': cookiesPath,
         });
 
         let jsonOutput: any;
