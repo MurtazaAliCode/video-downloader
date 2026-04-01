@@ -49,7 +49,7 @@ export async function downloadVideoWithYtDlp(
                 'Origin: https://www.youtube.com'
             ],
             'ffmpeg-location': './ffmpeg',
-            'cookie': cookiesPath
+            'cookies': cookiesPath
         };
 
         // Run download
@@ -96,7 +96,7 @@ export async function getTitleFromYtDlp(videoUrl: string): Promise<string | null
             // @ts-ignore
             'no-check-certificates': true,
             'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-            'cookie': cookiesPath,
+            'cookies': cookiesPath,
         });
 
         let jsonOutput: any;
