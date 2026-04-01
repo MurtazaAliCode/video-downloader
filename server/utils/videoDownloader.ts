@@ -1,7 +1,11 @@
 // @ts-ignore
-import youtubedl from 'youtube-dl-exec';
+import youtubedl, { create } from 'youtube-dl-exec';
 import path from 'path';
 import fs from 'fs/promises';
+
+// Production mein hum ./yt-dl-p manual binary use karenge (Render rate limit bypass karne ke liye)
+const binPath = path.resolve(process.cwd(), 'yt-dlp');
+const ytdlp = process.env.NODE_ENV === 'production' ? create(binPath) : youtubedl;
 
 /**
  * Video download using youtube-dl-exec (wrapper for yt-dlp, auto-binary)
@@ -42,7 +46,7 @@ export async function downloadVideoWithYtDlp(
         };
 
         // Run download
-        await youtubedl(videoUrl, options);
+        await ytdlp(videoUrl, options);
 
         // Final File check
         await fs.access(outputPath);
@@ -79,7 +83,7 @@ export async function getTitleFromYtDlp(videoUrl: string): Promise<string | null
         console.log(`🔍 Fetching title for: ${videoUrl}`);
 
         // JSON dump (no download)
-        const rawOutput = await youtubedl(videoUrl, {
+        const rawOutput = await ytdlp(videoUrl, {
             dumpSingleJson: true,
             noWarnings: true,
             // @ts-ignore

@@ -11,5 +11,7 @@ services:
         value: production
       - key: DATABASE_URL
         generateValue: false # This tells Render to ask for it if missing
+      - key: YOUTUBE_DL_SKIP_DOWNLOAD
+        value: "true"
       - key: PORT
         value: 10000

@@ -16,3 +16,13 @@ if [ ! -f "./ffmpeg" ]; then
 else
   echo "FFmpeg already exists, skipping download."
 fi
+
+# yt-dlp static download (direct link to bypass API rate limit)
+if [ ! -f "./yt-dlp" ]; then
+  echo "Downloading yt-dlp binary..."
+  curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -o ./yt-dlp
+  chmod +x ./yt-dlp
+  echo "yt-dlp installed successfully."
+else
+  echo "yt-dlp already exists, skipping download."
+fi
