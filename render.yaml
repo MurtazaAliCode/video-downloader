@@ -4,7 +4,7 @@ services:
     name: vid-downloader-pro
     env: node
     plan: free
-    buildCommand: npm install --include=dev && npm run build
+    buildCommand: YOUTUBE_DL_SKIP_DOWNLOAD=true npm install --ignore-scripts --include=dev && npm run build
     startCommand: npm start
     envVars:
       - key: DATABASE_URL
