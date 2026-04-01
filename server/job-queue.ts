@@ -2,8 +2,7 @@
 import { stat } from 'fs/promises';
 import path from 'path';
 import { storage } from './storage.js';  // Storage import
-import { downloadVideoWithYtDlp } from './utils/videoDownloader.js';  // Download import
-import { getTitleFromYtDlp } from './yt-dlp-utils.js';  // Title import
+import { downloadVideoWithYtDlp, getTitleFromYtDlp } from './utils/videoDownloader.js';  // Title and Download imports
 import { log } from './vite.js';  // Log import
 
 interface JobData {
