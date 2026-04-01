@@ -53,16 +53,18 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  // CRITICAL: Yahan aapki saari routes load hoti hain (routes.ts se)
-  registerRoutes(app); // No need to await or capture return value here
+  // HEALTH CHECK: Render needs this to see the server is alive
+  app.get("/health", (_req, res) => res.status(200).send("OK"));
 
-  // Create HTTP server
-  const server = http.createServer(app);
+  // CRITICAL: Put static serving BEFORE routes for faster response
+  if (app.get("env") === "development") {
+    // Vite setup should be after routes for proxying, but in production we want static first
+  } else {
+    serveStatic(app);
+  }
 
-  // SANITY CHECK ROUTE: Yeh check karne ke liye ki Express theek se chal raha hai ya nahi.
-  app.get('/api/status-check', (_req, res) => {
-    res.json({ success: true, message: 'Server is running and routes are active!' });
-  });
+  // Yahan aapki saari routes load hoti hain (routes.ts se)
+  registerRoutes(app);
 
   // Global Error Handler
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
@@ -76,22 +78,22 @@ app.use((req, res, next) => {
     // throw err; <--- Is line ko hata diya gaya hai.
   });
 
-  // Development mein Vite server set up karein, baaki mein static files serve karein
   if (app.get("env") === "development") {
-    await setupVite(app, server); // Pass the http server
+    // Create HTTP server for Vite ONLY in development
+    const server = http.createServer(app);
+    await setupVite(app, server);
+    
+    const port = parseInt(process.env.PORT || '5000', 10);
+    server.listen(port, "0.0.0.0", () => {
+      log(`serving on port ${port} (Vite Dev)`);
+    });
   } else {
-    serveStatic(app);
+    // PRODUCTION: Use direct app.listen for better port binding on Render
+    const port = parseInt(process.env.PORT || '10000', 10);
+    app.listen(port, "0.0.0.0", () => {
+      log(`serving on port ${port} (Production)`);
+    });
   }
-
-  // Server start karein
-  const port = parseInt(process.env.PORT || '5000', 10);
-  server.listen({ // Listen on the http server
-    port,
-    host: "0.0.0.0",
-    // 'reusePort: true' hata diya gaya hai
-  }, () => {
-    log(`serving on port ${port}`);
-  });
   // Periodic Cleanup: Runs every hour to delete jobs older than 12 hours (from database and disk)
   setInterval(async () => {
     try {
