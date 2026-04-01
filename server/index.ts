@@ -56,15 +56,13 @@ app.use((req, res, next) => {
   // HEALTH CHECK: Render needs this to see the server is alive
   app.get("/health", (_req, res) => res.status(200).send("OK"));
 
-  // CRITICAL: Put static serving BEFORE routes for faster response
-  if (app.get("env") === "development") {
-    // Vite setup should be after routes for proxying, but in production we want static first
-  } else {
-    serveStatic(app);
-  }
-
   // Yahan aapki saari routes load hoti hain (routes.ts se)
   registerRoutes(app);
+
+  // CRITICAL: Static serving (catch-all) MUST be AFTER API routes
+  if (app.get("env") !== "development") {
+    serveStatic(app);
+  }
 
   // Global Error Handler
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
