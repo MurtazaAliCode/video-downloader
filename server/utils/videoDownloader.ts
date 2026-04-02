@@ -31,9 +31,9 @@ export async function downloadVideoWithYtDlp(
         const options = {
             format: downloadFormat === 'mp3' ? 'bestaudio/best' : 'best[ext=mp4]/best',
             output: outputPath,
-            'no-warnings': false, // Turn off for debugging
-            'verbose': true, // Essential for debugging cookies in Render logs
-            'ignore-errors': false,
+            noWarnings: false, // Turn off for debugging
+            verbose: true, // Essential for debugging cookies in Render logs
+            ignoreErrors: false,
             'no-check-certificates': true,
             'concurrent-fragments': 5, 
             'buffer-size': '1024K',
