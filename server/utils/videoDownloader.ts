@@ -28,24 +28,26 @@ export async function downloadVideoWithYtDlp(
         console.log(`Starting ${downloadFormat} download with youtube-dl-exec: ${videoUrl}`);
 
         // Command options with Round 2 Bypass Strategy
-        // Command options with Round 3 Final Bypass Strategy
+        // Command options with Professional Proxy & iOS Bypass Strategy
         const options = {
             format: downloadFormat === 'mp3' ? 'bestaudio/best' : 'best[ext=mp4]/best',
             output: outputPath,
-            verbose: true, // Keep for now to be sure
+            verbose: true,
             ignoreErrors: false,
             'no-check-certificates': true,
             'concurrent-fragments': 5, 
             'buffer-size': '1024K',
             'hls-prefer-native': true,
             'add-header': [
-                'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                'Accept: */*',
-                'Accept-Language: en-US,en;q=0.9'
+                'User-Agent: Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1',
+                'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                'Accept-Language: en-US,en;q=0.9',
+                'Sec-Fetch-Mode: navigate'
             ],
             'ffmpeg-location': './ffmpeg',
             'cookies': cookiesPath,
-            'extractor-args': 'youtube:player_client=android,tv,web_embedded',
+            'extractor-args': 'youtube:player_client=ios,web_embedded',
+            'proxy': process.env.YOUTUBE_PROXY, // Proxy URL (Render dashboard mein add karein)
             'geo-bypass': true,
             'force-ipv4': true
         };
@@ -87,20 +89,22 @@ export async function getTitleFromYtDlp(videoUrl: string): Promise<string | null
     try {
         console.log(`🔍 Fetching title for: ${videoUrl}`);
 
-        // JSON dump (no download)
-        const rawOutput = await ytdlp(videoUrl, {
+        // JSON dump with Proxy & iOS Bypass Strategy
+        const options = {
             dumpSingleJson: true,
             verbose: true,
-            // @ts-ignore
             'no-check-certificates': true,
             'add-header': [
-                'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+                'User-Agent: Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1'
             ],
             'cookies': cookiesPath,
-            'extractor-args': 'youtube:player_client=android,tv,web_embedded',
+            'extractor-args': 'youtube:player_client=ios,web_embedded',
+            'proxy': process.env.YOUTUBE_PROXY,
             'geo-bypass': true,
             'force-ipv4': true
-        });
+        };
+
+        const rawOutput = await ytdlp(videoUrl, options);
 
         let jsonOutput: any;
         try {
