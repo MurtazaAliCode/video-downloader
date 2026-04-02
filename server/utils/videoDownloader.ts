@@ -27,14 +27,14 @@ export async function downloadVideoWithYtDlp(
 
         console.log(`Starting ${downloadFormat} download with youtube-dl-exec: ${videoUrl}`);
 
-        // Command options with robust bypasses and speed optimizations
+        // Command options with Round 2 Bypass Strategy
         const options = {
             format: downloadFormat === 'mp3' ? 'bestaudio/best' : 'best[ext=mp4]/best',
             output: outputPath,
-            'no-warnings': true,
+            'no-warnings': false, // Turn off for debugging
+            'verbose': true, // Essential for debugging cookies in Render logs
             'ignore-errors': false,
             'no-check-certificates': true,
-            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
             'concurrent-fragments': 5, 
             'buffer-size': '1024K',
             'hls-prefer-native': true,
@@ -42,14 +42,11 @@ export async function downloadVideoWithYtDlp(
                 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
                 'Accept-Language: en-US,en;q=0.9',
                 'Sec-Ch-Ua: "Not_A Brand";v="8", "Chromium";v="120", "Google Chrome";v="120"',
-                'Sec-Ch-Ua-Mobile: ?0',
-                'Sec-Ch-Ua-Platform: "Windows"',
-                'Referer: https://www.youtube.com/',
                 'Origin: https://www.youtube.com'
             ],
             'ffmpeg-location': './ffmpeg',
             'cookies': cookiesPath,
-            'extractor-args': 'youtube:player_client=android,web,ios',
+            'extractor-args': 'youtube:player_client=ios',
             'geo-bypass': true,
             'force-ipv4': true
         };
@@ -94,12 +91,12 @@ export async function getTitleFromYtDlp(videoUrl: string): Promise<string | null
         // JSON dump (no download)
         const rawOutput = await ytdlp(videoUrl, {
             dumpSingleJson: true,
-            noWarnings: true,
+            noWarnings: false,
+            verbose: true, // For debugging cookies in Render logs
             // @ts-ignore
             'no-check-certificates': true,
-            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
             'cookies': cookiesPath,
-            'extractor-args': 'youtube:player_client=android,web,ios',
+            'extractor-args': 'youtube:player_client=ios',
             'geo-bypass': true,
             'force-ipv4': true
         });
