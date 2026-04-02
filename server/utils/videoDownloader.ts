@@ -16,21 +16,53 @@ const ytdlp = process.env.NODE_ENV === 'production' ? create(binPath) : youtubed
  * @param onProgress - Progress callback (simulated, real via logs)
  * @returns Promise with result
  */
+/**
+ * Map UI quality selection to yt-dlp format strings
+ */
+function getFormatByQuality(quality: string, downloadFormat: string): string {
+    if (downloadFormat === 'mp3') {
+        return 'bestaudio/best';
+    }
+
+    // Mapping logic to save proxy data
+    switch (quality) {
+        case 'low': // 360p
+            return 'best[height<=360][ext=mp4]/best[height<=360]/best';
+        case 'medium': // 480p
+            return 'best[height<=480][ext=mp4]/best[height<=480]/best';
+        case 'high': // 720p
+        case 'highest': // User requested 720p for Ultra High too
+            return 'best[height<=720][ext=mp4]/best[height<=720]/best';
+        default:
+            return 'best[height<=720][ext=mp4]/best[height<=720]/best';
+    }
+}
+
+/**
+ * Video download using youtube-dl-exec (wrapper for yt-dlp, auto-binary)
+ * @param videoUrl - Video URL
+ * @param outputPath - Save path
+ * @param downloadFormat - 'mp4' or 'mp3'
+ * @param onProgress - Progress callback (simulated, real via logs)
+ * @param quality - UI quality choice ('low', 'medium', 'high', 'highest')
+ * @returns Promise with result
+ */
 export async function downloadVideoWithYtDlp(
     videoUrl: string,
     outputPath: string,
     downloadFormat: string = 'mp4',
-    onProgress?: (progress: number) => void
+    onProgress?: (progress: number) => void,
+    quality: string = 'high'
 ): Promise<{ success: boolean; filePath?: string; error?: string }> {
     try {
         await fs.mkdir(path.dirname(outputPath), { recursive: true });
 
-        console.log(`Starting ${downloadFormat} download with youtube-dl-exec: ${videoUrl}`);
+        const formatString = getFormatByQuality(quality, downloadFormat);
+        console.log(`Starting ${downloadFormat} download (${quality} -> ${formatString}) with youtube-dl-exec: ${videoUrl}`);
 
-        // Command options with Round 2 Bypass Strategy
         // Command options with Professional Proxy & iOS Bypass Strategy
         const options = {
-            format: downloadFormat === 'mp3' ? 'bestaudio/best' : 'best[ext=mp4]/best',
+            format: formatString,
             output: outputPath,
             verbose: true,
             ignoreErrors: false,

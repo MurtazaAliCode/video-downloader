@@ -9,6 +9,7 @@ interface JobData {
     id: string;
     url: string;
     downloadFormat: string;
+    quality?: string;
 }
 
 interface QueueJob {
@@ -40,7 +41,7 @@ class SimpleJobQueue {
 
         this.isProcessing = true;
         const queueJob = this.queue.shift()!;  // First job lo
-        const { id: jobId, url, downloadFormat } = queueJob.data;
+        const { id: jobId, url, downloadFormat, quality } = queueJob.data;
         queueJob.status = 'processing';
 
         console.log(`Processing job from queue: ${jobId}`);
@@ -68,7 +69,7 @@ class SimpleJobQueue {
                 if (progress % 10 === 0) {
                     storage.updateJobStatus(jobId, 'processing', 10 + Math.floor(progress * 0.8)).catch(err => console.error('Progress update error:', err));
                 }
-            });
+            }, quality || 'high');
 
             if (!result.success) {
                 throw new Error(result.error || 'Download failed');

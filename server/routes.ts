@@ -30,7 +30,8 @@ router.post("/download-video", async (req: Request, res: Response) => {
     await addDownloadJob({
       id: job.id,
       url: job.url,
-      downloadFormat: job.downloadFormat
+      downloadFormat: job.downloadFormat,
+      quality: options?.quality
     });
 
     // Client ko response dein
