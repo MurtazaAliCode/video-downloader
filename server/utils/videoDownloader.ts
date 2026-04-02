@@ -28,11 +28,11 @@ export async function downloadVideoWithYtDlp(
         console.log(`Starting ${downloadFormat} download with youtube-dl-exec: ${videoUrl}`);
 
         // Command options with Round 2 Bypass Strategy
+        // Command options with Round 3 Final Bypass Strategy
         const options = {
             format: downloadFormat === 'mp3' ? 'bestaudio/best' : 'best[ext=mp4]/best',
             output: outputPath,
-            noWarnings: false, // Turn off for debugging
-            verbose: true, // Essential for debugging cookies in Render logs
+            verbose: true, // Keep for now to be sure
             ignoreErrors: false,
             'no-check-certificates': true,
             'concurrent-fragments': 5, 
@@ -41,12 +41,13 @@ export async function downloadVideoWithYtDlp(
             'add-header': [
                 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
                 'Accept-Language: en-US,en;q=0.9',
-                'Sec-Ch-Ua: "Not_A Brand";v="8", "Chromium";v="120", "Google Chrome";v="120"',
                 'Origin: https://www.youtube.com'
             ],
             'ffmpeg-location': './ffmpeg',
             'cookies': cookiesPath,
-            'extractor-args': 'youtube:player_client=ios',
+            'extractor-args': 'youtube:player_client=ios,web_embedded',
+            // @ts-ignore
+            'impersonate': 'chrome',
             'geo-bypass': true,
             'force-ipv4': true
         };
@@ -91,12 +92,13 @@ export async function getTitleFromYtDlp(videoUrl: string): Promise<string | null
         // JSON dump (no download)
         const rawOutput = await ytdlp(videoUrl, {
             dumpSingleJson: true,
-            noWarnings: false,
-            verbose: true, // For debugging cookies in Render logs
+            verbose: true,
             // @ts-ignore
             'no-check-certificates': true,
             'cookies': cookiesPath,
-            'extractor-args': 'youtube:player_client=ios',
+            'extractor-args': 'youtube:player_client=ios,web_embedded',
+            // @ts-ignore
+            'impersonate': 'chrome',
             'geo-bypass': true,
             'force-ipv4': true
         });
