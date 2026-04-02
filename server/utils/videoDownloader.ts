@@ -41,13 +41,12 @@ export async function downloadVideoWithYtDlp(
             'add-header': [
                 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
                 'Accept-Language: en-US,en;q=0.9',
+                'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
                 'Origin: https://www.youtube.com'
             ],
             'ffmpeg-location': './ffmpeg',
             'cookies': cookiesPath,
             'extractor-args': 'youtube:player_client=ios,web_embedded',
-            // @ts-ignore
-            'impersonate': 'chrome',
             'geo-bypass': true,
             'force-ipv4': true
         };
@@ -95,10 +94,11 @@ export async function getTitleFromYtDlp(videoUrl: string): Promise<string | null
             verbose: true,
             // @ts-ignore
             'no-check-certificates': true,
+            'add-header': [
+                'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+            ],
             'cookies': cookiesPath,
             'extractor-args': 'youtube:player_client=ios,web_embedded',
-            // @ts-ignore
-            'impersonate': 'chrome',
             'geo-bypass': true,
             'force-ipv4': true
         });
