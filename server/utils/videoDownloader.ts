@@ -35,7 +35,6 @@ export async function downloadVideoWithYtDlp(
             'ignore-errors': false,
             'no-check-certificates': true,
             'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-            'extractor-args': 'youtube:player_client=ios,android,web',
             'concurrent-fragments': 5, 
             'buffer-size': '1024K',
             'hls-prefer-native': true,
@@ -46,11 +45,13 @@ export async function downloadVideoWithYtDlp(
                 'Sec-Ch-Ua-Mobile: ?0',
                 'Sec-Ch-Ua-Platform: "Windows"',
                 'Referer: https://www.youtube.com/',
-                'Origin: https://www.youtube.com',
-                `Cookie: __Secure-3PSID=g.a0007QjyF4XfZCvyCVYu3lK62pKBLI30v8lR_LXamLB9KWO_Dp5kjwSWjPAsAbkhkxYa1rUxnwACgYKASISARESFQHGX2MiZ-MK6WPgBtSmnCwxvgSC7hoVAUF8yKr9uhGUHpuSRucFaVy5HJNU0076; __Secure-3PAPISID=Zl10S6WEC1Qjupll/ARWLk7BZqt2L9d_cy; LOGIN_INFO=AFmmF2swRgIhAKSqybZAOFR1fFLn3-x23FIvLcUBMOi5Kwz8H_189NTYAiEA7gBcebi0bMuQdeK2dqRLYNKMVl1cS3IZQXsPhuS7YCA:QUQ3MjNmeXBMajMwM044dWJDZk5sZFNyeXk2YzRaRlhuY2JZMHNKMzZoSEpvZ1hKUWVqZm1sQW5yRXVvVGlEZUwzcTJTcjJydmtJUS1FTmRLMGw2aVdHVU5HMzE2TVU0NkQ2S2JDZ0hqX1dWZlZHRzZ1VEZYOC1wZ1FFdERKZGQwd1hRdlpxNUE2VWJTb1J4OXdTX1F4Vk5JUlRRaDNUNlRR`
+                'Origin: https://www.youtube.com'
             ],
             'ffmpeg-location': './ffmpeg',
-            'cookies': cookiesPath
+            'cookies': cookiesPath,
+            'extractor-args': 'youtube:player_client=android,web,ios',
+            'geo-bypass': true,
+            'force-ipv4': true
         };
 
         // Run download
@@ -98,9 +99,9 @@ export async function getTitleFromYtDlp(videoUrl: string): Promise<string | null
             'no-check-certificates': true,
             'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
             'cookies': cookiesPath,
-            'add-header': [
-                `Cookie: __Secure-3PSID=g.a0007QjyF4XfZCvyCVYu3lK62pKBLI30v8lR_LXamLB9KWO_Dp5kjwSWjPAsAbkhkxYa1rUxnwACgYKASISARESFQHGX2MiZ-MK6WPgBtSmnCwxvgSC7hoVAUF8yKr9uhGUHpuSRucFaVy5HJNU0076; __Secure-3PAPISID=Zl10S6WEC1Qjupll/ARWLk7BZqt2L9d_cy; LOGIN_INFO=AFmmF2swRgIhAKSqybZAOFR1fFLn3-x23FIvLcUBMOi5Kwz8H_189NTYAiEA7gBcebi0bMuQdeK2dqRLYNKMVl1cS3IZQXsPhuS7YCA:QUQ3MjNmeXBMajMwM044dWJDZk5sZFNyeXk2YzRaRlhuY2JZMHNKMzZoSEpvZ1hKUWVqZm1sQW5yRXVvVGlEZUwzcTJTcjJydmtJUS1FTmRLMGw2aVdHVU5HMzE2TVU0NkQ2S2JDZ0hqX1dWZlZHRzZ1VEZYOC1wZ1FFdERKZGQwd1hRdlpxNUE2VWJTb1J4OXdTX1F4Vk5JUlRRaDNUNlRR`
-            ]
+            'extractor-args': 'youtube:player_client=android,web,ios',
+            'geo-bypass': true,
+            'force-ipv4': true
         });
 
         let jsonOutput: any;
