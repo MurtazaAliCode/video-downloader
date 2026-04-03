@@ -17,6 +17,14 @@ const ytdlp = process.env.NODE_ENV === 'production' ? create(binPath) : youtubed
  * @returns Promise with result
  */
 /**
+ * Helper to check if the platform always requires a proxy (e.g. YouTube/TikTok)
+ */
+function shouldAlwaysUseProxy(url: string): boolean {
+    const alwaysProxyHosts = ['youtube.com', 'youtu.be', 'tiktok.com'];
+    return alwaysProxyHosts.some(host => url.toLowerCase().includes(host));
+}
+
+/**
  * Map UI quality selection to yt-dlp format strings
  */
 function getFormatByQuality(quality: string, downloadFormat: string): string {
@@ -40,12 +48,6 @@ function getFormatByQuality(quality: string, downloadFormat: string): string {
 
 /**
  * Video download using youtube-dl-exec (wrapper for yt-dlp, auto-binary)
- * @param videoUrl - Video URL
- * @param outputPath - Save path
- * @param downloadFormat - 'mp4' or 'mp3'
- * @param onProgress - Progress callback (simulated, real via logs)
- * @param quality - UI quality choice ('low', 'medium', 'high', 'highest')
- * @returns Promise with result
  */
 export async function downloadVideoWithYtDlp(
     videoUrl: string,
@@ -58,10 +60,13 @@ export async function downloadVideoWithYtDlp(
         await fs.mkdir(path.dirname(outputPath), { recursive: true });
 
         const formatString = getFormatByQuality(quality, downloadFormat);
-        console.log(`Starting ${downloadFormat} download (${quality} -> ${formatString}) with youtube-dl-exec: ${videoUrl}`);
+        const alwaysProxy = shouldAlwaysUseProxy(videoUrl);
+        const proxy = process.env.YOUTUBE_PROXY;
 
-        // Command options with Professional Proxy & iOS Bypass Strategy
-        const options = {
+        console.log(`🎬 Target: ${videoUrl} | Always Proxy: ${alwaysProxy} | Format: ${formatString}`);
+
+        // Command options template
+        const baseOptions = {
             format: formatString,
             output: outputPath,
             verbose: true,
@@ -79,23 +84,41 @@ export async function downloadVideoWithYtDlp(
             'ffmpeg-location': './ffmpeg',
             'cookies': cookiesPath,
             'extractor-args': 'youtube:player_client=ios,web_embedded',
-            'proxy': process.env.YOUTUBE_PROXY, // Proxy URL (Render dashboard mein add karein)
             'geo-bypass': true,
             'force-ipv4': true
         };
 
-        // Run download
-        await ytdlp(videoUrl, options);
+        // Decision Logic: Proxy or no Proxy?
+        let currentOptions: any = { ...baseOptions };
+        
+        if (alwaysProxy && proxy) {
+            console.log(`🚀 Using proxy for YouTube/TikTok...`);
+            currentOptions.proxy = proxy;
+        }
+
+        try {
+            // First Attempt
+            await ytdlp(videoUrl, currentOptions);
+            console.log(`✅ Download finished successfully.`);
+        } catch (downloadError) {
+            // Fallback: If not alwaysProxy and first attempt failed, try WITH proxy
+            if (!alwaysProxy && proxy && !currentOptions.proxy) {
+                console.warn(`⚠️ Download failed without proxy. Retrying with proxy for FB/IG/etc...`);
+                currentOptions.proxy = proxy;
+                await ytdlp(videoUrl, currentOptions);
+                console.log(`✅ Download successful after proxy fallback.`);
+            } else {
+                throw downloadError; // Rethrow if it was already using proxy or no proxy available
+            }
+        }
 
         // Final File check
         await fs.access(outputPath);
-        console.log(`Download successful: ${outputPath}`);
         onProgress?.(100);
-
         return { success: true, filePath: outputPath };
 
     } catch (error) {
-        console.error('youtube-dl-exec download failed:', error);
+        console.error('💥 youtube-dl-exec download failed:', error);
 
         // Final check: sometimes yt-dlp returns an error code but the file is fully downloaded
         try {
@@ -103,9 +126,7 @@ export async function downloadVideoWithYtDlp(
             console.log('File detected despite error code. Marking as success.');
             onProgress?.(100);
             return { success: true, filePath: outputPath };
-        } catch (e) {
-            // File truly not found
-        }
+        } catch (e) { }
 
         return {
             success: false,
@@ -118,10 +139,10 @@ export async function downloadVideoWithYtDlp(
  * Fetch video title using youtube-dl-exec (wrapper for yt-dlp)
  */
 export async function getTitleFromYtDlp(videoUrl: string): Promise<string | null> {
-    try {
-        console.log(`🔍 Fetching title for: ${videoUrl}`);
+    const alwaysProxy = shouldAlwaysUseProxy(videoUrl);
+    const proxy = process.env.YOUTUBE_PROXY;
 
-        // JSON dump with Proxy & iOS Bypass Strategy
+    async function fetchTitle(useProxy: boolean) {
         const options = {
             dumpSingleJson: true,
             verbose: true,
@@ -131,25 +152,34 @@ export async function getTitleFromYtDlp(videoUrl: string): Promise<string | null
             ],
             'cookies': cookiesPath,
             'extractor-args': 'youtube:player_client=ios,web_embedded',
-            'proxy': process.env.YOUTUBE_PROXY,
             'geo-bypass': true,
-            'force-ipv4': true
+            'force-ipv4': true,
+            ...(useProxy && proxy ? { proxy } : {})
         };
 
         const rawOutput = await ytdlp(videoUrl, options);
+        const jsonOutput = typeof rawOutput === 'string' ? JSON.parse(rawOutput) : rawOutput;
+        return jsonOutput.title || 'Unknown Title';
+    }
 
-        let jsonOutput: any;
-        try {
-            jsonOutput = typeof rawOutput === 'string' ? JSON.parse(rawOutput) : rawOutput;
-        } catch (parseError) {
-            console.error('Failed to parse yt-dlp JSON output:', parseError);
-            return null;
+    try {
+        console.log(`🔍 Fetching title (Always Proxy: ${alwaysProxy})...`);
+        
+        // If YouTube/TikTok, use proxy immediately
+        if (alwaysProxy && proxy) {
+            return await fetchTitle(true);
         }
 
-        const title = jsonOutput.title || 'Unknown Title';
-        console.log(`✅ Title fetched: ${title}`);
-        return title;
-
+        // Try without proxy first
+        try {
+            return await fetchTitle(false);
+        } catch (error) {
+            if (proxy) {
+                console.warn(`⚠️ Title fetch failed. Retrying with proxy...`);
+                return await fetchTitle(true);
+            }
+            throw error;
+        }
     } catch (error) {
         console.error('Title fetch error:', error);
         return null;
