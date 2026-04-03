@@ -69,7 +69,6 @@ export async function downloadVideoWithYtDlp(
         const baseOptions = {
             format: formatString,
             output: outputPath,
-            verbose: false, // Production mein false rakhein
             quiet: true, // Output kam karein speed badhane ke liye
             'no-playlist': true,
             'no-mtime': true, // File modification time check na karein
@@ -151,7 +150,6 @@ export async function getTitleFromYtDlp(videoUrl: string): Promise<string | null
     async function fetchTitle(useProxy: boolean) {
         const options: any = {
             dumpSingleJson: true,
-            verbose: false,
             quiet: true,
             'no-check-certificates': true,
             'no-playlist': true,
