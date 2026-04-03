@@ -28,7 +28,7 @@ interface ThemeProviderProps {
 
 export function ThemeProvider({
   children,
-  defaultTheme = "light",
+  defaultTheme = "dark",
   storageKey = "vid-donloader-theme",
 }: ThemeProviderProps) {
   const [theme, setTheme] = useState<Theme>(() => {

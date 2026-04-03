@@ -216,22 +216,22 @@ export default function Home() {
                       {/* Platform Logos */}
                       <div className="text-center">
                         <p className="text-sm text-muted-foreground mb-3">Supported platforms:</p>
-                        <div className="flex justify-center items-center space-x-8">
-                          <div className="flex flex-col items-center space-y-2">
-                            <img src={youtubeLogo} alt="YouTube" className="w-12 h-12 rounded-lg" />
-                            <span className="text-xs text-muted-foreground">YouTube</span>
+                        <div className="flex flex-wrap justify-center items-center gap-4 sm:gap-8">
+                          <div className="flex flex-col items-center space-y-2 min-w-[70px]">
+                            <img src={youtubeLogo} alt="YouTube" className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg transition-transform hover:scale-110" />
+                            <span className="text-[10px] sm:text-xs text-muted-foreground">YouTube</span>
                           </div>
-                          <div className="flex flex-col items-center space-y-2">
-                            <img src={facebookLogo} alt="Facebook" className="w-12 h-12 rounded-lg" />
-                            <span className="text-xs text-muted-foreground">Facebook</span>
+                          <div className="flex flex-col items-center space-y-2 min-w-[70px]">
+                            <img src={facebookLogo} alt="Facebook" className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg transition-transform hover:scale-110" />
+                            <span className="text-[10px] sm:text-xs text-muted-foreground">Facebook</span>
                           </div>
-                          <div className="flex flex-col items-center space-y-2">
-                            <img src={instagramLogo} alt="Instagram" className="w-12 h-12 rounded-lg" />
-                            <span className="text-xs text-muted-foreground">Instagram</span>
+                          <div className="flex flex-col items-center space-y-2 min-w-[70px]">
+                            <img src={instagramLogo} alt="Instagram" className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg transition-transform hover:scale-110" />
+                            <span className="text-[10px] sm:text-xs text-muted-foreground">Instagram</span>
                           </div>
-                          <div className="flex flex-col items-center space-y-2">
-                            <img src={tiktokLogo} alt="TikTok" className="w-12 h-12 rounded-lg object-contain bg-white p-1" />
-                            <span className="text-xs text-muted-foreground">TikTok</span>
+                          <div className="flex flex-col items-center space-y-2 min-w-[70px]">
+                            <img src={tiktokLogo} alt="TikTok" className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg object-contain bg-white p-1 transition-transform hover:scale-110" />
+                            <span className="text-[10px] sm:text-xs text-muted-foreground">TikTok</span>
                           </div>
                         </div>
                       </div>
@@ -284,18 +284,20 @@ export default function Home() {
                   <CardTitle className="text-lg">Quick Stats</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  {[
-                    { value: "100,000+", label: "Videos Downloaded", sub: "Global users" },
-                    { value: "25,000+", label: "Happy Users", sub: "Daily active" },
-                    { value: "MP4", label: "Output Format", sub: "High compatibility" },
-                  ].map((stat, index) => (
-                    <div key={index} className="text-center relative">
-                      <div className="text-3xl font-extrabold text-white drop-shadow-md">{stat.value}</div>
-                      <div className="text-sm font-semibold text-white/80">{stat.label}</div>
-                      <div className="text-[10px] text-white/40 uppercase tracking-tighter">{stat.sub}</div>
-                      {index < 2 && <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-12 h-px bg-white/10"></div>}
-                    </div>
-                  ))}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-6">
+                    {[
+                      { value: "100,000+", label: "Videos Downloaded", sub: "Global users" },
+                      { value: "25,000+", label: "Happy Users", sub: "Daily active" },
+                      { value: "MP4", label: "Output Format", sub: "High compatibility" },
+                    ].map((stat, index) => (
+                      <div key={index} className="text-center relative py-2">
+                        <div className="text-3xl font-extrabold text-foreground dark:text-white drop-shadow-md">{stat.value}</div>
+                        <div className="text-sm font-semibold text-muted-foreground dark:text-white/80">{stat.label}</div>
+                        <div className="text-[10px] text-muted-foreground/60 dark:text-white/40 uppercase tracking-tighter">{stat.sub}</div>
+                        {index < 2 && <div className="hidden lg:block absolute -bottom-3 left-1/2 -translate-x-1/2 w-12 h-px bg-white/10"></div>}
+                      </div>
+                    ))}
+                  </div>
                 </CardContent>
               </Card>
             </div>

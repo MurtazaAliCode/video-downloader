@@ -4,6 +4,7 @@ import { storage } from "./storage.js";
 import { addDownloadJob } from './job-queue.js';  // Simple queue ke liye
 import { InsertJob } from "../shared/schema.js";
 import { log } from "./vite.js";  // Log ke liye
+import { sendAdminNotification, sendUserConfirmation } from "./email.js";
 
 // Setup Express Router
 export const router = Router();
@@ -94,6 +95,47 @@ router.get("/download/:jobId", async (req: Request, res: Response) => {
   } catch (error) {
     console.error(`Unexpected error in download endpoint for ${jobId}:`, error);
     res.status(500).json({ message: "Internal server error." });
+  }
+});
+
+// Endpoint: Submit contact message (Contact Us / Report)
+router.post("/contact", async (req: Request, res: Response) => {
+  try {
+    const { name, email, subject, message } = req.body;
+
+    if (!name || !email || !subject || !message) {
+      return res.status(400).json({ message: "All fields are required." });
+    }
+
+    // Save to database
+    const contactMessage = await storage.createContactMessage({
+      name,
+      email,
+      subject,
+      message,
+    });
+
+    // Send emails in the background
+    // 1. Notify Admin
+    sendAdminNotification({ name, email, subject, message }).catch(err => 
+      console.error("Failed to send admin email:", err)
+    );
+
+    // 2. Confirm to User (as requested by user)
+    sendUserConfirmation({ name, email }).catch(err => 
+      console.error("Failed to send user confirmation email:", err)
+    );
+
+    return res.status(201).json({
+      message: "Message received successfully.",
+      id: contactMessage.id
+    });
+  } catch (error) {
+    console.error("🚨 Contact/Report submission error:", error);
+    return res.status(500).json({
+      message: "Failed to process your message.",
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
   }
 });
 
