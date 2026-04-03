@@ -15,30 +15,58 @@ export default function AdComponent({ id, type, placeholderText }: AdComponentPr
   const adRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // NOTE FOR USER: Paste your Ad Network script logic here.
-    // Example: For Adsterra, you might need to append a <script> tag to adRef.current.
-    
-    // if (adRef.current) {
-    //   const script = document.createElement("script");
-    //   script.src = "//www.highperformanceformat.com/YOUR_ID/invoke.js";
-    //   script.async = true;
-    //   adRef.current.appendChild(script);
-    // }
-    
-    console.log(`Ad component ${id} of type ${type} initialized.`);
+    if (!adRef.current) return;
+
+    // Clear previous children to prevent duplicate ads on re-render
+    adRef.current.innerHTML = "";
+
+    const scriptId = `adsterra-${id}`;
+    if (document.getElementById(scriptId)) return;
+
+    const container = document.createElement("div");
+    container.id = `container-${id}`;
+    adRef.current.appendChild(container);
+
+    if (type === "banner" || type === "sidebar") {
+      // Adsterra Standard Banner Logic (atOptions)
+      const optionsScript = document.createElement("script");
+      optionsScript.type = "text/javascript";
+      
+      const width = type === "banner" ? 728 : 300;
+      const height = type === "banner" ? 90 : 250;
+      
+      optionsScript.innerHTML = `
+        atOptions = {
+          'key' : '${id}',
+          'format' : 'iframe',
+          'height' : ${height},
+          'width' : ${width},
+          'params' : {}
+        };
+      `;
+      adRef.current.appendChild(optionsScript);
+
+      const invokeScript = document.createElement("script");
+      invokeScript.type = "text/javascript";
+      invokeScript.src = `//www.highperformanceformat.com/${id}/invoke.js`;
+      adRef.current.appendChild(invokeScript);
+    } else if (type === "native") {
+      // Adsterra Native Banner Logic
+      const nativeScript = document.createElement("script");
+      nativeScript.async = true;
+      nativeScript.setAttribute("data-cfasync", "false");
+      nativeScript.src = `https://pl29050240.profitablecpmratenetwork.com/${id}/invoke.js`;
+      adRef.current.appendChild(nativeScript);
+    }
+
+    console.log(`Adsterra component ${id} of type ${type} injected.`);
   }, [id, type]);
 
   return (
     <div 
       ref={adRef}
-      className="ad-container w-full bg-muted/20 border border-dashed border-muted-foreground/30 rounded-lg flex items-center justify-center min-h-[100px]"
-      id={id}
-    >
-      <div className="text-center p-4">
-        <p className="text-xs uppercase tracking-widest text-muted-foreground font-semibold">Advertisement</p>
-        <p className="text-sm text-muted-foreground/60 mt-1">{placeholderText || `${type.toUpperCase()} SLOT`}</p>
-        <p className="text-[10px] text-muted-foreground/40 mt-2">Paste your ad script in AdComponent.tsx</p>
-      </div>
-    </div>
+      className="ad-container w-full flex items-center justify-center min-h-[100px]"
+      id={`ad-slot-${id}`}
+    />
   );
 }

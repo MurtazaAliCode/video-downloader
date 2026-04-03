@@ -43,6 +43,9 @@ export default function Home() {
   const [downloadFormat, setDownloadFormat] = useState("mp4");
   const [isQualityDialogOpen, setIsQualityDialogOpen] = useState(false);
   const [detectedPlatform, setDetectedPlatform] = useState<string>("");
+  const [selectedQualityToUnlock, setSelectedQualityToUnlock] = useState<string | null>(null);
+
+  const smartlinkUrl = "https://www.profitablecpmratenetwork.com/phb566a4t2?key=353d9eacad54473bb5e47ab851a76327";
 
   const detectPlatform = (url: string) => {
     if (url.includes('youtube.com') || url.includes('youtu.be')) return 'youtube';
@@ -87,6 +90,25 @@ export default function Home() {
 
     setDetectedPlatform(validation.platform || "unknown");
     setIsQualityDialogOpen(true);
+    setSelectedQualityToUnlock(null); // Reset unlock state when dialog opens
+  };
+
+  const handleQualitySelection = (qualityId: string) => {
+    if (qualityId === 'high' || qualityId === 'highest') {
+      setSelectedQualityToUnlock(qualityId);
+    } else {
+      startDownload(qualityId);
+    }
+  };
+
+  const handleUnlockAndDownload = () => {
+    if (selectedQualityToUnlock) {
+      // Open Smartlink in new tab
+      window.open(smartlinkUrl, '_blank');
+      // Proceed with download in background
+      startDownload(selectedQualityToUnlock);
+      setSelectedQualityToUnlock(null);
+    }
   };
 
   const startDownload = async (selectedQuality: string) => {
@@ -120,21 +142,21 @@ export default function Home() {
     {
       id: 'highest',
       label: 'Ultra High (1080p)',
-      desc: 'Best for TV and desktop',
+      desc: 'Unlock with short ad',
       icon: <Monitor className="w-5 h-5" />,
-      tag: 'Recommended'
+      tag: 'Premium'
     },
     {
       id: 'high',
       label: 'High (720p)',
-      desc: 'Great for all devices',
+      desc: 'Unlock with short ad',
       icon: <Tablet className="w-5 h-5" />,
-      tag: 'Fast'
+      tag: 'Popular'
     },
     {
       id: 'medium',
       label: 'Standard (480p)',
-      desc: 'Good for mobile viewing',
+      desc: 'Direct download',
       icon: <Smartphone className="w-5 h-5" />,
     },
     {
@@ -315,28 +337,60 @@ export default function Home() {
             </DialogTitle>
           </DialogHeader>
           <div className="grid gap-4 py-4">
-            {qualityOptions.map((opt) => (
-              <button
-                key={opt.id}
-                onClick={() => startDownload(opt.id)}
-                className="flex items-center justify-between p-4 rounded-2xl border border-white/10 hover:border-white/40 hover:bg-white/10 transition-all group text-left"
-              >
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center text-white group-hover:scale-110 transition-transform">
-                    {opt.icon}
+            {!selectedQualityToUnlock ? (
+              qualityOptions.map((opt) => (
+                <button
+                  key={opt.id}
+                  onClick={() => handleQualitySelection(opt.id)}
+                  className="flex items-center justify-between p-4 rounded-2xl border border-white/10 hover:border-white/40 hover:bg-white/10 transition-all group text-left"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center text-white group-hover:scale-110 transition-transform">
+                      {opt.icon}
+                    </div>
+                    <div>
+                      <p className="font-bold text-white">{opt.label}</p>
+                      <p className="text-xs text-white/60">{opt.desc}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="font-bold text-white">{opt.label}</p>
-                    <p className="text-xs text-white/60">{opt.desc}</p>
-                  </div>
+                  {opt.tag ? (
+                    <span className="text-[10px] font-bold uppercase tracking-wider bg-yellow-500/20 text-yellow-400 px-3 py-1.5 rounded-full border border-yellow-500/30">
+                      {opt.tag}
+                    </span>
+                  ) : (
+                    <div className="text-white/20 group-hover:text-white/60 transition-colors">
+                      <Download className="w-5 h-5" />
+                    </div>
+                  )}
+                </button>
+              ))
+            ) : (
+              <div className="text-center space-y-6 py-4 animate-in fade-in zoom-in duration-300">
+                <div className="w-20 h-20 mx-auto bg-yellow-500/10 rounded-full flex items-center justify-center mb-4">
+                  <Sparkles className="w-10 h-10 text-yellow-400 animate-pulse" />
                 </div>
-                {opt.tag && (
-                  <span className="text-[10px] font-bold uppercase tracking-wider bg-yellow-500/20 text-yellow-400 px-3 py-1.5 rounded-full border border-yellow-500/30">
-                    {opt.tag}
-                  </span>
-                )}
-              </button>
-            ))}
+                <div className="space-y-2">
+                  <h3 className="text-xl font-bold text-white">Unlock {selectedQualityToUnlock === 'highest' ? 'Ultra High' : 'High'} Quality</h3>
+                  <p className="text-white/60">Click the button below to watch a short ad and unlock your high-quality download instantly!</p>
+                </div>
+                <div className="pt-4 space-y-3">
+                  <Button
+                    onClick={handleUnlockAndDownload}
+                    className="w-full btn-gradient py-8 text-xl font-bold shadow-xl shadow-primary/20 hover:scale-105 transition-all"
+                  >
+                    <Sparkles className="w-6 h-6 mr-3 text-yellow-300" />
+                    WATCH AD & DOWNLOAD
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    onClick={() => setSelectedQualityToUnlock(null)}
+                    className="text-white/40 hover:text-white"
+                  >
+                    Back to options
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
         </DialogContent>
       </Dialog>

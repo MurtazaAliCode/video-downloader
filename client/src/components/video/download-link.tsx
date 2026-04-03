@@ -65,7 +65,15 @@ export function DownloadLink({ jobId, fileName, onProcessAnother }: DownloadLink
         </div>
 
         {/* Process Another Video */}
-        <div className="pt-4">
+        <div className="pt-4 space-y-3">
+          <Button
+            onClick={() => window.open('https://www.profitablecpmratenetwork.com/phb566a4t2?key=353d9eacad54473bb5e47ab851a76327', '_blank')}
+            variant="secondary"
+            className="w-full py-4 font-bold border-green-500/20 bg-green-500/5 hover:bg-green-500/10 text-green-700 dark:text-green-300 transition-all hover:scale-[1.02]"
+          >
+            🚀 Support Us (Click Here)
+          </Button>
+          
           <Button
             onClick={onProcessAnother}
             variant="outline"
