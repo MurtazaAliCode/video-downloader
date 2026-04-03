@@ -13,3 +13,13 @@ services:
         value: "true"
       - key: PORT
         value: 10000
+      - key: SMTP_HOST
+        value: smtp.gmail.com
+      - key: SMTP_PORT
+        value: 465
+      - key: SMTP_USER
+        generateValue: false # Prompt for value in Render
+      - key: SMTP_PASS
+        generateValue: false # Prompt for value in Render
+      - key: CONTACT_EMAIL
+        generateValue: false # Prompt for value in Render
