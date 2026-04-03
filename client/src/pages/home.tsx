@@ -85,7 +85,7 @@ export default function Home() {
       return;
     }
 
-    setDetectedPlatform(validation.platform);
+    setDetectedPlatform(validation.platform || "unknown");
     setIsQualityDialogOpen(true);
   };
 
