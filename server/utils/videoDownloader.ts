@@ -69,10 +69,14 @@ export async function downloadVideoWithYtDlp(
         const baseOptions = {
             format: formatString,
             output: outputPath,
-            verbose: true,
+            verbose: false, // Production mein false rakhein
+            quiet: true, // Output kam karein speed badhane ke liye
+            'no-playlist': true,
+            'no-mtime': true, // File modification time check na karein
+            'socket-timeout': 10, // 10s mein block detect karein
             ignoreErrors: false,
             'no-check-certificates': true,
-            'concurrent-fragments': 5, 
+            'concurrent-fragments': 3, // Resources kam use karein
             'buffer-size': '1024K',
             'hls-prefer-native': true,
             'add-header': [
@@ -94,6 +98,7 @@ export async function downloadVideoWithYtDlp(
         if (alwaysProxy && proxy) {
             console.log(`🚀 Using proxy for YouTube/TikTok...`);
             currentOptions.proxy = proxy;
+            delete currentOptions['socket-timeout']; // Proxy ke saath timeout nahi
         }
 
         try {
@@ -105,10 +110,11 @@ export async function downloadVideoWithYtDlp(
             if (!alwaysProxy && proxy && !currentOptions.proxy) {
                 console.warn(`⚠️ Download failed without proxy. Retrying with proxy for FB/IG/etc...`);
                 currentOptions.proxy = proxy;
+                delete currentOptions['socket-timeout']; // Retry mein zyada waqt dein
                 await ytdlp(videoUrl, currentOptions);
                 console.log(`✅ Download successful after proxy fallback.`);
             } else {
-                throw downloadError; // Rethrow if it was already using proxy or no proxy available
+                throw downloadError;
             }
         }
 
@@ -143,10 +149,12 @@ export async function getTitleFromYtDlp(videoUrl: string): Promise<string | null
     const proxy = process.env.YOUTUBE_PROXY;
 
     async function fetchTitle(useProxy: boolean) {
-        const options = {
+        const options: any = {
             dumpSingleJson: true,
-            verbose: true,
+            verbose: false,
+            quiet: true,
             'no-check-certificates': true,
+            'no-playlist': true,
             'add-header': [
                 'User-Agent: Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1'
             ],
@@ -154,7 +162,7 @@ export async function getTitleFromYtDlp(videoUrl: string): Promise<string | null
             'extractor-args': 'youtube:player_client=ios,web_embedded',
             'geo-bypass': true,
             'force-ipv4': true,
-            ...(useProxy && proxy ? { proxy } : {})
+            ...(useProxy && proxy ? { proxy } : { 'socket-timeout': 10 })
         };
 
         const rawOutput = await ytdlp(videoUrl, options);
