@@ -1,5 +1,6 @@
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { AdBanner, AdSocialBar } from "@/components/layout/AdSlots";
 import { Card, CardContent } from "@/components/ui/card";
 import { CheckCircle } from "lucide-react";
 import teamPhoto from "@/assets/teams_photo.png";
@@ -8,6 +9,8 @@ export default function About() {
   return (
     <div className="min-h-screen bg-background">
       <Header />
+      <AdSocialBar />
+      <AdBanner />
 
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-20">
         <div className="max-w-4xl mx-auto">

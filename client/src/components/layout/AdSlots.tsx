@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import AdComponent from "./AdComponent";
 
 export function AdBanner() {
@@ -48,4 +49,18 @@ export function AdInContent() {
       </div>
     </div>
   );
+}
+
+export function AdSocialBar() {
+  useEffect(() => {
+    // Only inject if it doesn't already exist to prevent duplicates
+    if (!document.querySelector('script[src*="a6802f5cfc02b7c8d4821933c0525799.js"]')) {
+      const script = document.createElement("script");
+      script.type = "text/javascript";
+      script.src = "//pl29050243.profitablecpmratenetwork.com/a6/80/2f/a6802f5cfc02b7c8d4821933c0525799.js";
+      document.body.appendChild(script);
+    }
+  }, []);
+
+  return null;
 }

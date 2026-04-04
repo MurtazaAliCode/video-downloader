@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useLocation } from "wouter";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
-import { AdBanner, AdSidebar } from "@/components/layout/AdSlots";
+import { AdBanner, AdSidebar, AdInContent } from "@/components/layout/AdSlots";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -394,6 +394,11 @@ export default function Home() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Native Ad Placement */}
+      <div className="container mx-auto px-4 max-w-4xl pt-8">
+        <AdInContent />
+      </div>
 
       {/* Features Section */}
       <section className="py-24 bg-background relative">
