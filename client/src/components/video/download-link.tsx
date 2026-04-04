@@ -15,58 +15,34 @@ export function DownloadLink({ jobId, fileName, onProcessAnother }: DownloadLink
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const handleDownload = async () => {
+  const handleDownload = () => {
     if (isDownloading) return;
     setIsDownloading(true);
     setError(null);
 
     try {
       const downloadUrl = `/api/download/${jobId}`;
-      const response = await fetch(downloadUrl);
+      
+      // Native browser download (Best for Mobile Gallery/Downloads)
+      // fetch+blob causes out-of-memory or stream errors on mobile networks.
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = `${fileName || 'video'}.mp4`;
+      link.target = '_blank'; // Required for some iOS versions
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
 
-      if (!response.ok) throw new Error('Download failed. Please try again.');
+      // We cannot know exactly when a native download finishes,
+      // so we wait a few seconds and show success state.
+      setTimeout(() => {
+        setDownloaded(true);
+        setIsDownloading(false);
+      }, 2500);
 
-      const contentDisposition = response.headers.get('content-disposition');
-
-      if (contentDisposition && contentDisposition.includes('attachment')) {
-        // Server streamed with attachment header → save as blob
-        const blob = await response.blob();
-        const blobUrl = URL.createObjectURL(blob);
-
-        const match = contentDisposition.match(/filename="?([^";\n]*)"?/);
-        const dlName = match?.[1] || `${fileName || 'video'}.mp4`;
-
-        const link = document.createElement('a');
-        link.href = blobUrl;
-        link.download = dlName;
-        link.style.display = 'none';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-
-        // Keep blobUrl alive for preview (5 minutes)
-        setPreviewUrl(blobUrl);
-        setTimeout(() => {
-          URL.revokeObjectURL(blobUrl);
-          setPreviewUrl(null);
-        }, 5 * 60 * 1000);
-
-      } else {
-        // Fallback anchor download
-        const link = document.createElement('a');
-        link.href = downloadUrl;
-        link.download = `${fileName || 'video'}.mp4`;
-        link.style.display = 'none';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      }
-
-      setDownloaded(true);
     } catch (err) {
       console.error('Download error:', err);
-      setError(err instanceof Error ? err.message : 'Download failed. Please try again.');
-    } finally {
+      setError('Download failed. Please try again.');
       setIsDownloading(false);
     }
   };
