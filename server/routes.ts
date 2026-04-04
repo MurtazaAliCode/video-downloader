@@ -85,10 +85,60 @@ router.get("/download/:jobId", async (req: Request, res: Response) => {
   }
 
   try {
-    // RapidAPI mode: downloadUrl is a direct external URL → redirect browser to it
+    // RapidAPI mode: stream from CDN with Content-Disposition: attachment (force download)
     if (job.downloadUrl && job.downloadUrl.startsWith('http')) {
-      console.log(`↗️ Redirecting job ${jobId} to direct CDN URL`);
-      return res.redirect(302, job.downloadUrl);
+      const https = await import('https');
+      const http = await import('http');
+      const cdnUrl = new URL(job.downloadUrl);
+      const lib: any = cdnUrl.protocol === 'https:' ? https : http;
+
+      // Clean filename
+      const safeTitle = (job.title || 'video').replace(/[^\w\s-]/g, '').trim().substring(0, 80);
+      const filename = `${safeTitle}.mp4`;
+
+      const proxyRequest = lib.get({
+        hostname: cdnUrl.hostname,
+        path: cdnUrl.pathname + cdnUrl.search,
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          'Referer': `https://${cdnUrl.hostname}/`,
+          'Accept': '*/*',
+          'Accept-Encoding': 'identity',
+          'Connection': 'keep-alive'
+        }
+      }, (fileRes: any) => {
+        if (fileRes.statusCode === 200) {
+          // Success: stream with download headers
+          res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+          res.setHeader('Content-Type', fileRes.headers['content-type'] || 'video/mp4');
+          if (fileRes.headers['content-length']) {
+            res.setHeader('Content-Length', fileRes.headers['content-length']);
+          }
+          console.log(`📡 Streaming job ${jobId} with attachment header`);
+          fileRes.pipe(res);
+
+        } else if ([301, 302, 307, 308].includes(fileRes.statusCode)) {
+          // CDN redirected to another URL — follow it
+          const location = fileRes.headers.location;
+          fileRes.resume();
+          console.log(`↩️ CDN redirect → ${location}`);
+          if (location) return res.redirect(302, location);
+
+        } else {
+          // CDN blocked server (403 etc) — fallback: redirect browser directly
+          fileRes.resume();
+          console.warn(`⚠️ CDN returned ${fileRes.statusCode} for ${jobId}. Falling back to redirect.`);
+          return res.redirect(302, job.downloadUrl!);
+        }
+      });
+
+      proxyRequest.on('error', (err: Error) => {
+        console.error(`Proxy stream error for ${jobId}:`, err.message);
+        // Fallback: redirect browser to CDN directly
+        if (!res.headersSent) res.redirect(302, job.downloadUrl!);
+      });
+
+      return;
     }
 
     // yt-dlp mode: serve local file
@@ -99,12 +149,13 @@ router.get("/download/:jobId", async (req: Request, res: Response) => {
     res.download(job.outputPath, `${job.title || 'video'}.${job.downloadFormat}`, (err) => {
       if (err) {
         console.error(`Error serving file for ${jobId}:`, err);
-        res.status(500).send("Could not download the file.");
+        if (!res.headersSent) res.status(500).send("Could not download the file.");
       }
     });
+
   } catch (error) {
     console.error(`Unexpected error in download endpoint for ${jobId}:`, error);
-    res.status(500).json({ message: "Internal server error." });
+    if (!res.headersSent) res.status(500).json({ message: "Internal server error." });
   }
 });
 
