@@ -50,17 +50,19 @@ class SimpleJobQueue {
             // Update storage to 'processing' (frontend polling ke liye)
             await storage.updateJobStatus(jobId, 'processing', 5);
 
-            // 1. Title fetch
+            // 1. Title fetch (ye API se title aur download info dono laata hai)
             console.log(`🔍 Fetching title for ${jobId}...`);
             const title = await getTitleFromYtDlp(url);
             if (title) {
-                // Title storage mein update (optional, status mein bhejte hain)
-                await storage.updateJobStatus(jobId, 'processing', 10);  // Progress 10%
+                // Title storage mein save karo
+                await storage.updateJobTitle(jobId, title).catch(() => {}); // Ignore if method doesn't exist
+                await storage.updateJobStatus(jobId, 'processing', 10);
                 log(`Job ${jobId}: Title fetched: ${title}`);
             }
 
-            // 2. Download
+            // 2. Download (RapidAPI se direct download)
             console.log(`⬇️ Starting download for ${jobId}...`);
+            // outputPath placeholder - actual extension API response se decide hogi
             const outputPath = path.join(process.cwd(), 'downloads', `${jobId}.${downloadFormat}`);
 
             const result = await downloadVideoWithYtDlp(url, outputPath, downloadFormat, (progress: any) => {
@@ -75,13 +77,15 @@ class SimpleJobQueue {
                 throw new Error(result.error || 'Download failed');
             }
 
-            // 3. Finalize
-            console.log(`🏁 Finalizing ${jobId}...`);
-            const stats = await stat(outputPath);
+            // 3. Finalize - actual file path use karo (extension change ho sakti hai)
+            const actualOutputPath = result.filePath || outputPath;
+            console.log(`🏁 Finalizing ${jobId}... Path: ${actualOutputPath}`);
+            const stats = await stat(actualOutputPath);
             const downloadUrl = `/api/download/${jobId}`;
 
-            await storage.updateJobOutput(jobId, outputPath);
+            await storage.updateJobOutput(jobId, actualOutputPath);
             await storage.updateJobDownloadUrl(jobId, downloadUrl);
+            if (title) await storage.updateJobTitle(jobId, title);
             await storage.updateJobStatus(jobId, 'completed', 100);
 
             log(`Job ${jobId} completed. File size: ${stats.size} bytes`);

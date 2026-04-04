@@ -8,6 +8,7 @@ export interface IStorage {
   createJob(job: InsertJob): Promise<Job>;
   getJob(id: string): Promise<Job | undefined>;
   updateJobStatus(id: string, status: string, progress?: number): Promise<void>;
+  updateJobTitle(id: string, title: string): Promise<void>;
   updateJobOutput(id: string, outputPath: string): Promise<void>;
   updateJobDownloadUrl(id: string, downloadUrl: string): Promise<void>;
   updateJobError(id: string, errorMessage: string): Promise<void>;
@@ -567,6 +568,10 @@ Start protecting your video content with professional watermarks using VidDonloa
     if (status === 'completed' || status === 'failed') updates.completedAt = new Date();
     
     await db.update(jobs).set(updates).where(eq(jobs.id, id));
+  }
+
+  async updateJobTitle(id: string, title: string): Promise<void> {
+    await db.update(jobs).set({ title }).where(eq(jobs.id, id));
   }
 
   async updateJobOutput(id: string, outputPath: string): Promise<void> {
