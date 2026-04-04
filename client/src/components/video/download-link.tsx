@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Download, CheckCircle, Loader2 } from "lucide-react";
+import { Download, CheckCircle, Loader2, Play, FolderOpen } from "lucide-react";
 
 interface DownloadLinkProps {
   jobId: string;
@@ -12,40 +12,47 @@ interface DownloadLinkProps {
 export function DownloadLink({ jobId, fileName, onProcessAnother }: DownloadLinkProps) {
   const [isDownloading, setIsDownloading] = useState(false);
   const [downloaded, setDownloaded] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const handleDownload = async () => {
     if (isDownloading) return;
     setIsDownloading(true);
+    setError(null);
 
     try {
       const downloadUrl = `/api/download/${jobId}`;
-
-      // Use fetch to get the file as blob (works with Content-Disposition: attachment)
       const response = await fetch(downloadUrl);
 
-      if (!response.ok) {
-        throw new Error('Download failed');
-      }
+      if (!response.ok) throw new Error('Download failed. Please try again.');
 
-      // Check if it's a redirect to external URL (fallback case)
       const contentDisposition = response.headers.get('content-disposition');
-      
+
       if (contentDisposition && contentDisposition.includes('attachment')) {
-        // Server gave us the file directly with attachment header
+        // Server streamed with attachment header → save as blob
         const blob = await response.blob();
         const blobUrl = URL.createObjectURL(blob);
+
+        const match = contentDisposition.match(/filename="?([^";\n]*)"?/);
+        const dlName = match?.[1] || `${fileName || 'video'}.mp4`;
+
         const link = document.createElement('a');
         link.href = blobUrl;
-        // Get filename from header or use default
-        const match = contentDisposition.match(/filename="?([^";\n]*)"?/);
-        link.download = match?.[1] || `${fileName || 'video'}.mp4`;
+        link.download = dlName;
         link.style.display = 'none';
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-        setTimeout(() => URL.revokeObjectURL(blobUrl), 5000);
+
+        // Keep blobUrl alive for preview (5 minutes)
+        setPreviewUrl(blobUrl);
+        setTimeout(() => {
+          URL.revokeObjectURL(blobUrl);
+          setPreviewUrl(null);
+        }, 5 * 60 * 1000);
+
       } else {
-        // Fallback: direct link download
+        // Fallback anchor download
         const link = document.createElement('a');
         link.href = downloadUrl;
         link.download = `${fileName || 'video'}.mp4`;
@@ -56,12 +63,19 @@ export function DownloadLink({ jobId, fileName, onProcessAnother }: DownloadLink
       }
 
       setDownloaded(true);
-    } catch (error) {
-      console.error('Download error:', error);
-      // Last resort: open in new tab
-      window.open(`/api/download/${jobId}`, '_blank');
+    } catch (err) {
+      console.error('Download error:', err);
+      setError(err instanceof Error ? err.message : 'Download failed. Please try again.');
     } finally {
       setIsDownloading(false);
+    }
+  };
+
+  const handlePreview = () => {
+    if (previewUrl) {
+      window.open(previewUrl, '_blank');
+    } else {
+      window.open(`/api/download/${jobId}`, '_blank');
     }
   };
 
@@ -69,31 +83,66 @@ export function DownloadLink({ jobId, fileName, onProcessAnother }: DownloadLink
     <Card className="border-green-500/50 shadow-lg shadow-green-500/10">
       <CardHeader>
         <div className="text-center">
-          <div className="w-16 h-16 mx-auto mb-4 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
-            <CheckCircle className="w-8 h-8 text-green-600 dark:text-green-400" />
-          </div>
-          <CardTitle className="text-2xl mb-2 text-green-600 dark:text-green-400">
-            {downloaded ? 'Download Started! ✓' : 'Your Video is Ready!'}
-          </CardTitle>
-          <p className="text-muted-foreground">
+          <div className={`w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center transition-all ${
+            downloaded
+              ? 'bg-green-100 dark:bg-green-900/30'
+              : 'bg-blue-100 dark:bg-blue-900/30'
+          }`}>
             {downloaded
-              ? 'Check your Downloads folder.'
-              : 'Click the button below to save the video to your device.'}
+              ? <CheckCircle className="w-8 h-8 text-green-600 dark:text-green-400" />
+              : <Download className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+            }
+          </div>
+          <CardTitle className={`text-2xl mb-2 ${
+            downloaded ? 'text-green-600 dark:text-green-400' : 'text-foreground'
+          }`}>
+            {downloaded ? '✅ Video Downloaded!' : 'Your Video is Ready!'}
+          </CardTitle>
+          <p className="text-muted-foreground text-sm">
+            {downloaded
+              ? 'Video has been saved to your Downloads folder.'
+              : 'Click the Download button to save the video to your device.'}
           </p>
         </div>
       </CardHeader>
-      <CardContent className="space-y-4">
-        {/* Download Button */}
+
+      <CardContent className="space-y-3">
+
+        {/* ✅ Success Message */}
+        {downloaded && (
+          <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-4">
+            <div className="flex items-start gap-3">
+              <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 shrink-0" />
+              <div>
+                <p className="text-sm font-semibold text-green-700 dark:text-green-400">
+                  Download Complete!
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  📁 Check your browser's <strong>Downloads bar</strong> (bottom of screen) or open your <strong>Downloads folder</strong> to find the video.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ⚠️ Error Message */}
+        {error && (
+          <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-3 text-sm text-red-600 dark:text-red-400">
+            ⚠️ {error}
+          </div>
+        )}
+
+        {/* ⬇️ Download Button */}
         <Button
           onClick={handleDownload}
           disabled={isDownloading}
-          className="w-full bg-green-600 hover:bg-green-700 text-white py-6 text-lg font-semibold transition-all hover:scale-[1.02]"
+          className="w-full bg-green-600 hover:bg-green-700 text-white py-6 text-lg font-semibold transition-all hover:scale-[1.02] disabled:opacity-70"
           data-testid="download-button"
         >
           {isDownloading ? (
             <>
               <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-              Downloading...
+              Downloading... Please wait
             </>
           ) : (
             <>
@@ -103,19 +152,20 @@ export function DownloadLink({ jobId, fileName, onProcessAnother }: DownloadLink
           )}
         </Button>
 
+        {/* 👁️ Preview Button (only shown after download) */}
         {downloaded && (
-          <div className="bg-green-500/10 rounded-lg p-4 text-center border border-green-500/20">
-            <p className="text-sm font-medium text-green-600 dark:text-green-400">
-              ✓ Video saved to your Downloads folder
-            </p>
-            <p className="text-[10px] text-muted-foreground mt-1">
-              Check your browser's download bar or Downloads folder
-            </p>
-          </div>
+          <Button
+            onClick={handlePreview}
+            variant="outline"
+            className="w-full py-4 font-medium border-blue-500/30 hover:bg-blue-500/10 text-blue-600 dark:text-blue-400"
+          >
+            <Play className="w-4 h-4 mr-2" />
+            Preview / Open Video
+          </Button>
         )}
 
-        {/* Process Another Video */}
-        <div className="pt-2 space-y-3">
+        {/* 🚀 Support + Another Video */}
+        <div className="pt-1 space-y-3">
           <Button
             onClick={() => window.open('https://www.profitablecpmratenetwork.com/phb566a4t2?key=353d9eacad54473bb5e47ab851a76327', '_blank')}
             variant="secondary"
@@ -123,13 +173,14 @@ export function DownloadLink({ jobId, fileName, onProcessAnother }: DownloadLink
           >
             🚀 Support Us (Click Here)
           </Button>
-          
+
           <Button
             onClick={onProcessAnother}
             variant="outline"
             className="w-full py-3 font-medium border-primary/20 hover:bg-primary/5"
             data-testid="process-another-button"
           >
+            <FolderOpen className="w-4 h-4 mr-2" />
             Download Another Video
           </Button>
         </div>
