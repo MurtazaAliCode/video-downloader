@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Download, CheckCircle, Loader2, Play, FolderOpen } from "lucide-react";
@@ -14,6 +14,7 @@ export function DownloadLink({ jobId, fileName, onProcessAnother }: DownloadLink
   const [downloaded, setDownloaded] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const autoDownloadedRef = useRef(false);
 
   const handleDownload = () => {
     if (isDownloading) return;
@@ -23,18 +24,14 @@ export function DownloadLink({ jobId, fileName, onProcessAnother }: DownloadLink
     try {
       const downloadUrl = `/api/download/${jobId}`;
       
-      // Native browser download (Best for Mobile Gallery/Downloads)
-      // fetch+blob causes out-of-memory or stream errors on mobile networks.
       const link = document.createElement('a');
       link.href = downloadUrl;
       link.download = `${fileName || 'video'}.mp4`;
-      link.target = '_blank'; // Required for some iOS versions
+      link.target = '_blank';
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
 
-      // We cannot know exactly when a native download finishes,
-      // so we wait a few seconds and show success state.
       setTimeout(() => {
         setDownloaded(true);
         setIsDownloading(false);
@@ -46,6 +43,13 @@ export function DownloadLink({ jobId, fileName, onProcessAnother }: DownloadLink
       setIsDownloading(false);
     }
   };
+
+  useEffect(() => {
+    if (!autoDownloadedRef.current) {
+      autoDownloadedRef.current = true;
+      handleDownload();
+    }
+  }, []);
 
   const handlePreview = () => {
     if (previewUrl) {
