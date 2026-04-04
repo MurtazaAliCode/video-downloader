@@ -175,39 +175,36 @@ async function downloadFileFromUrl(
 }
 
 // =====================================================
-// RapidAPI Download (YouTube/TikTok always, FB/IG fallback)
+// RapidAPI - Get direct download URL (no server-side download)
+// YouTube CDN URLs are IP-restricted, so browser downloads directly
 // =====================================================
 async function downloadViaRapidAPI(
     videoUrl: string,
-    outputPath: string,
+    _outputPath: string,
     downloadFormat: string,
     onProgress?: (progress: number) => void,
     quality: string = 'high'
-): Promise<{ success: boolean; filePath?: string; error?: string }> {
+): Promise<{ success: boolean; directUrl?: string; ext?: string; title?: string; error?: string }> {
     if (!RAPIDAPI_KEY) {
         return { success: false, error: 'RAPIDAPI_KEY not configured' };
     }
 
     console.log(`🌐 RapidAPI: Fetching info for ${videoUrl}`);
-    onProgress?.(15);
+    onProgress?.(30);
 
     const apiResponse = await fetchVideoInfoFromAPI(videoUrl);
-    console.log(`✅ RapidAPI: Got info. Title: ${apiResponse.title}`);
-    onProgress?.(35);
+    const title = apiResponse?.title || apiResponse?.author || 'Downloaded Video';
+    console.log(`✅ RapidAPI: Got info. Title: ${title}`);
+    onProgress?.(70);
 
     const selectedMedia = selectBestDownloadUrl(apiResponse, downloadFormat, quality);
     if (!selectedMedia) throw new Error('No downloadable media found in API response');
 
-    console.log(`📥 RapidAPI: Downloading (${selectedMedia.ext})...`);
-    const finalOutputPath = outputPath.replace(/\.[^.]+$/, `.${selectedMedia.ext}`);
-
-    await downloadFileFromUrl(selectedMedia.url, finalOutputPath, (progress) => {
-        onProgress?.(35 + Math.floor(progress * 0.6));
-    });
-
     onProgress?.(100);
-    console.log(`✅ RapidAPI: Download complete: ${finalOutputPath}`);
-    return { success: true, filePath: finalOutputPath };
+    console.log(`✅ RapidAPI: Direct URL ready (${selectedMedia.ext}). Browser will download.`);
+
+    // Return direct URL — browser downloads from CDN (no 403 issue)
+    return { success: true, directUrl: selectedMedia.url, ext: selectedMedia.ext, title };
 }
 
 // =====================================================
@@ -281,15 +278,15 @@ export async function downloadVideoWithYtDlp(
     downloadFormat: string = 'mp4',
     onProgress?: (progress: number) => void,
     quality: string = 'high'
-): Promise<{ success: boolean; filePath?: string; error?: string }> {
+): Promise<{ success: boolean; filePath?: string; directUrl?: string; ext?: string; title?: string; error?: string }> {
     try {
         await fs.mkdir(path.dirname(outputPath), { recursive: true });
         const platform = getPlatformType(videoUrl);
         console.log(`🎯 Platform detected: ${platform}`);
 
-        // YouTube & TikTok → Always RapidAPI
+        // YouTube & TikTok → Always RapidAPI (returns direct URL, no server download)
         if (platform === 'youtube' || platform === 'tiktok') {
-            console.log(`🚀 ${platform}: Using RapidAPI (primary)`);
+            console.log(`🚀 ${platform}: Using RapidAPI (direct URL mode)`);
             return await downloadViaRapidAPI(videoUrl, outputPath, downloadFormat, onProgress, quality);
         }
 
@@ -300,16 +297,16 @@ export async function downloadVideoWithYtDlp(
                 onProgress?.(5);
                 const result = await downloadViaYtDlp(videoUrl, outputPath, downloadFormat, onProgress, quality);
                 if (result.success) {
-                    console.log(`✅ ${platform}: yt-dlp worked without RapidAPI!`);
+                    console.log(`✅ ${platform}: yt-dlp worked!`);
                     return result;
                 }
             } catch (ytdlpErr) {
-                console.warn(`⚠️ ${platform}: yt-dlp failed (${ytdlpErr instanceof Error ? ytdlpErr.message : 'unknown'}). Falling back to RapidAPI...`);
+                console.warn(`⚠️ ${platform}: yt-dlp failed. Falling back to RapidAPI...`);
                 return await downloadViaRapidAPI(videoUrl, outputPath, downloadFormat, onProgress, quality);
             }
         }
 
-        // Other platforms (Twitter, Vimeo, etc.) → yt-dlp only
+        // Other platforms → yt-dlp only
         console.log(`🔧 ${platform}: Using yt-dlp`);
         return await downloadViaYtDlp(videoUrl, outputPath, downloadFormat, onProgress, quality);
 

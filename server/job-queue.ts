@@ -77,18 +77,32 @@ class SimpleJobQueue {
                 throw new Error(result.error || 'Download failed');
             }
 
-            // 3. Finalize - actual file path use karo (extension change ho sakti hai)
-            const actualOutputPath = result.filePath || outputPath;
-            console.log(`🏁 Finalizing ${jobId}... Path: ${actualOutputPath}`);
-            const stats = await stat(actualOutputPath);
-            const downloadUrl = `/api/download/${jobId}`;
+            // 3. Finalize
+            if (result.directUrl) {
+                // === RapidAPI Mode: Direct URL milti hai, server pe file nahi hai ===
+                // Title API response mein bhi hoti hai
+                const finalTitle = result.title || title || 'Downloaded Video';
+                console.log(`🏁 RapidAPI Job ${jobId} complete. Direct URL ready.`);
 
-            await storage.updateJobOutput(jobId, actualOutputPath);
-            await storage.updateJobDownloadUrl(jobId, downloadUrl);
-            if (title) await storage.updateJobTitle(jobId, title);
-            await storage.updateJobStatus(jobId, 'completed', 100);
+                await storage.updateJobDownloadUrl(jobId, result.directUrl);
+                await storage.updateJobTitle(jobId, finalTitle);
+                await storage.updateJobStatus(jobId, 'completed', 100);
+                log(`Job ${jobId} completed via RapidAPI (direct URL).`);
 
-            log(`Job ${jobId} completed. File size: ${stats.size} bytes`);
+            } else {
+                // === yt-dlp Mode: Local file save ki gai hai ===
+                const actualOutputPath = result.filePath || outputPath;
+                console.log(`🏁 yt-dlp Job ${jobId} complete. File: ${actualOutputPath}`);
+                const stats = await stat(actualOutputPath);
+                const downloadUrl = `/api/download/${jobId}`;
+
+                await storage.updateJobOutput(jobId, actualOutputPath);
+                await storage.updateJobDownloadUrl(jobId, downloadUrl);
+                if (title) await storage.updateJobTitle(jobId, title);
+                await storage.updateJobStatus(jobId, 'completed', 100);
+                log(`Job ${jobId} completed. File size: ${stats.size} bytes`);
+            }
+
             queueJob.status = 'completed';
 
         } catch (error) {

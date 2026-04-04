@@ -80,12 +80,22 @@ router.get("/download/:jobId", async (req: Request, res: Response) => {
   const { jobId } = req.params;
   const job = await storage.getJob(jobId);
 
-  if (!job || job.status !== 'completed' || !job.outputPath) {
+  if (!job || job.status !== 'completed') {
     return res.status(404).json({ message: "File not ready or job expired." });
   }
 
   try {
-    // File ko client ko bhejen
+    // RapidAPI mode: downloadUrl is a direct external URL → redirect browser to it
+    if (job.downloadUrl && job.downloadUrl.startsWith('http')) {
+      console.log(`↗️ Redirecting job ${jobId} to direct CDN URL`);
+      return res.redirect(302, job.downloadUrl);
+    }
+
+    // yt-dlp mode: serve local file
+    if (!job.outputPath) {
+      return res.status(404).json({ message: "File not found." });
+    }
+
     res.download(job.outputPath, `${job.title || 'video'}.${job.downloadFormat}`, (err) => {
       if (err) {
         console.error(`Error serving file for ${jobId}:`, err);
