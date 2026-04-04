@@ -175,37 +175,125 @@ async function downloadFileFromUrl(
 }
 
 // =====================================================
-// RapidAPI - Get direct download URL (no server-side download)
-// YouTube CDN URLs are IP-restricted, so browser downloads directly
+// RapidAPI - Download file server-side with proper headers
+// Falls back to directUrl if server download fails (403 etc)
 // =====================================================
 async function downloadViaRapidAPI(
     videoUrl: string,
-    _outputPath: string,
+    outputPath: string,
     downloadFormat: string,
     onProgress?: (progress: number) => void,
     quality: string = 'high'
-): Promise<{ success: boolean; directUrl?: string; ext?: string; title?: string; error?: string }> {
+): Promise<{ success: boolean; filePath?: string; directUrl?: string; ext?: string; title?: string; error?: string }> {
     if (!RAPIDAPI_KEY) {
         return { success: false, error: 'RAPIDAPI_KEY not configured' };
     }
 
     console.log(`🌐 RapidAPI: Fetching info for ${videoUrl}`);
-    onProgress?.(30);
+    onProgress?.(20);
 
     const apiResponse = await fetchVideoInfoFromAPI(videoUrl);
     const title = apiResponse?.title || apiResponse?.author || 'Downloaded Video';
     console.log(`✅ RapidAPI: Got info. Title: ${title}`);
-    onProgress?.(70);
+    onProgress?.(40);
 
     const selectedMedia = selectBestDownloadUrl(apiResponse, downloadFormat, quality);
     if (!selectedMedia) throw new Error('No downloadable media found in API response');
 
-    onProgress?.(100);
-    console.log(`✅ RapidAPI: Direct URL ready (${selectedMedia.ext}). Browser will download.`);
+    const finalOutputPath = outputPath.replace(/\.[^.]+$/, `.${selectedMedia.ext}`);
+    const cdnUrl = selectedMedia.url;
 
-    // Return direct URL — browser downloads from CDN (no 403 issue)
-    return { success: true, directUrl: selectedMedia.url, ext: selectedMedia.ext, title };
+    // Determine Referer based on platform
+    const parsedVideoUrl = new URL(videoUrl);
+    const isYoutube = parsedVideoUrl.hostname.includes('youtube') || parsedVideoUrl.hostname.includes('youtu.be');
+    const referer = isYoutube ? 'https://www.youtube.com/' : 'https://www.tiktok.com/';
+
+    console.log(`📥 RapidAPI: Attempting server-side download...`);
+
+    try {
+        // Try server-side download with browser-like headers
+        await downloadFileFromUrlWithHeaders(cdnUrl, finalOutputPath, referer, (progress) => {
+            onProgress?.(40 + Math.floor(progress * 0.55));
+        });
+
+        onProgress?.(100);
+        console.log(`✅ RapidAPI: Server download success: ${finalOutputPath}`);
+        return { success: true, filePath: finalOutputPath, title };
+
+    } catch (downloadErr) {
+        // Server download failed (403/IP restricted) — return directUrl as fallback
+        console.warn(`⚠️ Server download failed: ${downloadErr instanceof Error ? downloadErr.message : 'unknown'}. Returning directUrl for client.`);
+        onProgress?.(100);
+        return { success: true, directUrl: cdnUrl, ext: selectedMedia.ext, title };
+    }
 }
+
+// Download with custom Referer header (for CDN 403 workaround)
+async function downloadFileFromUrlWithHeaders(
+    fileUrl: string,
+    savePath: string,
+    referer: string,
+    onProgress?: (progress: number) => void
+): Promise<void> {
+    return new Promise((resolve, reject) => {
+        const makeRequest = (url: string, redirectCount = 0) => {
+            if (redirectCount > 5) return reject(new Error('Too many redirects'));
+
+            const parsedUrl = new URL(url);
+            const lib = parsedUrl.protocol === 'https:' ? https : require('http');
+
+            lib.get({
+                hostname: parsedUrl.hostname,
+                path: parsedUrl.pathname + parsedUrl.search,
+                headers: {
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+                    'Accept': 'video/mp4,video/*;q=0.9,*/*;q=0.8',
+                    'Accept-Encoding': 'identity',
+                    'Accept-Language': 'en-US,en;q=0.9',
+                    'Referer': referer,
+                    'Origin': referer.replace(/\/$/, ''),
+                    'Range': 'bytes=0-',
+                    'Connection': 'keep-alive',
+                    'Sec-Fetch-Dest': 'video',
+                    'Sec-Fetch-Mode': 'no-cors',
+                    'Sec-Fetch-Site': 'cross-site',
+                }
+            }, async (res: any) => {
+                if ([301, 302, 307, 308].includes(res.statusCode)) {
+                    const location = res.headers.location;
+                    if (!location) return reject(new Error('Redirect with no location'));
+                    res.resume();
+                    return makeRequest(location, redirectCount + 1);
+                }
+
+                if (res.statusCode !== 200 && res.statusCode !== 206) {
+                    res.resume();
+                    return reject(new Error(`HTTP ${res.statusCode} while downloading`));
+                }
+
+                const totalLength = parseInt(res.headers['content-length'] || '0', 10);
+                let downloadedLength = 0;
+
+                try {
+                    const { createWriteStream } = await import('fs');
+                    const fileStream = createWriteStream(savePath);
+                    res.on('data', (chunk: Buffer) => {
+                        downloadedLength += chunk.length;
+                        if (totalLength > 0 && onProgress) {
+                            onProgress(Math.floor((downloadedLength / totalLength) * 100));
+                        }
+                    });
+                    res.pipe(fileStream);
+                    fileStream.on('finish', () => { fileStream.close(); resolve(); });
+                    fileStream.on('error', (err: Error) => reject(err));
+                } catch (err) { reject(err); }
+            }).on('error', (e: Error) => reject(e));
+        };
+        makeRequest(fileUrl);
+    });
+}
+
+
 
 // =====================================================
 // yt-dlp Download (Facebook/Instagram/Others)
