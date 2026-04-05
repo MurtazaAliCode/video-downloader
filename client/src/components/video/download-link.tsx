@@ -137,27 +137,41 @@ export function DownloadLink({ jobId, fileName, platform, onProcessAnother }: Do
         {/* ✅ Success Message & Alternative Instructions */}
         {downloaded && (
           <div className="space-y-3">
-            <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-4 text-center">
-              <p className="text-sm font-bold text-green-700 dark:text-green-400">
+            <div className={`border rounded-xl p-4 text-center transition-all duration-300 ${
+              (platform === 'youtube' || platform === 'tiktok')
+                ? 'bg-blue-500/10 border-blue-500/30 shadow-sm animate-pulse-slow'
+                : 'bg-green-500/10 border-green-500/30'
+            }`}>
+              <p className={`text-sm font-bold ${
+                (platform === 'youtube' || platform === 'tiktok') ? 'text-blue-700 dark:text-blue-400' : 'text-green-700 dark:text-green-400'
+              }`}>
                 ✅ Video Processed Successfully!
               </p>
+              
               {(platform === 'youtube' || platform === 'tiktok') && (
-                <p className="text-xs text-blue-600 dark:text-blue-400 font-bold mt-2 py-1 px-2 bg-blue-500/5 rounded-lg border border-blue-500/10 inline-block">
-                  💡 Tip: Agar video browser mein khul jaye, toh niche **3 dots (⋮)** par clik karke **Download** karein.
-                </p>
+                <div className="mt-4 space-y-3 animate-in fade-in zoom-in-95 duration-500">
+                  <p className="text-xs text-blue-700 dark:text-blue-300 font-bold uppercase tracking-tight">
+                    👇 Instruction (Pehle ye karein):
+                  </p>
+                  <p className="text-[13px] text-blue-600 dark:text-blue-400 leading-relaxed font-medium">
+                    Please niche de gaye **"Preview Video"** button par clik karein. 
+                    Wahan video player ke corner mein **3 dots** 
+                    <span className="inline-flex items-center justify-center w-6 h-6 bg-blue-500/20 rounded-md mx-1 font-bold text-lg">⋮</span> 
+                    par clik karke **Download** kar len.
+                  </p>
+                </div>
               )}
             </div>
 
-            {/* Platform Specific Instruction for YouTube/TikTok */}
+            {/* Platform Specific Instruction for YouTube/TikTok (Consolidated) */}
             {(platform === 'youtube' || platform === 'tiktok') && (
-              <div className="bg-blue-500/10 border border-blue-500/30 rounded-xl p-4 animate-in zoom-in-95 duration-500">
-                <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center shrink-0">
-                    <span className="text-lg">💡</span>
+              <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-4 shadow-sm">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-yellow-500/20 flex items-center justify-center shrink-0 animate-bounce">
+                    <span className="text-xl">⚠️</span>
                   </div>
-                  <div className="text-left text-xs leading-relaxed text-blue-700 dark:text-blue-300">
-                    <p className="font-bold mb-1 uppercase tracking-tight">Important for {platform === 'youtube' ? 'YouTube' : 'TikTok'}:</p>
-                    <p>Agar video download na ho aur new tab mein khul jaye, toh niche de gaye **3 dots (⋮)** par click karein aur **Download** select karein.</p>
+                  <div className="text-left text-xs font-bold text-yellow-800 dark:text-yellow-400">
+                    <p>Important: Normal download button block ho sakta hai. Isliye "Preview Video" wala tariqa use karein!</p>
                   </div>
                 </div>
               </div>
