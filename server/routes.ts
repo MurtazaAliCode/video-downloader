@@ -123,11 +123,14 @@ router.get("/download/:jobId", async (req: Request, res: Response) => {
           hostname: cdnUrl.hostname,
           path: cdnUrl.pathname + cdnUrl.search,
           headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36',
             'Referer': referer,
             'Accept': '*/*',
             'Cookie': cookieHeader,
-            'Connection': 'keep-alive'
+            'Connection': 'keep-alive',
+            'Sec-Ch-Ua': '"Not/A)Brand";v="8", "Chromium";v="126", "Google Chrome";v="126"',
+            'Sec-Ch-Ua-Mobile': '?0',
+            'Sec-Ch-Ua-Platform': '"Windows"',
           }
         }, (fileRes: any) => {
           const { statusCode } = fileRes;
@@ -157,10 +160,12 @@ router.get("/download/:jobId", async (req: Request, res: Response) => {
             }
 
           } else {
-            // Blocked or Error
+            // Blocked or Error - AGGRESSIVE LOGGING
             fileRes.resume();
-            console.warn(`⚠️ CDN Proxy Error: ${statusCode} for job ${jobId}`);
-            
+            console.error(`❌ PROXY ERROR: CDN returned status ${statusCode} for job ${jobId}`);
+            console.error(`❌ URL: ${urlToStream.substring(0, 100)}...`);
+            console.error(`❌ Headers received from CDN:`, JSON.stringify(fileRes.headers, null, 2));
+
             if (!res.headersSent) {
                 const platformLabel = job.platform?.toUpperCase() || 'CDN';
                 const message = (statusCode === 403) 

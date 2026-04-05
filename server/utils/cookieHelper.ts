@@ -25,6 +25,7 @@ export function getCookieHeader(targetUrl: string, cookiesFileName: string = 'co
                                targetHostname.includes('youtube.com') ||
                                targetHostname.includes('google.com');
 
+        let matchedCount = 0;
         for (const line of lines) {
             const trimmed = line.trim();
             if (!trimmed || trimmed.startsWith('#')) continue;
@@ -36,18 +37,19 @@ export function getCookieHeader(targetUrl: string, cookiesFileName: string = 'co
             const name = parts[5];
             const value = parts[6].trim();
 
-            // Match logic:
-            // 1. If it's a Google/YouTube host, include all related cookies (some cookies are set on .youtube.com but needed on .googlevideo.com)
             const isGoogleCookie = domain.includes('google.com') ||
                                   domain.includes('youtube.com') ||
                                   domain.includes('googlevideo.com');
 
+            // Logic: If target is Google/YouTube, include all Google/YouTube cookies
             if (isGoogleContext && isGoogleCookie) {
                 cookieParts.push(`${name}=${value}`);
+                matchedCount++;
             } 
-            // 2. Otherwise match literal domain or wildcard domain (starting with .)
-            else if (targetHostname.includes(domain.startsWith('.') ? domain.substring(1) : domain)) {
+            // Otherwise match exact domain or wildcard (suffix)
+            else if (targetHostname.endsWith(domain.startsWith('.') ? domain.substring(1) : domain)) {
                 cookieParts.push(`${name}=${value}`);
+                matchedCount++;
             }
         }
 
@@ -66,9 +68,13 @@ export function getCookieHeader(targetUrl: string, cookiesFileName: string = 'co
             .map(([k, v]) => `${k}=${v}`)
             .join('; ');
 
+        if (header && isGoogleContext) {
+            console.log(`🍪 CookieHelper: Matched ${uniqueCookiesMap.size} unique cookies for Google/YouTube host: ${targetHostname}`);
+        }
+
         return header;
     } catch (err) {
-        console.error('Error parsing cookies in helper:', err);
+        console.error('❌ CookieHelper Error:', err);
         return '';
     }
 }

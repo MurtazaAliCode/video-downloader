@@ -130,7 +130,7 @@ async function downloadFileFromUrl(
                 hostname: parsedUrl.hostname,
                 path: parsedUrl.pathname + parsedUrl.search,
                 headers: {
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36',
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36',
                     'Accept': '*/*',
                     'Accept-Encoding': 'identity'
                 }
@@ -247,11 +247,14 @@ async function downloadFileFromUrlWithHeaders(
                 hostname: parsedUrl.hostname,
                 path: parsedUrl.pathname + parsedUrl.search,
                 headers: {
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36',
                     'Accept': '*/*',
                     'Referer': referer,
                     'Cookie': getCookieHeader(fileUrl),
-                    'Connection': 'keep-alive'
+                    'Connection': 'keep-alive',
+                    'Sec-Ch-Ua': '"Not/A)Brand";v="8", "Chromium";v="126", "Google Chrome";v="126"',
+                    'Sec-Ch-Ua-Mobile': '?0',
+                    'Sec-Ch-Ua-Platform': '"Windows"',
                 }
             }, async (res: any) => {
                 if ([301, 302, 307, 308].includes(res.statusCode)) {
