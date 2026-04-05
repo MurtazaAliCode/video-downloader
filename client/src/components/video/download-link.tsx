@@ -25,20 +25,19 @@ export function DownloadLink({ jobId, fileName, onProcessAnother }: DownloadLink
     const targetFileName = `${fileName || 'video'}.mp4`;
 
     try {
-      // First, attempt to fetch the video via the proxy to force a Blob download.
-      // This guarantees a "Save As" dialogue without opening a new tab that plays inline.
       const response = await fetch(downloadUrl);
       
-      // If our proxy falls back to a 302 redirect to a direct video URL, fetch will transparently follow it.
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      if (!response.ok) {
+        // If server explicitly returns an error (403, 500, etc)
+        const errorText = await response.text().catch(() => `HTTP ${response.status}`);
+        throw new Error(errorText);
+      }
       
       const contentType = response.headers.get('content-type');
       if (contentType && contentType.includes('text/html')) {
-          // If we got an HTML page instead of a video, fallback to standard link opening
-          throw new Error('Received HTML instead of video');
+          throw new Error('Received HTML instead of video. This usually means the download link expired.');
       }
 
-      // Convert the response to a Blob (stores in browser RAM temporarily)
       const blob = await response.blob();
       const blobUrl = window.URL.createObjectURL(blob);
       
@@ -49,27 +48,36 @@ export function DownloadLink({ jobId, fileName, onProcessAnother }: DownloadLink
       link.click();
       document.body.removeChild(link);
       
-      // Cleanup
       setTimeout(() => window.URL.revokeObjectURL(blobUrl), 10000);
 
       setDownloaded(true);
       setIsDownloading(false);
 
-    } catch (err) {
-      console.warn('Frontend fetch failed (CORS or size), falling back to new tab:', err);
-      // Fallback: If CORS blocks the fetch or it's too large, fallback to opening in a new tab
-      const link = document.createElement('a');
-      link.href = downloadUrl;
-      link.download = targetFileName;
-      link.target = '_blank';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-
-      setTimeout(() => {
-        setDownloaded(true);
+    } catch (err: any) {
+      console.warn('Download process failed:', err);
+      
+      // Check if it's a server error or a network/CORS error
+      const isServerError = err.message.includes('Download blocked') || err.message.includes('HTTP');
+      
+      if (isServerError) {
+        // Show server error directly in the UI instead of falling back to a dead link
+        setError(err.message);
         setIsDownloading(false);
-      }, 2500);
+      } else {
+        // For network/CORS/Memory errors, try the fallback one last time
+        const link = document.createElement('a');
+        link.href = downloadUrl;
+        link.download = targetFileName;
+        link.target = '_blank';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        setTimeout(() => {
+          setDownloaded(true);
+          setIsDownloading(false);
+        }, 2500);
+      }
     }
   };
 

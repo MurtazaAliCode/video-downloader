@@ -150,45 +150,44 @@ router.get("/download/:jobId", async (req: Request, res: Response) => {
             'Connection': 'keep-alive'
           }
         }, (fileRes: any) => {
-          if (fileRes.statusCode === 200 || fileRes.statusCode === 206) {
+          const { statusCode } = fileRes;
+          
+          if (statusCode === 200 || statusCode === 206) {
             // Success: stream with download headers
             res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
             res.setHeader('Content-Type', fileRes.headers['content-type'] || 'video/mp4');
-            if (fileRes.headers['content-length']) {
-              res.setHeader('Content-Length', fileRes.headers['content-length']);
+            const contentLength = fileRes.headers['content-length'];
+            if (contentLength) {
+              res.setHeader('Content-Length', contentLength);
             }
-            console.log(`📡 Streaming job ${jobId} with attachment header from ${urlToStream}`);
+            
+            console.log(`📡 Streaming job ${jobId} (${contentLength || 'unknown'} bytes) as attachment`);
             fileRes.pipe(res);
 
-          } else if ([301, 302, 307, 308].includes(fileRes.statusCode)) {
-            // CDN redirected to another URL — follow it internally
+          } else if ([301, 302, 307, 308].includes(statusCode)) {
+            // Follow redirect internals
             const location = fileRes.headers.location;
             fileRes.resume();
-            if (location) {
-                console.log(`↩️ CDN redirect → ${location}`);
-                let nextUrl = location;
-                if (!location.startsWith('http')) {
-                    nextUrl = new URL(location, urlToStream).toString();
-                }
+            if (location && redirectCount < 5) {
+                const nextUrl = location.startsWith('http') ? location : new URL(location, urlToStream).toString();
+                console.log(`↩️ Proxy redirect (${redirectCount + 1}) → ${nextUrl}`);
                 streamCdn(nextUrl, redirectCount + 1);
             } else {
-                if (!res.headersSent) return res.redirect(302, job.downloadUrl!);
+                if (!res.headersSent) res.status(404).send('Too many redirects or missing location header from CDN.');
             }
 
           } else {
-            // CDN blocked server (403 etc)
+            // Blocked or Error
             fileRes.resume();
-            console.warn(`⚠️ CDN returned ${fileRes.statusCode} for ${jobId}. Mode: ${job.platform}`);
+            console.warn(`⚠️ CDN Proxy Error: ${statusCode} for job ${jobId}`);
             
-            // For YouTube/TikTok, redirection usually fails to download, so we log more
-            if (job.platform === 'youtube' || job.platform === 'tiktok') {
-                console.error(`💥 CRITICAL BLOCK on ${job.platform}. Proxy failed with ${fileRes.statusCode}`);
-                if (!res.headersSent) {
-                    return res.status(fileRes.statusCode).send(`Download blocked by ${job.platform} CDN. Try again later or use a different video.`);
-                }
-            } else {
-                // For other platforms, redirect might still work
-                if (!res.headersSent) return res.redirect(302, job.downloadUrl!);
+            if (!res.headersSent) {
+                const platformLabel = job.platform?.toUpperCase() || 'CDN';
+                const message = (statusCode === 403) 
+                    ? `Download blocked by ${platformLabel} (Access Denied). Try refreshing the page or using a different link.`
+                    : `CDN returned error ${statusCode}. Could not stream video.`;
+                
+                res.status(statusCode).send(message);
             }
           }
         });
