@@ -5,6 +5,8 @@ import { addDownloadJob } from './job-queue.js';  // Simple queue ke liye
 import { InsertJob } from "../shared/schema.js";
 import { log } from "./vite.js";  // Log ke liye
 import { sendAdminNotification, sendUserConfirmation } from "./email.js";
+import fs from 'fs';
+import path from 'path';
 
 // Setup Express Router
 export const router = Router();
@@ -101,13 +103,41 @@ router.get("/download/:jobId", async (req: Request, res: Response) => {
         const lib: any = cdnUrl.protocol === 'https:' ? https : http;
 
         // Clean filename
-        const safeTitle = (job.title || 'video').replace(/[^\\w\\s-]/g, '').trim().substring(0, 80) || 'video';
+        const safeTitle = (job.title || 'video').replace(/[^\w\s-]/g, '').trim().substring(0, 80) || 'video';
         const filename = `${safeTitle}.mp4`;
 
         // Better referer for bypassing blocks
         let referer = `https://${cdnUrl.hostname}/`;
-        if (job.platform === 'youtube' || job.url?.includes('youtube')) referer = 'https://www.youtube.com/';
-        else if (job.platform === 'tiktok' || job.url?.includes('tiktok')) referer = 'https://www.tiktok.com/';
+        if (job?.platform === 'youtube' || job?.url?.includes('youtube')) referer = 'https://www.youtube.com/';
+        else if (job?.platform === 'tiktok' || job?.url?.includes('tiktok')) referer = 'https://www.tiktok.com/';
+
+        // --- COOKIE PARSING LOGIC ---
+        let cookieHeader = '';
+        try {
+            const cookiesPath = path.resolve(process.cwd(), 'cookies.txt');
+            if (fs.existsSync(cookiesPath)) {
+                const cookieContent = fs.readFileSync(cookiesPath, 'utf8');
+                const lines = cookieContent.split('\n');
+                const cookieParts: string[] = [];
+                
+                for (const line of lines) {
+                    if (!line || line.startsWith('#')) continue;
+                    const parts = line.split(/\t/);
+                    if (parts.length >= 7) {
+                        const domain = parts[0];
+                        const name = parts[5];
+                        const value = parts[6].trim();
+                        // GoogleVideo request calls often need .google.com or .youtube.com cookies
+                        if (cdnUrl.hostname.includes(domain) || domain.includes('youtube.com') || domain.includes('google.com')) {
+                            cookieParts.push(`${name}=${value}`);
+                        }
+                    }
+                }
+                cookieHeader = cookieParts.join('; ');
+            }
+        } catch (err) {
+            console.error('Error parsing cookies for proxy:', err);
+        }
 
         const proxyRequest = lib.get({
           hostname: cdnUrl.hostname,
@@ -116,6 +146,7 @@ router.get("/download/:jobId", async (req: Request, res: Response) => {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
             'Referer': referer,
             'Accept': '*/*',
+            'Cookie': cookieHeader,
             'Connection': 'keep-alive'
           }
         }, (fileRes: any) => {
@@ -145,10 +176,20 @@ router.get("/download/:jobId", async (req: Request, res: Response) => {
             }
 
           } else {
-            // CDN blocked server (403 etc) — fallback: redirect browser directly
+            // CDN blocked server (403 etc)
             fileRes.resume();
-            console.warn(`⚠️ CDN returned ${fileRes.statusCode} for ${jobId}. Falling back to redirect.`);
-            if (!res.headersSent) return res.redirect(302, job.downloadUrl!);
+            console.warn(`⚠️ CDN returned ${fileRes.statusCode} for ${jobId}. Mode: ${job.platform}`);
+            
+            // For YouTube/TikTok, redirection usually fails to download, so we log more
+            if (job.platform === 'youtube' || job.platform === 'tiktok') {
+                console.error(`💥 CRITICAL BLOCK on ${job.platform}. Proxy failed with ${fileRes.statusCode}`);
+                if (!res.headersSent) {
+                    return res.status(fileRes.statusCode).send(`Download blocked by ${job.platform} CDN. Try again later or use a different video.`);
+                }
+            } else {
+                // For other platforms, redirect might still work
+                if (!res.headersSent) return res.redirect(302, job.downloadUrl!);
+            }
           }
         });
 
@@ -159,7 +200,7 @@ router.get("/download/:jobId", async (req: Request, res: Response) => {
         });
       };
 
-      await streamCdn(job.downloadUrl);
+      await streamCdn(job.downloadUrl || '');
       return;
     }
 
