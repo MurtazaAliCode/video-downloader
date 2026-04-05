@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Download, CheckCircle, Loader2, Play, FolderOpen } from "lucide-react";
+import { Download, CheckCircle, Loader2, Play, FolderOpen, AlertTriangle } from "lucide-react";
 
 interface DownloadLinkProps {
   jobId: string;
@@ -122,7 +122,7 @@ export function DownloadLink({ jobId, fileName, platform, onProcessAnother }: Do
                     Your video has been saved successfully.
                     {(platform === 'youtube' || platform === 'tiktok') && (
                       <span className="block mt-1 text-xs text-blue-500 font-bold">
-                        (3-dots ⋮ menu per clik karke download karein)
+                        (Click the 3-dots ⋮ on video to download)
                       </span>
                     )}
                   </>
@@ -139,7 +139,7 @@ export function DownloadLink({ jobId, fileName, platform, onProcessAnother }: Do
           <div className="space-y-3">
             <div className={`border rounded-xl p-4 text-center transition-all duration-300 ${
               (platform === 'youtube' || platform === 'tiktok')
-                ? 'bg-blue-500/10 border-blue-500/30 shadow-sm animate-pulse-slow'
+                ? 'bg-blue-500/10 border-blue-500/30 shadow-sm'
                 : 'bg-green-500/10 border-green-500/30'
             }`}>
               <p className={`text-sm font-bold ${
@@ -149,15 +149,15 @@ export function DownloadLink({ jobId, fileName, platform, onProcessAnother }: Do
               </p>
               
               {(platform === 'youtube' || platform === 'tiktok') && (
-                <div className="mt-4 space-y-3 animate-in fade-in zoom-in-95 duration-500">
+                <div className="mt-4 space-y-3 animate-in fade-in zoom-in-95 duration-500 text-center">
                   <p className="text-xs text-blue-700 dark:text-blue-300 font-bold uppercase tracking-tight">
-                    👇 Instruction (Pehle ye karein):
+                    👇 How to Download:
                   </p>
                   <p className="text-[13px] text-blue-600 dark:text-blue-400 leading-relaxed font-medium">
-                    Please niche de gaye **"Preview Video"** button par clik karein. 
-                    Wahan video player ke corner mein **3 dots** 
-                    <span className="inline-flex items-center justify-center w-6 h-6 bg-blue-500/20 rounded-md mx-1 font-bold text-lg">⋮</span> 
-                    par clik karke **Download** kar len.
+                    Click the <span className="font-bold text-blue-700 dark:text-blue-300 underline">"Preview Video"</span> button at the bottom,
+                    then click the <span className="font-bold">3-dots</span> 
+                    <span className="inline-flex items-center justify-center w-6 h-6 bg-blue-500/20 rounded-md mx-1 font-bold text-lg leading-none">⋮</span> 
+                    on the video and select <span className="font-bold underline">Download</span>.
                   </p>
                 </div>
               )}
@@ -167,11 +167,11 @@ export function DownloadLink({ jobId, fileName, platform, onProcessAnother }: Do
             {(platform === 'youtube' || platform === 'tiktok') && (
               <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-4 shadow-sm">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-yellow-500/20 flex items-center justify-center shrink-0 animate-bounce">
-                    <span className="text-xl">⚠️</span>
+                  <div className="w-10 h-10 rounded-full bg-yellow-500/20 flex items-center justify-center shrink-0">
+                    <AlertTriangle className="w-5 h-5 text-yellow-600 dark:text-yellow-400 font-bold" />
                   </div>
-                  <div className="text-left text-xs font-bold text-yellow-800 dark:text-yellow-400">
-                    <p>Important: Normal download button block ho sakta hai. Isliye "Preview Video" wala tariqa use karein!</p>
+                  <div className="text-left text-[13px] font-bold text-yellow-800 dark:text-yellow-400 leading-tight">
+                    <p>Easy Method: Please use the "Preview Video" option. Standard downloads might be blocked on this platform.</p>
                   </div>
                 </div>
               </div>
