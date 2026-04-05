@@ -372,31 +372,22 @@ export async function downloadVideoWithYtDlp(
         const platform = getPlatformType(videoUrl);
         console.log(`🎯 Platform detected: ${platform}`);
 
-        // YouTube & TikTok → Always RapidAPI (returns direct URL, no server download)
-        if (platform === 'youtube' || platform === 'tiktok') {
-            console.log(`🚀 ${platform}: Using RapidAPI (direct URL mode)`);
-            return await downloadViaRapidAPI(videoUrl, outputPath, downloadFormat, onProgress, quality);
-        }
-
-        // Facebook & Instagram → Try yt-dlp first, fallback to RapidAPI
-        if (platform === 'facebook' || platform === 'instagram') {
-            console.log(`🔄 ${platform}: Trying yt-dlp first...`);
-            try {
-                onProgress?.(5);
-                const result = await downloadViaYtDlp(videoUrl, outputPath, downloadFormat, onProgress, quality);
-                if (result.success) {
-                    console.log(`✅ ${platform}: yt-dlp worked!`);
-                    return result;
-                }
-            } catch (ytdlpErr) {
-                console.warn(`⚠️ ${platform}: yt-dlp failed. Falling back to RapidAPI...`);
-                return await downloadViaRapidAPI(videoUrl, outputPath, downloadFormat, onProgress, quality);
+        // All platforms: Try yt-dlp first for reliable local downloading
+        console.log(`🔄 ${platform}: Trying yt-dlp first...`);
+        try {
+            onProgress?.(5);
+            const result = await downloadViaYtDlp(videoUrl, outputPath, downloadFormat, onProgress, quality);
+            if (result.success) {
+                console.log(`✅ ${platform}: yt-dlp worked!`);
+                return result;
             }
+        } catch (ytdlpErr) {
+            console.warn(`⚠️ ${platform}: yt-dlp failed. Falling back to RapidAPI...`);
         }
 
-        // Other platforms → yt-dlp only
-        console.log(`🔧 ${platform}: Using yt-dlp`);
-        return await downloadViaYtDlp(videoUrl, outputPath, downloadFormat, onProgress, quality);
+        // Fallback to RapidAPI if yt-dlp fails
+        console.log(`🚀 ${platform}: Falling back to RapidAPI`);
+        return await downloadViaRapidAPI(videoUrl, outputPath, downloadFormat, onProgress, quality);
 
     } catch (error) {
         console.error('💥 Download failed:', error);
