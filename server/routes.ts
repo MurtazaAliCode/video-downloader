@@ -89,55 +89,79 @@ router.get("/download/:jobId", async (req: Request, res: Response) => {
     if (job.downloadUrl && job.downloadUrl.startsWith('http')) {
       const https = await import('https');
       const http = await import('http');
-      const cdnUrl = new URL(job.downloadUrl);
-      const lib: any = cdnUrl.protocol === 'https:' ? https : http;
 
-      // Clean filename
-      const safeTitle = (job.title || 'video').replace(/[^\w\s-]/g, '').trim().substring(0, 80);
-      const filename = `${safeTitle}.mp4`;
-
-      const proxyRequest = lib.get({
-        hostname: cdnUrl.hostname,
-        path: cdnUrl.pathname + cdnUrl.search,
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-          'Referer': `https://${cdnUrl.hostname}/`,
-          'Accept': '*/*',
-          'Accept-Encoding': 'identity',
-          'Connection': 'keep-alive'
+      const streamCdn = async (urlToStream: string, redirectCount = 0) => {
+        if (redirectCount > 5) {
+          console.error(`Too many redirects for ${jobId}`);
+          if (!res.headersSent) return res.redirect(302, job.downloadUrl!);
+          return;
         }
-      }, (fileRes: any) => {
-        if (fileRes.statusCode === 200) {
-          // Success: stream with download headers
-          res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-          res.setHeader('Content-Type', fileRes.headers['content-type'] || 'video/mp4');
-          if (fileRes.headers['content-length']) {
-            res.setHeader('Content-Length', fileRes.headers['content-length']);
+
+        const cdnUrl = new URL(urlToStream);
+        const lib: any = cdnUrl.protocol === 'https:' ? https : http;
+
+        // Clean filename
+        const safeTitle = (job.title || 'video').replace(/[^\\w\\s-]/g, '').trim().substring(0, 80) || 'video';
+        const filename = `${safeTitle}.mp4`;
+
+        // Better referer for bypassing blocks
+        let referer = `https://${cdnUrl.hostname}/`;
+        if (job.platform === 'youtube' || job.url?.includes('youtube')) referer = 'https://www.youtube.com/';
+        else if (job.platform === 'tiktok' || job.url?.includes('tiktok')) referer = 'https://www.tiktok.com/';
+
+        const proxyRequest = lib.get({
+          hostname: cdnUrl.hostname,
+          path: cdnUrl.pathname + cdnUrl.search,
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+            'Referer': referer,
+            'Origin': referer.replace(/\\/$/, ''),
+            'Accept': 'video/mp4,video/*;q=0.9,*/*;q=0.8',
+            'Accept-Encoding': 'identity',
+            'Connection': 'keep-alive'
           }
-          console.log(`📡 Streaming job ${jobId} with attachment header`);
-          fileRes.pipe(res);
+        }, (fileRes: any) => {
+          if (fileRes.statusCode === 200 || fileRes.statusCode === 206) {
+            // Success: stream with download headers
+            res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+            res.setHeader('Content-Type', fileRes.headers['content-type'] || 'video/mp4');
+            if (fileRes.headers['content-length']) {
+              res.setHeader('Content-Length', fileRes.headers['content-length']);
+            }
+            console.log(`📡 Streaming job ${jobId} with attachment header from ${urlToStream}`);
+            fileRes.pipe(res);
 
-        } else if ([301, 302, 307, 308].includes(fileRes.statusCode)) {
-          // CDN redirected to another URL — follow it
-          const location = fileRes.headers.location;
-          fileRes.resume();
-          console.log(`↩️ CDN redirect → ${location}`);
-          if (location) return res.redirect(302, location);
+          } else if ([301, 302, 307, 308].includes(fileRes.statusCode)) {
+            // CDN redirected to another URL — follow it internally
+            const location = fileRes.headers.location;
+            fileRes.resume();
+            if (location) {
+                console.log(`↩️ CDN redirect → ${location}`);
+                let nextUrl = location;
+                if (!location.startsWith('http')) {
+                    nextUrl = new URL(location, urlToStream).toString();
+                }
+                streamCdn(nextUrl, redirectCount + 1);
+            } else {
+                if (!res.headersSent) return res.redirect(302, job.downloadUrl!);
+            }
 
-        } else {
-          // CDN blocked server (403 etc) — fallback: redirect browser directly
-          fileRes.resume();
-          console.warn(`⚠️ CDN returned ${fileRes.statusCode} for ${jobId}. Falling back to redirect.`);
-          return res.redirect(302, job.downloadUrl!);
-        }
-      });
+          } else {
+            // CDN blocked server (403 etc) — fallback: redirect browser directly
+            fileRes.resume();
+            console.warn(`⚠️ CDN returned ${fileRes.statusCode} for ${jobId}. Falling back to redirect.`);
+            if (!res.headersSent) return res.redirect(302, job.downloadUrl!);
+          }
+        });
 
-      proxyRequest.on('error', (err: Error) => {
-        console.error(`Proxy stream error for ${jobId}:`, err.message);
-        // Fallback: redirect browser to CDN directly
-        if (!res.headersSent) res.redirect(302, job.downloadUrl!);
-      });
+        proxyRequest.on('error', (err: Error) => {
+          console.error(`Proxy stream error for ${jobId}:`, err.message);
+          // Fallback: redirect browser to CDN directly
+          if (!res.headersSent) res.redirect(302, job.downloadUrl!);
+        });
+      };
 
+      await streamCdn(job.downloadUrl);
       return;
     }
 
