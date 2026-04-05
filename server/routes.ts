@@ -71,6 +71,7 @@ router.get("/status/:jobId", async (req: Request, res: Response) => {
       downloadUrl: job.downloadUrl,
       title: job.title,  // Frontend auto-download ke liye
       errorMessage: job.errorMessage,
+      platform: job.platform,
     });
   } catch (error) {
     console.error(`Error fetching status for ${jobId}:`, error);
