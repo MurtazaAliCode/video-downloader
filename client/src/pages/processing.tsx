@@ -101,6 +101,7 @@ export default function Processing({ params }: ProcessingPageProps) {
             <DownloadLink
               jobId={jobId}
               fileName={job.title || 'video'} 
+              platform={job.platform}
               onProcessAnother={handleProcessAnother}
             />
           ) : job.status === 'failed' ? (
