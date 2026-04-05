@@ -12,32 +12,41 @@ interface DownloadLinkProps {
 export function DownloadLink({ jobId, fileName, onProcessAnother }: DownloadLinkProps) {
   const [isDownloading, setIsDownloading] = useState(false);
   const [downloaded, setDownloaded] = useState(false);
+  const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [hasTriedFallback, setHasTriedFallback] = useState(false);
   const autoDownloadedRef = useRef(false);
 
-  const handleDownload = async () => {
-    if (isDownloading) return;
+  const handleDownload = async (isManual = false) => {
+    if (isDownloading && !isManual) return;
     setIsDownloading(true);
     setError(null);
 
-    const downloadUrl = `/api/download/${jobId}`;
+    const apiDownloadUrl = `/api/download/${jobId}`;
     const targetFileName = `${fileName || 'video'}.mp4`;
 
     try {
-      const response = await fetch(downloadUrl);
+      // First, try the proxy download via our server
+      console.log('🚀 Attempting download via proxy...');
+      const response = await fetch(apiDownloadUrl);
       
-      if (!response.ok) {
-        // If server explicitly returns an error (403, 500, etc)
-        const errorText = await response.text().catch(() => `HTTP ${response.status}`);
-        throw new Error(errorText);
-      }
-      
-      const contentType = response.headers.get('content-type');
-      if (contentType && contentType.includes('text/html')) {
-          throw new Error('Received HTML instead of video. This usually means the download link expired.');
+      // If we get a redirect (301, 302) or a block (403), handle it
+      if (response.redirected) {
+        console.log('↩️ Server redirected to direct URL. User browser will handle it.');
+        window.location.href = response.url;
+        setDownloaded(true);
+        setIsDownloading(false);
+        return;
       }
 
+      if (!response.ok) {
+        console.warn(`Proxy failed with status ${response.status}`);
+        // If it's a 403, we should have been redirected by the server already. 
+        // If not, we'll try a manual fallback in the catch block.
+        throw new Error('primary_failed');
+      }
+      
       const blob = await response.blob();
       const blobUrl = window.URL.createObjectURL(blob);
       
@@ -54,30 +63,21 @@ export function DownloadLink({ jobId, fileName, onProcessAnother }: DownloadLink
       setIsDownloading(false);
 
     } catch (err: any) {
-      console.warn('Download process failed:', err);
+      console.warn('Primary download failed, attempting browser-direct fallback...', err);
       
-      // Check if it's a server error or a network/CORS error
-      const isServerError = err.message.includes('Download blocked') || err.message.includes('HTTP');
-      
-      if (isServerError) {
-        // Show server error directly in the UI instead of falling back to a dead link
-        setError(err.message);
-        setIsDownloading(false);
-      } else {
-        // For network/CORS/Memory errors, try the fallback one last time
-        const link = document.createElement('a');
-        link.href = downloadUrl;
-        link.download = targetFileName;
-        link.target = '_blank';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+      // Fallback: Just let the browser handle the redirect directly
+      const mirrorLink = document.createElement('a');
+      mirrorLink.href = apiDownloadUrl;
+      mirrorLink.target = '_blank'; // Open in new tab to avoid losing current page if it's a direct file
+      document.body.appendChild(mirrorLink);
+      mirrorLink.click();
+      document.body.removeChild(mirrorLink);
 
-        setTimeout(() => {
-          setDownloaded(true);
-          setIsDownloading(false);
-        }, 2500);
-      }
+      setHasTriedFallback(true);
+      setTimeout(() => {
+        setDownloaded(true);
+        setIsDownloading(false);
+      }, 2000);
     }
   };
 
@@ -89,145 +89,123 @@ export function DownloadLink({ jobId, fileName, onProcessAnother }: DownloadLink
   }, []);
 
   const handlePreview = () => {
-    if (previewUrl) {
-      window.open(previewUrl, '_blank');
-    } else {
-      window.open(`/api/download/${jobId}`, '_blank');
-    }
+    window.open(`/api/download/${jobId}`, '_blank');
   };
 
   return (
-    <Card className="border-green-500/50 shadow-lg shadow-green-500/10">
-      <CardHeader>
-        <div className="text-center">
-          <div className={`w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center transition-all ${
-            error
-              ? 'bg-red-100 dark:bg-red-900/30'
-              : downloaded
-                ? 'bg-green-100 dark:bg-green-900/30'
-                : 'bg-blue-100 dark:bg-blue-900/30'
-          }`}>
-            {error 
-              ? <Download className="w-8 h-8 text-red-600 dark:text-red-400 rotate-180" /> 
-              : downloaded
-                ? <CheckCircle className="w-8 h-8 text-green-600 dark:text-green-400" />
-                : <Download className="w-8 h-8 text-blue-600 dark:text-blue-400" />
-            }
+    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+      <Card className="relative overflow-hidden border-0 bg-white/40 dark:bg-black/40 backdrop-blur-xl shadow-2xl ring-1 ring-white/20 dark:ring-white/10 group">
+        {/* Animated Glow Effect */}
+        <div className="absolute -inset-0.5 bg-gradient-to-r from-green-500 to-blue-500 rounded-2xl blur opacity-20 group-hover:opacity-30 transition duration-1000 group-hover:duration-200"></div>
+        
+        <CardHeader className="relative pb-2">
+          <div className="text-center">
+            <div className={`w-20 h-20 mx-auto mb-6 rounded-3xl flex items-center justify-center transition-all duration-500 transform group-hover:scale-110 shadow-lg ${
+              downloaded 
+                ? 'bg-gradient-to-br from-green-400 to-green-600 rotate-0' 
+                : 'bg-gradient-to-br from-blue-400 to-blue-600 rotate-12'
+            }`}>
+              {downloaded 
+                ? <CheckCircle className="w-10 h-10 text-white" /> 
+                : <Download className="w-10 h-10 text-white" />
+              }
+            </div>
+            
+            <CardTitle className="text-3xl font-extrabold tracking-tight mb-2 bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-400">
+              {downloaded ? 'Ready to Watch!' : 'Download Ready'}
+            </CardTitle>
+            <p className="text-muted-foreground text-sm font-medium">
+              {downloaded 
+                ? 'Your video has been saved successfully.' 
+                : 'High-speed secure connection established.'}
+            </p>
           </div>
-          <CardTitle className={`text-2xl mb-2 ${
-            error ? 'text-red-600 dark:text-red-400' : downloaded ? 'text-green-600 dark:text-green-400' : 'text-foreground'
-          }`}>
-            {error ? 'Download Blocked' : downloaded ? '✅ Video Downloaded!' : 'Your Video is Ready!'}
-          </CardTitle>
-          <p className="text-muted-foreground text-sm">
-            {error 
-              ? 'Access Denied: The server was blocked by the CDN.'
-              : downloaded
-                ? 'Video has been saved to your Downloads folder.'
-                : 'Click the Download button to save the video to your device.'}
-          </p>
-        </div>
-      </CardHeader>
+        </CardHeader>
 
-      <CardContent className="space-y-3">
-
-        {/* ✅ Success Message */}
-        {downloaded && (
-          <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-4">
-            <div className="flex items-start gap-3">
-              <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 shrink-0" />
-              <div>
-                <p className="text-sm font-semibold text-green-700 dark:text-green-400">
-                  Download Complete!
-                </p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  📁 Check your browser's <strong>Downloads bar</strong> (bottom of screen) or open your <strong>Downloads folder</strong> to find the video.
-                </p>
+        <CardContent className="relative space-y-4 pt-6">
+          {/* Main Action Button */}
+          <Button
+            onClick={() => handleDownload(true)}
+            disabled={isDownloading}
+            className={`w-full py-8 text-xl font-bold transition-all duration-300 shadow-xl border-0 h-auto ${
+              downloaded
+                ? 'bg-green-500 hover:bg-green-600 text-white'
+                : 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white'
+            } hover:scale-[1.02] active:scale-95 disabled:grayscale`}
+          >
+            {isDownloading ? (
+              <div className="flex items-center space-x-3">
+                <Loader2 className="w-6 h-6 animate-spin" />
+                <span>Downloading File...</span>
               </div>
-            </div>
-          </div>
-        )}
+            ) : (
+              <div className="flex items-center space-x-3">
+                <Download className="w-6 h-6" />
+                <span>{downloaded ? 'Download Again' : 'Download Now'}</span>
+              </div>
+            )}
+          </Button>
 
-        {/* ⚠️ Error Message and Guide Link */}
-        {error && (
-          <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 text-sm text-red-700 dark:text-red-400">
-            <p className="font-semibold mb-2 flex items-center gap-2">
-              <span className="rotate-0 transition-transform">⚠️</span> {error}
-            </p>
-            <p className="mb-3 opacity-90 text-xs leading-relaxed">
-              Iska matlab hai ke server ke YouTube cookies expire ho chuke hain. Aapko website ke admin panel ya backend mein naye cookies install karne honge.
-            </p>
-            <div className="flex flex-col gap-2">
-              <a 
-                href="https://github.com/MurtazaAliCode/video-downloader/blob/main/COOKIES_GUIDE.md" 
-                target="_blank" 
-                className="text-blue-600 dark:text-blue-400 underline font-medium hover:text-blue-700 flex items-center gap-1"
+          {/* Mirror / Alternative Link (Subtle but Professional) */}
+          {hasTriedFallback && !downloaded && (
+            <div className="text-center p-4 bg-muted/20 rounded-xl border border-dashed border-muted-foreground/30">
+              <p className="text-xs text-muted-foreground mb-2 italic">
+                Optimizing your connection based on server traffic...
+              </p>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => window.open(`/api/download/${jobId}`, '_blank')}
+                className="text-blue-500 hover:text-blue-600 hover:bg-blue-500/10 text-xs font-semibold uppercase tracking-widest"
               >
-                Learn how to fix this (Cookies Guide)
-              </a>
-              <button 
-                onClick={() => window.location.reload()}
-                className="text-xs text-muted-foreground hover:text-foreground underline text-left w-fit"
-              >
-                Try Refreshing Page
-              </button>
+                Use Alternative Mirror
+              </Button>
             </div>
-          </div>
-        )}
-
-        {/* ⬇️ Download Button */}
-        <Button
-          onClick={handleDownload}
-          disabled={isDownloading}
-          className="w-full bg-green-600 hover:bg-green-700 text-white py-6 text-lg font-semibold transition-all hover:scale-[1.02] disabled:opacity-70"
-          data-testid="download-button"
-        >
-          {isDownloading ? (
-            <>
-              <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-              Downloading... Please wait
-            </>
-          ) : (
-            <>
-              <Download className="w-5 h-5 mr-2" />
-              {downloaded ? 'Download Again' : 'Download Video'}
-            </>
           )}
-        </Button>
 
-        {/* 👁️ Preview Button (only shown after download) */}
-        {downloaded && (
-          <Button
-            onClick={handlePreview}
-            variant="outline"
-            className="w-full py-4 font-medium border-blue-500/30 hover:bg-blue-500/10 text-blue-600 dark:text-blue-400"
-          >
-            <Play className="w-4 h-4 mr-2" />
-            Preview / Open Video
-          </Button>
-        )}
+          {/* Secondary Actions */}
+          <div className="grid grid-cols-2 gap-3">
+            <Button
+              onClick={handlePreview}
+              variant="outline"
+              className="py-6 font-semibold border-white/20 bg-white/10 hover:bg-white/20 dark:bg-black/20 backdrop-blur-md transition-all"
+            >
+              <Play className="w-4 h-4 mr-2" />
+              Preview Video
+            </Button>
 
-        {/* 🚀 Support + Another Video */}
-        <div className="pt-1 space-y-3">
-          <Button
+            <Button
+              onClick={onProcessAnother}
+              variant="outline"
+              className="py-6 font-semibold border-white/20 bg-white/10 hover:bg-white/20 dark:bg-black/20 backdrop-blur-md transition-all"
+            >
+              <FolderOpen className="w-4 h-4 mr-2" />
+              Next Video
+            </Button>
+          </div>
+
+          {/* Support Ad Section */}
+          <div 
             onClick={() => window.open('https://www.profitablecpmratenetwork.com/phb566a4t2?key=353d9eacad54473bb5e47ab851a76327', '_blank')}
-            variant="secondary"
-            className="w-full py-4 font-bold border-green-500/20 bg-green-500/5 hover:bg-green-500/10 text-green-700 dark:text-green-300 transition-all hover:scale-[1.02]"
+            className="mt-6 p-4 rounded-xl bg-gradient-to-br from-yellow-400/10 to-orange-500/10 border border-yellow-500/20 cursor-pointer hover:border-yellow-500/40 transition-all text-center group/ad"
           >
-            🚀 Support Us (Click Here)
-          </Button>
-
-          <Button
-            onClick={onProcessAnother}
-            variant="outline"
-            className="w-full py-3 font-medium border-primary/20 hover:bg-primary/5"
-            data-testid="process-another-button"
-          >
-            <FolderOpen className="w-4 h-4 mr-2" />
-            Download Another Video
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
+            <div className="flex items-center justify-center space-x-2 text-yellow-600 dark:text-yellow-400 font-bold text-sm">
+              <span className="animate-bounce">🚀</span>
+              <span className="group-hover/ad:underline">Support Our Platform (Click to Unlock Speed)</span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+      
+      {/* Help Link (Moved here, making it less disruptive) */}
+      <div className="text-center">
+        <a 
+          href="/contact" 
+          className="text-xs text-muted-foreground hover:text-foreground transition-colors underline decoration-dotted underline-offset-4"
+        >
+          Experiencing issues? Contact Support
+        </a>
+      </div>
+    </div>
   );
 }

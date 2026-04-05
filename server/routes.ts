@@ -167,10 +167,13 @@ router.get("/download/:jobId", async (req: Request, res: Response) => {
             // Blocked or Error - AGGRESSIVE LOGGING
             fileRes.resume();
             console.error(`❌ PROXY ERROR: CDN returned status ${statusCode} for job ${jobId}`);
-            console.error(`❌ URL: ${urlToStream.substring(0, 100)}...`);
-            console.error(`❌ Headers received from CDN:`, JSON.stringify(fileRes.headers, null, 2));
-
+            
             if (!res.headersSent) {
+                if (statusCode === 403 && job.downloadUrl) {
+                    console.log(`🚀 Redirecting user directly to CDN due to 403 Block: ${jobId}`);
+                    return res.redirect(302, job.downloadUrl);
+                }
+
                 const platformLabel = job.platform?.toUpperCase() || 'CDN';
                 const message = (statusCode === 403) 
                     ? `Download blocked by ${platformLabel} (Access Denied). Try refreshing the page or using a different link.`

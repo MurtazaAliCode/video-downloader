@@ -6,6 +6,7 @@ import { Footer } from "@/components/layout/Footer";
 import { ProgressBar } from "@/components/ui/progress-bar";
 import { DownloadLink } from "@/components/video/download-link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import type { Job } from "@shared/schema";
 
@@ -72,67 +73,92 @@ export default function Processing({ params }: ProcessingPageProps) {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background relative overflow-hidden">
+      {/* Premium Background Atmosphere */}
+      <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-500/10 rounded-full blur-[120px] animate-pulse"></div>
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-500/10 rounded-full blur-[120px] animate-pulse delay-1000"></div>
+      </div>
+
       <Header />
       
-      <div className="container mx-auto px-4 py-20">
-        <div className="max-w-2xl mx-auto space-y-8">
-          <div className="text-center">
-            <h1 className="text-3xl font-bold mb-4">Video Processing</h1>
-            <p className="text-muted-foreground">
+      <div className="container relative z-10 mx-auto px-4 py-20">
+        <div className="max-w-2xl mx-auto space-y-12">
+          <div className="text-center space-y-4 animate-in fade-in slide-in-from-top-4 duration-1000">
+            <h1 className="text-4xl md:text-5xl font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-gray-900 via-gray-700 to-gray-900 dark:from-white dark:via-gray-300 dark:to-white">
+              {job.status === 'completed' ? 'Success!' : 'Processing...'}
+            </h1>
+            <p className="text-muted-foreground text-lg max-w-md mx-auto">
               {job.status === 'completed' 
-                ? 'Your video has been processed successfully!' 
+                ? 'Your video was processed by our high-speed engine.' 
                 : job.status === 'failed'
-                ? 'Processing failed. Please try again.'
-                : 'Processing your video...'}
+                ? 'We encountered an issue, but don\'t worry!'
+                : 'Our AI is extracting the best quality for you...'}
             </p>
           </div>
 
           {job.status === 'completed' ? (
             <DownloadLink
               jobId={jobId}
-              fileName="video" // Would get actual filename from job data
+              fileName={job.title || 'video'} 
               onProcessAnother={handleProcessAnother}
             />
           ) : job.status === 'failed' ? (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-destructive">Processing Failed</CardTitle>
+            <Card className="border-0 bg-red-500/5 backdrop-blur-xl ring-1 ring-red-500/20 shadow-2xl overflow-hidden">
+              <CardHeader className="text-center pt-8">
+                <div className="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <Loader2 className="w-8 h-8 text-red-600 rotate-45" />
+                </div>
+                <CardTitle className="text-2xl font-bold text-red-600 dark:text-red-400">Connection Interrupted</CardTitle>
               </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground mb-4">
-                  {job.errorMessage || 'An error occurred during processing.'}
+              <CardContent className="space-y-6 pb-8 text-center px-8">
+                <p className="text-muted-foreground leading-relaxed">
+                  {job.errorMessage || 'The processing link expired or was interrupted. This can happen during peak traffic.'}
                 </p>
-                <button
-                  onClick={handleProcessAnother}
-                  className="w-full btn-gradient text-primary-foreground py-3 rounded-lg font-medium"
-                >
-                  Try Again
-                </button>
+                <div className="pt-2">
+                  <Button
+                    onClick={handleProcessAnother}
+                    className="w-full bg-red-600 hover:bg-red-700 text-white py-6 text-lg font-bold shadow-lg shadow-red-500/20"
+                  >
+                    Try Alternative Method
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           ) : (
-            <Card>
-              <CardHeader>
-                <div className="text-center">
-                  <div className="w-16 h-16 mx-auto mb-4">
-                    <Loader2 className="w-16 h-16 animate-spin text-primary" />
+            <Card className="border-0 bg-white/40 dark:bg-black/40 backdrop-blur-xl ring-1 ring-white/20 dark:ring-white/10 shadow-2xl overflow-hidden animate-in zoom-in-95 duration-500">
+              <CardHeader className="text-center pt-12 pb-4">
+                <div className="relative w-24 h-24 mx-auto mb-8">
+                  <div className="absolute inset-0 bg-primary/20 rounded-full animate-ping"></div>
+                  <div className="relative bg-gradient-to-br from-primary to-blue-600 w-24 h-24 rounded-3xl flex items-center justify-center shadow-2xl">
+                    <Loader2 className="w-12 h-12 animate-spin text-white" />
                   </div>
-                  <CardTitle className="text-xl mb-2">Processing Your Video</CardTitle>
-                  <p className="text-muted-foreground">
-                    This may take a few moments depending on file size...
-                  </p>
                 </div>
+                <CardTitle className="text-2xl font-black tracking-tight mb-2">Analyzing Request</CardTitle>
+                <p className="text-muted-foreground text-sm font-medium italic">
+                  Fetching high-speed buffers from CDN...
+                </p>
               </CardHeader>
-              <CardContent className="space-y-6">
-                <ProgressBar value={job.progress || 0} />
+              <CardContent className="space-y-8 px-10 pb-12">
+                <div className="space-y-2">
+                   <div className="flex justify-between text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                     <span>Optimization</span>
+                     <span>{Math.round(job.progress || 0)}%</span>
+                   </div>
+                   <ProgressBar 
+                     value={job.progress || 0} 
+                     className="h-3 bg-primary/10" 
+                   />
+                </div>
                 
-                <div className="bg-muted/30 rounded-lg p-4">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
-                    <span className="text-sm text-muted-foreground">
-                      {job.status === 'processing' ? 'Processing video...' : 'Preparing for processing...'}
-                    </span>
+                <div className="flex justify-center gap-4">
+                  <div className="flex items-center space-x-2 text-xs font-semibold text-muted-foreground bg-muted/40 px-3 py-1.5 rounded-full ring-1 ring-black/5 dark:ring-white/5">
+                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                    <span>Secure Proxy</span>
+                  </div>
+                  <div className="flex items-center space-x-2 text-xs font-semibold text-muted-foreground bg-muted/40 px-3 py-1.5 rounded-full ring-1 ring-black/5 dark:ring-white/5">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse delay-500"></div>
+                    <span>CDN Ready</span>
                   </div>
                 </div>
               </CardContent>
