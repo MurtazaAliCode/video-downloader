@@ -6,10 +6,11 @@ import { Download, CheckCircle, Loader2, Play, FolderOpen } from "lucide-react";
 interface DownloadLinkProps {
   jobId: string;
   fileName: string;
+  platform?: string;
   onProcessAnother: () => void;
 }
 
-export function DownloadLink({ jobId, fileName, onProcessAnother }: DownloadLinkProps) {
+export function DownloadLink({ jobId, fileName, platform, onProcessAnother }: DownloadLinkProps) {
   const [isDownloading, setIsDownloading] = useState(false);
   const [downloaded, setDownloaded] = useState(false);
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
@@ -116,15 +117,55 @@ export function DownloadLink({ jobId, fileName, onProcessAnother }: DownloadLink
             </CardTitle>
             <p className="text-muted-foreground text-sm font-medium">
               {downloaded 
-                ? 'Your video has been saved successfully.' 
+                ? (
+                  <>
+                    Your video has been saved successfully.
+                    {(platform === 'youtube' || platform === 'tiktok') && (
+                      <span className="block mt-1 text-xs text-blue-500 font-bold">
+                        (3-dots ⋮ menu per clik karke download karein)
+                      </span>
+                    )}
+                  </>
+                )
                 : 'High-speed secure connection established.'}
             </p>
           </div>
         </CardHeader>
 
-        <CardContent className="relative space-y-4 pt-6">
-          {/* Main Action Button */}
-          <Button
+        <CardContent className="relative space-y-4 pt-4 text-center">
+
+        {/* ✅ Success Message & Alternative Instructions */}
+        {downloaded && (
+          <div className="space-y-3">
+            <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-4 text-center">
+              <p className="text-sm font-bold text-green-700 dark:text-green-400">
+                ✅ Video Processed Successfully!
+              </p>
+              {(platform === 'youtube' || platform === 'tiktok') && (
+                <p className="text-xs text-blue-600 dark:text-blue-400 font-bold mt-2 py-1 px-2 bg-blue-500/5 rounded-lg border border-blue-500/10 inline-block">
+                  💡 Tip: Agar video browser mein khul jaye, toh niche **3 dots (⋮)** par clik karke **Download** karein.
+                </p>
+              )}
+            </div>
+
+            {/* Platform Specific Instruction for YouTube/TikTok */}
+            {(platform === 'youtube' || platform === 'tiktok') && (
+              <div className="bg-blue-500/10 border border-blue-500/30 rounded-xl p-4 animate-in zoom-in-95 duration-500">
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center shrink-0">
+                    <span className="text-lg">💡</span>
+                  </div>
+                  <div className="text-left text-xs leading-relaxed text-blue-700 dark:text-blue-300">
+                    <p className="font-bold mb-1 uppercase tracking-tight">Important for {platform === 'youtube' ? 'YouTube' : 'TikTok'}:</p>
+                    <p>Agar video download na ho aur new tab mein khul jaye, toh niche de gaye **3 dots (⋮)** par click karein aur **Download** select karein.</p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        <Button
             onClick={() => handleDownload(true)}
             disabled={isDownloading}
             className={`w-full py-8 text-xl font-bold transition-all duration-300 shadow-xl border-0 h-auto ${
