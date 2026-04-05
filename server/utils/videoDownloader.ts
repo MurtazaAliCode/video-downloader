@@ -323,28 +323,33 @@ async function downloadViaYtDlp(
         quiet: true,
         'no-playlist': true,
         'no-mtime': true,
-        'socket-timeout': 15,
-        ignoreErrors: false,
+        'socket-timeout': 30,
+        ignoreErrors: true,
         'no-check-certificates': true,
-        'concurrent-fragments': 3,
-        'buffer-size': '1024K',
+        'concurrent-fragments': 5,
+        'buffer-size': '2M',
         'hls-prefer-native': true,
         'add-header': [
-            'User-Agent: Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1',
-            'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
+            'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36',
+            'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+            'Accept-Language: en-US,en;q=0.9',
+            'Sec-Fetch-Mode: navigate',
+            'Sec-Fetch-Site: cross-site',
+            'Sec-Fetch-Dest: video'
         ],
         'ffmpeg-location': './ffmpeg',
         'geo-bypass': true,
-        'force-ipv4': true
+        'force-ipv4': true,
+        'impersonate': 'chrome'
     };
 
-    // Cookies sirf agar file exist kare
+    // Use cookies if the file exists
     try {
         await fs.access(cookiesPath);
         options['cookies'] = cookiesPath;
-    } catch { /* cookies.txt nahi hai, skip */ }
+    } catch { /* cookies.txt not found, skip */ }
 
-    console.log(`🔧 yt-dlp: Downloading ${videoUrl}`);
+    console.log(`🔧 yt-dlp: Starting download with impersonation for ${videoUrl}`);
     await ytdlp(videoUrl, options);
     await fs.access(outputPath);
     onProgress?.(100);
