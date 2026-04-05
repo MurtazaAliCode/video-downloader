@@ -16,17 +16,51 @@ export function DownloadLink({ jobId, fileName, onProcessAnother }: DownloadLink
   const [error, setError] = useState<string | null>(null);
   const autoDownloadedRef = useRef(false);
 
-  const handleDownload = () => {
+  const handleDownload = async () => {
     if (isDownloading) return;
     setIsDownloading(true);
     setError(null);
 
+    const downloadUrl = `/api/download/${jobId}`;
+    const targetFileName = `${fileName || 'video'}.mp4`;
+
     try {
-      const downloadUrl = `/api/download/${jobId}`;
+      // First, attempt to fetch the video via the proxy to force a Blob download.
+      // This guarantees a "Save As" dialogue without opening a new tab that plays inline.
+      const response = await fetch(downloadUrl);
+      
+      // If our proxy falls back to a 302 redirect to a direct video URL, fetch will transparently follow it.
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      
+      const contentType = response.headers.get('content-type');
+      if (contentType && contentType.includes('text/html')) {
+          // If we got an HTML page instead of a video, fallback to standard link opening
+          throw new Error('Received HTML instead of video');
+      }
+
+      // Convert the response to a Blob (stores in browser RAM temporarily)
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
       
       const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = targetFileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      // Cleanup
+      setTimeout(() => window.URL.revokeObjectURL(blobUrl), 10000);
+
+      setDownloaded(true);
+      setIsDownloading(false);
+
+    } catch (err) {
+      console.warn('Frontend fetch failed (CORS or size), falling back to new tab:', err);
+      // Fallback: If CORS blocks the fetch or it's too large, fallback to opening in a new tab
+      const link = document.createElement('a');
       link.href = downloadUrl;
-      link.download = `${fileName || 'video'}.mp4`;
+      link.download = targetFileName;
       link.target = '_blank';
       document.body.appendChild(link);
       link.click();
@@ -36,11 +70,6 @@ export function DownloadLink({ jobId, fileName, onProcessAnother }: DownloadLink
         setDownloaded(true);
         setIsDownloading(false);
       }, 2500);
-
-    } catch (err) {
-      console.error('Download error:', err);
-      setError('Download failed. Please try again.');
-      setIsDownloading(false);
     }
   };
 
