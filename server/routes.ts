@@ -7,6 +7,7 @@ import { log } from "./vite.js";  // Log ke liye
 import { sendAdminNotification, sendUserConfirmation } from "./email.js";
 import fs from 'fs';
 import path from 'path';
+import { getCookieHeader } from "./utils/cookieHelper.js";
 
 // Setup Express Router
 export const router = Router();
@@ -111,32 +112,11 @@ router.get("/download/:jobId", async (req: Request, res: Response) => {
         if (job?.platform === 'youtube' || job?.url?.includes('youtube')) referer = 'https://www.youtube.com/';
         else if (job?.platform === 'tiktok' || job?.url?.includes('tiktok')) referer = 'https://www.tiktok.com/';
 
-        // --- COOKIE PARSING LOGIC ---
-        let cookieHeader = '';
-        try {
-            const cookiesPath = path.resolve(process.cwd(), 'cookies.txt');
-            if (fs.existsSync(cookiesPath)) {
-                const cookieContent = fs.readFileSync(cookiesPath, 'utf8');
-                const lines = cookieContent.split('\n');
-                const cookieParts: string[] = [];
-                
-                for (const line of lines) {
-                    if (!line || line.startsWith('#')) continue;
-                    const parts = line.split(/\t/);
-                    if (parts.length >= 7) {
-                        const domain = parts[0];
-                        const name = parts[5];
-                        const value = parts[6].trim();
-                        // GoogleVideo request calls often need .google.com or .youtube.com cookies
-                        if (cdnUrl.hostname.includes(domain) || domain.includes('youtube.com') || domain.includes('google.com')) {
-                            cookieParts.push(`${name}=${value}`);
-                        }
-                    }
-                }
-                cookieHeader = cookieParts.join('; ');
-            }
-        } catch (err) {
-            console.error('Error parsing cookies for proxy:', err);
+        // --- INJECT COOKIES USING HELPER ---
+        const cookieHeader = getCookieHeader(urlToStream);
+        if (cookieHeader) {
+            const platformLabel = job.platform?.toUpperCase() || 'CDN';
+            console.log(`📡 Injected cookies into ${platformLabel} proxy request for ${jobId}`);
         }
 
         const proxyRequest = lib.get({

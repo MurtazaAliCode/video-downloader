@@ -101,24 +101,30 @@ export function DownloadLink({ jobId, fileName, onProcessAnother }: DownloadLink
       <CardHeader>
         <div className="text-center">
           <div className={`w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center transition-all ${
-            downloaded
-              ? 'bg-green-100 dark:bg-green-900/30'
-              : 'bg-blue-100 dark:bg-blue-900/30'
+            error
+              ? 'bg-red-100 dark:bg-red-900/30'
+              : downloaded
+                ? 'bg-green-100 dark:bg-green-900/30'
+                : 'bg-blue-100 dark:bg-blue-900/30'
           }`}>
-            {downloaded
-              ? <CheckCircle className="w-8 h-8 text-green-600 dark:text-green-400" />
-              : <Download className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+            {error 
+              ? <Download className="w-8 h-8 text-red-600 dark:text-red-400 rotate-180" /> 
+              : downloaded
+                ? <CheckCircle className="w-8 h-8 text-green-600 dark:text-green-400" />
+                : <Download className="w-8 h-8 text-blue-600 dark:text-blue-400" />
             }
           </div>
           <CardTitle className={`text-2xl mb-2 ${
-            downloaded ? 'text-green-600 dark:text-green-400' : 'text-foreground'
+            error ? 'text-red-600 dark:text-red-400' : downloaded ? 'text-green-600 dark:text-green-400' : 'text-foreground'
           }`}>
-            {downloaded ? '✅ Video Downloaded!' : 'Your Video is Ready!'}
+            {error ? 'Download Blocked' : downloaded ? '✅ Video Downloaded!' : 'Your Video is Ready!'}
           </CardTitle>
           <p className="text-muted-foreground text-sm">
-            {downloaded
-              ? 'Video has been saved to your Downloads folder.'
-              : 'Click the Download button to save the video to your device.'}
+            {error 
+              ? 'Access Denied: The server was blocked by the CDN.'
+              : downloaded
+                ? 'Video has been saved to your Downloads folder.'
+                : 'Click the Download button to save the video to your device.'}
           </p>
         </div>
       </CardHeader>
@@ -142,10 +148,30 @@ export function DownloadLink({ jobId, fileName, onProcessAnother }: DownloadLink
           </div>
         )}
 
-        {/* ⚠️ Error Message */}
+        {/* ⚠️ Error Message and Guide Link */}
         {error && (
-          <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-3 text-sm text-red-600 dark:text-red-400">
-            ⚠️ {error}
+          <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 text-sm text-red-700 dark:text-red-400">
+            <p className="font-semibold mb-2 flex items-center gap-2">
+              <span className="rotate-0 transition-transform">⚠️</span> {error}
+            </p>
+            <p className="mb-3 opacity-90 text-xs leading-relaxed">
+              Iska matlab hai ke server ke YouTube cookies expire ho chuke hain. Aapko website ke admin panel ya backend mein naye cookies install karne honge.
+            </p>
+            <div className="flex flex-col gap-2">
+              <a 
+                href="https://github.com/MurtazaAliCode/video-downloader/blob/main/COOKIES_GUIDE.md" 
+                target="_blank" 
+                className="text-blue-600 dark:text-blue-400 underline font-medium hover:text-blue-700 flex items-center gap-1"
+              >
+                Learn how to fix this (Cookies Guide)
+              </a>
+              <button 
+                onClick={() => window.location.reload()}
+                className="text-xs text-muted-foreground hover:text-foreground underline text-left w-fit"
+              >
+                Try Refreshing Page
+              </button>
+            </div>
           </div>
         )}
 

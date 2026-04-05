@@ -3,6 +3,7 @@ import youtubedl, { create } from 'youtube-dl-exec';
 import path from 'path';
 import fs from 'fs/promises';
 import https from 'https';
+import { getCookieHeader } from './cookieHelper';
 
 // =====================================================
 // Binary setup for yt-dlp (Facebook/Instagram etc.)
@@ -249,6 +250,7 @@ async function downloadFileFromUrlWithHeaders(
                     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
                     'Accept': '*/*',
                     'Referer': referer,
+                    'Cookie': getCookieHeader(fileUrl),
                     'Connection': 'keep-alive'
                 }
             }, async (res: any) => {
