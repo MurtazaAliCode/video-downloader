@@ -15,14 +15,14 @@ export function Footer() {
                 <Folder className="w-5 h-5 text-primary-foreground" />
               </div>
               <span className="text-lg font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                VidDonloader
+                VidDownloader
               </span>
             </div>
             <p className="text-sm text-muted-foreground mb-4">
               Free online video processing tool for personal use. Safe, secure, and privacy-focused.
             </p>
             <p className="text-xs text-muted-foreground">
-              © {currentYear} VidDonloader. All rights reserved.
+              © {currentYear} VidDownloader. All rights reserved.
             </p>
           </div>
 

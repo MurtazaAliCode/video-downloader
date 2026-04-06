@@ -299,11 +299,14 @@ async function downloadFileFromUrlWithHeaders(
 function getFormatByQuality(quality: string, downloadFormat: string): string {
     if (downloadFormat === 'mp3') return 'bestaudio/best';
     switch (quality) {
-        case 'low': return 'best[height<=360][ext=mp4]/best[height<=360]/best';
-        case 'medium': return 'best[height<=480][ext=mp4]/best[height<=480]/best';
+        case 'low': 
+            return 'best[height<=360][vcodec!=none][ext=mp4]/best[height<=360][vcodec!=none]/best';
+        case 'medium': 
+            return 'best[height<=480][vcodec!=none][ext=mp4]/best[height<=480][vcodec!=none]/best';
         case 'high':
         case 'highest':
-        default: return 'best[height<=720][ext=mp4]/best[height<=720]/best';
+        default: 
+            return 'best[height<=720][vcodec!=none][ext=mp4]/best[vcodec!=none][ext=mp4]/best[vcodec!=none]/best';
     }
 }
 
