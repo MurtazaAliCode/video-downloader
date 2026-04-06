@@ -94,7 +94,7 @@ function selectBestDownloadUrl(
     };
     const targetHeight = qualityHeightMap[quality] || 720;
 
-    const videoMedias = medias.filter((m: any) => m.extension === 'mp4' || m.videoAvailable !== false);
+    const videoMedias = medias.filter((m: any) => m.videoAvailable === true);
     if (videoMedias.length === 0) return { url: medias[0].url, ext: medias[0].extension || 'mp4' };
 
     const heightMedias = videoMedias.filter((m: any) => {
