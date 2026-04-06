@@ -95,7 +95,7 @@ function selectBestDownloadUrl(
     const targetHeight = qualityHeightMap[quality] || 720;
 
     const videoMedias = medias.filter((m: any) => m.videoAvailable === true);
-    if (videoMedias.length === 0) return { url: medias[0].url, ext: medias[0].extension || 'mp4' };
+    if (videoMedias.length === 0) return null;
 
     const heightMedias = videoMedias.filter((m: any) => {
         const h = parseInt(m.quality || m.height || '0', 10);
@@ -300,13 +300,13 @@ function getFormatByQuality(quality: string, downloadFormat: string): string {
     if (downloadFormat === 'mp3') return 'bestaudio/best';
     switch (quality) {
         case 'low': 
-            return 'best[height<=360][vcodec!=none][ext=mp4]/best[height<=360][vcodec!=none]/best';
+            return 'best[height<=360][vcodec!=none][acodec!=none]/best[height<=360][vcodec!=none]/best[vcodec!=none][acodec!=none]/best[vcodec!=none]';
         case 'medium': 
-            return 'best[height<=480][vcodec!=none][ext=mp4]/best[height<=480][vcodec!=none]/best';
+            return 'best[height<=480][vcodec!=none][acodec!=none]/best[height<=480][vcodec!=none]/best[vcodec!=none][acodec!=none]/best[vcodec!=none]';
         case 'high':
         case 'highest':
         default: 
-            return 'best[height<=720][vcodec!=none][ext=mp4]/best[vcodec!=none][ext=mp4]/best[vcodec!=none]/best';
+            return 'best[height<=720][vcodec!=none][acodec!=none]/best[vcodec!=none][ext=mp4]/best[vcodec!=none]/best';
     }
 }
 
