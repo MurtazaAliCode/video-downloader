@@ -94,24 +94,42 @@ function selectBestDownloadUrl(
     };
     const targetHeight = qualityHeightMap[quality] || 720;
 
-    const videoMedias = medias.filter((m: any) => m.videoAvailable === true);
+    // More inclusive video detection (check flag, type, or extension)
+    const videoExtensions = ['mp4', 'mov', 'avi', 'mkv', 'webm', 'ts', 'flv'];
+    const videoMedias = medias.filter((m: any) => 
+        m.videoAvailable === true || 
+        m.type === 'video' ||
+        videoExtensions.includes((m.extension || '').toLowerCase())
+    );
+
     if (videoMedias.length === 0) return null;
 
-    const heightMedias = videoMedias.filter((m: any) => {
-        const h = parseInt(m.quality || m.height || '0', 10);
+    // Function to parse height from "720p", "SD", "HD", or number
+    const parseHeight = (input: any): number => {
+        if (!input) return 0;
+        const s = String(input).toLowerCase();
+        if (s.includes('4k')) return 2160;
+        if (s.includes('2k')) return 1440;
+        if (s.includes('hd')) return 720;
+        if (s.includes('sd')) return 480;
+        const num = parseInt(s.replace(/[^\d]/g, ''), 10);
+        return isNaN(num) ? 0 : num;
+    };
+
+    const sortedVideos = videoMedias.sort((a, b) => parseHeight(b.quality || b.height) - parseHeight(a.quality || a.height));
+
+    // Try to find matching height or lower
+    const heightMedias = sortedVideos.filter((m: any) => {
+        const h = parseHeight(m.quality || m.height);
         return h <= targetHeight && h > 0;
     });
 
     if (heightMedias.length > 0) {
-        heightMedias.sort((a: any, b: any) => {
-            const ah = parseInt(a.quality || a.height || '0', 10);
-            const bh = parseInt(b.quality || b.height || '0', 10);
-            return bh - ah;
-        });
         return { url: heightMedias[0].url, ext: heightMedias[0].extension || 'mp4' };
     }
 
-    return { url: videoMedias[0].url, ext: videoMedias[0].extension || 'mp4' };
+    // Fail-safe: if no 360p found, just return the first available video (best/any)
+    return { url: sortedVideos[0].url, ext: sortedVideos[0].extension || 'mp4' };
 }
 
 async function downloadFileFromUrl(
@@ -298,11 +316,13 @@ async function downloadFileFromUrlWithHeaders(
 // =====================================================
 function getFormatByQuality(quality: string, downloadFormat: string): string {
     if (downloadFormat === 'mp3') return 'bestaudio/best';
+    
+    // yt-dlp format strings with strict video enforcement and quality-specific fallbacks
     switch (quality) {
         case 'low': 
-            return 'best[height<=360][vcodec!=none][acodec!=none]/best[height<=360][vcodec!=none]/best[vcodec!=none][acodec!=none]/best[vcodec!=none]';
+            return 'best[height<=360][vcodec!=none][acodec!=none]/best[height<=360][vcodec!=none]/best[vcodec!=none][acodec!=none]/best[vcodec!=none]/best';
         case 'medium': 
-            return 'best[height<=480][vcodec!=none][acodec!=none]/best[height<=480][vcodec!=none]/best[vcodec!=none][acodec!=none]/best[vcodec!=none]';
+            return 'best[height<=480][vcodec!=none][acodec!=none]/best[height<=480][vcodec!=none]/best[vcodec!=none][acodec!=none]/best[vcodec!=none]/best';
         case 'high':
         case 'highest':
         default: 
