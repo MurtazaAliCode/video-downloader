@@ -321,6 +321,7 @@ async function fetchPageHtml(pageUrl: string): Promise<string> {
                     'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1',
                     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
                     'Accept-Language': 'en-US,en;q=0.9',
+                    'X-IG-App-ID': '936619743392459',
                     'Cookie': getCookieHeader(url),
                 }
             }, (res: any) => {
@@ -665,7 +666,7 @@ export async function downloadVideoWithYtDlp(
         // ❌ NO RAPIDAPI - saves cost!
         // ============================================
         if (platform === 'facebook' || platform === 'instagram') {
-            console.log(`🔧 ${platform}: Using yt-dlp (NO RapidAPI - cost saving mode)`);
+            console.log(`🔧 ${platform}: Using local methods first (yt-dlp + DirectScraper)`);
 
             // Try 1: yt-dlp
             try {
@@ -679,7 +680,7 @@ export async function downloadVideoWithYtDlp(
                 console.warn(`⚠️ ${platform}: yt-dlp failed: ${ytErr instanceof Error ? ytErr.message : 'unknown'}`);
             }
 
-            // Try 2: Direct page scraper (extract video URLs from page HTML)
+            // Try 2: Direct page scraper
             console.log(`🔄 ${platform}: Falling back to DirectScraper...`);
             try {
                 onProgress?.(5);
@@ -689,10 +690,23 @@ export async function downloadVideoWithYtDlp(
                     return scraperResult;
                 }
             } catch (scraperErr) {
-                console.error(`❌ ${platform}: DirectScraper also failed: ${scraperErr instanceof Error ? scraperErr.message : 'unknown'}`);
+                console.warn(`⚠️ ${platform}: DirectScraper failed: ${scraperErr instanceof Error ? scraperErr.message : 'unknown'}`);
             }
 
-            throw new Error(`All methods failed for ${platform} (yt-dlp + DirectScraper). No RapidAPI used.`);
+            // Try 3: RapidAPI (Emergency Fallback for IG/FB)
+            console.log(`🚀 ${platform}: Falling back to RapidAPI (Cost-enabled mode)...`);
+            try {
+                onProgress?.(5);
+                const rapidResult = await downloadViaRapidAPI(videoUrl, outputPath, downloadFormat, onProgress, quality);
+                if (rapidResult.success) {
+                    console.log(`✅ ${platform}: RapidAPI worked!`);
+                    return rapidResult;
+                }
+            } catch (rapidErr) {
+                console.error(`❌ ${platform}: RapidAPI also failed: ${rapidErr instanceof Error ? rapidErr.message : 'unknown'}`);
+            }
+
+            throw new Error(`All methods failed for ${platform} (yt-dlp + DirectScraper + RapidAPI).`);
         }
 
         // ============================================
@@ -772,6 +786,14 @@ export async function getTitleFromYtDlp(videoUrl: string): Promise<string | null
                                    html.match(/<title>([^<]+)<\/title>/i);
                 if (titleMatch) {
                     return titleMatch[1].replace(/&amp;/g, '&').replace(/&quot;/g, '"').trim();
+                }
+            } catch { }
+
+            // Final fallback for IG/FB: Try RapidAPI
+            try {
+                if (RAPIDAPI_KEY) {
+                    const apiResponse = await fetchVideoInfoFromAPI(videoUrl);
+                    return apiResponse?.title || apiResponse?.author || 'Downloaded Video';
                 }
             } catch { }
         }
