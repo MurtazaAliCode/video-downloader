@@ -1,6 +1,4 @@
-// server/job-queue.ts - Full processing logic here (no circular import)
-// ⚡ OPTIMIZED: No separate title fetch — download function returns title directly
-import { stat } from 'fs/promises';
+import { stat, unlink, readdir } from 'fs/promises';
 import path from 'path';
 import { storage } from './storage.js';
 import { downloadVideoWithYtDlp } from './utils/videoDownloader.js';
@@ -20,7 +18,8 @@ interface QueueJob {
 
 class SimpleJobQueue {
     private queue: QueueJob[] = [];
-    private isProcessing = false;
+    private activeCount = 0;
+    private readonly MAX_CONCURRENT_JOBS = 3;
 
     async add(jobData: JobData): Promise<string> {
         const job: QueueJob = {
@@ -28,39 +27,32 @@ class SimpleJobQueue {
             status: 'pending',
         };
         this.queue.push(job);
-        console.log(`Added job to queue: ${jobData.id}`);
+        console.log(`Added job to queue: ${jobData.id} (Queue length: ${this.queue.length})`);
 
-        if (!this.isProcessing) {
-            this.processNext();
-        }
-
+        this.processNext();
         return jobData.id;
     }
 
     private async processNext() {
-        if (this.isProcessing || this.queue.length === 0) return;
+        if (this.activeCount >= this.MAX_CONCURRENT_JOBS || this.queue.length === 0) return;
 
-        this.isProcessing = true;
+        this.activeCount++;
         const queueJob = this.queue.shift()!;
         const { id: jobId, url, downloadFormat, quality } = queueJob.data;
         queueJob.status = 'processing';
 
         const startTime = Date.now();
-        console.log(`⚡ Processing job: ${jobId}`);
+        console.log(`⚡ [${this.activeCount}/${this.MAX_CONCURRENT_JOBS}] Processing job: ${jobId}`);
 
         try {
             // Update storage to 'processing'
             await storage.updateJobStatus(jobId, 'processing', 5);
 
-            // ⚡ DIRECT DOWNLOAD — No separate title fetch!
-            // Title comes from the download result itself (saves 1 full API call)
-            console.log(`⬇️ Starting download for ${jobId}...`);
             const outputPath = path.join(process.cwd(), 'downloads', `${jobId}.${downloadFormat}`);
 
             const result = await downloadVideoWithYtDlp(url, outputPath, downloadFormat, (progress: any) => {
-                // Throttled progress updates (every 20% to reduce DB writes)
+                // Throttled progress updates
                 if (progress % 20 === 0) {
-                    console.log(`📊 Progress for ${jobId}: ${progress}%`);
                     storage.updateJobStatus(jobId, 'processing', 5 + Math.floor(progress * 0.9)).catch(() => {});
                 }
             }, quality || 'high');
@@ -69,18 +61,14 @@ class SimpleJobQueue {
                 throw new Error(result.error || 'Download failed');
             }
 
-            // Finalize
             const title = result.title || 'Downloaded Video';
 
             if (result.directUrl) {
-                // === RapidAPI/Scraper Mode: Direct URL ===
-                console.log(`🏁 Job ${jobId} complete (direct URL). Title: ${title}`);
+                console.log(`🏁 Job ${jobId} complete (direct URL).`);
                 await storage.updateJobDownloadUrl(jobId, result.directUrl);
                 await storage.updateJobTitle(jobId, title);
                 await storage.updateJobStatus(jobId, 'completed', 100);
-
             } else {
-                // === yt-dlp Mode: Local file ===
                 const actualOutputPath = result.filePath || outputPath;
                 const stats = await stat(actualOutputPath);
                 const downloadUrl = `/api/download/${jobId}`;
@@ -102,21 +90,45 @@ class SimpleJobQueue {
             await storage.updateJobError(jobId, errorMessage);
             queueJob.status = 'failed';
         } finally {
-            this.isProcessing = false;
+            this.activeCount--;
             this.processNext();
         }
     }
 
-    getQueueLength(): number {
-        return this.queue.length;
+    // Auto-cleanup: Deletes files older than 1 hour
+    async startCleanupTask() {
+        const CLEANUP_INTERVAL = 15 * 60 * 1000; // 15 minutes
+        const MAX_AGE = 60 * 60 * 1000; // 1 hour
+
+        setInterval(async () => {
+            try {
+                const downloadsDir = path.join(process.cwd(), 'downloads');
+                const files = await readdir(downloadsDir);
+                const now = Date.now();
+
+                for (const file of files) {
+                    const filePath = path.join(downloadsDir, file);
+                    const fileStat = await stat(filePath);
+                    
+                    if (now - fileStat.mtimeMs > MAX_AGE) {
+                        await unlink(filePath);
+                        console.log(`🧹 Cleaned up old file: ${file}`);
+                    }
+                }
+            } catch (err) {
+                console.error('Cleanup error:', err);
+            }
+        }, CLEANUP_INTERVAL);
+        
+        console.log('🧹 Cleanup task started (Every 15 mins)');
     }
 }
 
 export const jobQueue = new SimpleJobQueue();
+jobQueue.startCleanupTask();
 
 export const addDownloadJob = async (jobData: JobData): Promise<string> => {
-    console.log('Adding job to simple queue:', jobData.id);
     return await jobQueue.add(jobData);
 };
 
-console.log('⚡ Optimized job queue initialized (no duplicate API calls)');
+console.log('⚡ High-performance concurrent job queue initialized');
