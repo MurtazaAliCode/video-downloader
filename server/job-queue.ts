@@ -1,9 +1,10 @@
 // server/job-queue.ts - Full processing logic here (no circular import)
+// ⚡ OPTIMIZED: No separate title fetch — download function returns title directly
 import { stat } from 'fs/promises';
 import path from 'path';
-import { storage } from './storage.js';  // Storage import
-import { downloadVideoWithYtDlp, getTitleFromYtDlp } from './utils/videoDownloader.js';  // Title and Download imports
-import { log } from './vite.js';  // Log import
+import { storage } from './storage.js';
+import { downloadVideoWithYtDlp } from './utils/videoDownloader.js';
+import { log } from './vite.js';
 
 interface JobData {
     id: string;
@@ -40,36 +41,27 @@ class SimpleJobQueue {
         if (this.isProcessing || this.queue.length === 0) return;
 
         this.isProcessing = true;
-        const queueJob = this.queue.shift()!;  // First job lo
+        const queueJob = this.queue.shift()!;
         const { id: jobId, url, downloadFormat, quality } = queueJob.data;
         queueJob.status = 'processing';
 
-        console.log(`Processing job from queue: ${jobId}`);
+        const startTime = Date.now();
+        console.log(`⚡ Processing job: ${jobId}`);
 
         try {
-            // Update storage to 'processing' (frontend polling ke liye)
+            // Update storage to 'processing'
             await storage.updateJobStatus(jobId, 'processing', 5);
 
-            // 1. Title fetch (ye API se title aur download info dono laata hai)
-            console.log(`🔍 Fetching title for ${jobId}...`);
-            const title = await getTitleFromYtDlp(url);
-            if (title) {
-                // Title storage mein save karo
-                await storage.updateJobTitle(jobId, title).catch(() => {}); // Ignore if method doesn't exist
-                await storage.updateJobStatus(jobId, 'processing', 10);
-                log(`Job ${jobId}: Title fetched: ${title}`);
-            }
-
-            // 2. Download (RapidAPI se direct download)
+            // ⚡ DIRECT DOWNLOAD — No separate title fetch!
+            // Title comes from the download result itself (saves 1 full API call)
             console.log(`⬇️ Starting download for ${jobId}...`);
-            // outputPath placeholder - actual extension API response se decide hogi
             const outputPath = path.join(process.cwd(), 'downloads', `${jobId}.${downloadFormat}`);
 
             const result = await downloadVideoWithYtDlp(url, outputPath, downloadFormat, (progress: any) => {
-                console.log(`📊 Progress for ${jobId}: ${progress}%`);
-                // Storage update (throttled)
-                if (progress % 10 === 0) {
-                    storage.updateJobStatus(jobId, 'processing', 10 + Math.floor(progress * 0.8)).catch(err => console.error('Progress update error:', err));
+                // Throttled progress updates (every 20% to reduce DB writes)
+                if (progress % 20 === 0) {
+                    console.log(`📊 Progress for ${jobId}: ${progress}%`);
+                    storage.updateJobStatus(jobId, 'processing', 5 + Math.floor(progress * 0.9)).catch(() => {});
                 }
             }, quality || 'high');
 
@@ -77,32 +69,31 @@ class SimpleJobQueue {
                 throw new Error(result.error || 'Download failed');
             }
 
-            // 3. Finalize
-            if (result.directUrl) {
-                // === RapidAPI Mode: Direct URL milti hai, server pe file nahi hai ===
-                // Title API response mein bhi hoti hai
-                const finalTitle = result.title || title || 'Downloaded Video';
-                console.log(`🏁 RapidAPI Job ${jobId} complete. Direct URL ready.`);
+            // Finalize
+            const title = result.title || 'Downloaded Video';
 
+            if (result.directUrl) {
+                // === RapidAPI/Scraper Mode: Direct URL ===
+                console.log(`🏁 Job ${jobId} complete (direct URL). Title: ${title}`);
                 await storage.updateJobDownloadUrl(jobId, result.directUrl);
-                await storage.updateJobTitle(jobId, finalTitle);
+                await storage.updateJobTitle(jobId, title);
                 await storage.updateJobStatus(jobId, 'completed', 100);
-                log(`Job ${jobId} completed via RapidAPI (direct URL).`);
 
             } else {
-                // === yt-dlp Mode: Local file save ki gai hai ===
+                // === yt-dlp Mode: Local file ===
                 const actualOutputPath = result.filePath || outputPath;
-                console.log(`🏁 yt-dlp Job ${jobId} complete. File: ${actualOutputPath}`);
                 const stats = await stat(actualOutputPath);
                 const downloadUrl = `/api/download/${jobId}`;
+                console.log(`🏁 Job ${jobId} complete (local). Size: ${stats.size} bytes`);
 
                 await storage.updateJobOutput(jobId, actualOutputPath);
                 await storage.updateJobDownloadUrl(jobId, downloadUrl);
-                if (title) await storage.updateJobTitle(jobId, title);
+                await storage.updateJobTitle(jobId, title);
                 await storage.updateJobStatus(jobId, 'completed', 100);
-                log(`Job ${jobId} completed. File size: ${stats.size} bytes`);
             }
 
+            const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+            log(`✅ Job ${jobId} completed in ${elapsed}s`);
             queueJob.status = 'completed';
 
         } catch (error) {
@@ -112,7 +103,7 @@ class SimpleJobQueue {
             queueJob.status = 'failed';
         } finally {
             this.isProcessing = false;
-            this.processNext();  // Next job
+            this.processNext();
         }
     }
 
@@ -128,4 +119,4 @@ export const addDownloadJob = async (jobData: JobData): Promise<string> => {
     return await jobQueue.add(jobData);
 };
 
-console.log('Simple in-memory job queue with full processing initialized! (No circular imports)');
+console.log('⚡ Optimized job queue initialized (no duplicate API calls)');

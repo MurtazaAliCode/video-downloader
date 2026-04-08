@@ -572,11 +572,14 @@ async function downloadViaYtDlp(
         quiet: true,
         'no-playlist': true,
         'no-mtime': true,
-        'socket-timeout': 30,
+        'socket-timeout': 15,
+        'retries': 3,
+        'fragment-retries': 3,
         ignoreErrors: true,
         'no-check-certificates': true,
-        'concurrent-fragments': 5,
-        'buffer-size': '2M',
+        'concurrent-fragments': 10,
+        'buffer-size': '8M',
+        'http-chunk-size': '10M',
         'hls-prefer-native': true,
         'add-header': [
             'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36',
@@ -589,7 +592,8 @@ async function downloadViaYtDlp(
         'ffmpeg-location': './ffmpeg',
         'geo-bypass': true,
         'force-ipv4': true,
-        'impersonate': 'chrome'
+        'impersonate': 'chrome',
+        'no-part': true,
     };
 
     // Use cookies if the file exists
