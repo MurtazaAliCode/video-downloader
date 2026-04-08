@@ -94,7 +94,7 @@ export default function Report() {
                 <div>
                   <h3 className="font-semibold text-foreground mb-2">Important Notice</h3>
                   <p className="text-sm text-muted-foreground">
-                    VidDonloader is designed for processing personal content only. We take reports of misuse seriously 
+                    VidDownloader is designed for processing personal content only. We take reports of misuse seriously 
                     and investigate all claims promptly. False reports may result in restrictions on your ability to use our service.
                   </p>
                 </div>

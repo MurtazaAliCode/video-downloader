@@ -31,11 +31,11 @@ export default function Terms() {
               </CardHeader>
               <CardContent className="prose dark:prose-invert max-w-none">
                 <p>
-                  Welcome to VidDonloader. By accessing or using our video processing service, you agree to comply with 
+                  Welcome to VidDownloader. By accessing or using our video processing service, you agree to comply with 
                   and be bound by these Terms of Service ("Terms"). If you do not agree to these Terms, please do not use our service.
                 </p>
                 <p>
-                  These Terms constitute a legally binding agreement between you and VidDonloader. We reserve the right to 
+                  These Terms constitute a legally binding agreement between you and VidDownloader. We reserve the right to 
                   modify these Terms at any time, and such modifications will be effective immediately upon posting.
                 </p>
               </CardContent>
@@ -47,7 +47,7 @@ export default function Terms() {
               </CardHeader>
               <CardContent className="prose dark:prose-invert max-w-none">
                 <p>
-                  VidDonloader is a free online video processing tool that allows users to:
+                  VidDownloader is a free online video processing tool that allows users to:
                 </p>
                 <ul>
                   <li>Compress video files to reduce file size</li>
@@ -69,7 +69,7 @@ export default function Terms() {
               </CardHeader>
               <CardContent className="prose dark:prose-invert max-w-none">
                 <h3>Permitted Use</h3>
-                <p>You may use VidDonloader to process videos that you own or have proper authorization to modify, including:</p>
+                <p>You may use VidDownloader to process videos that you own or have proper authorization to modify, including:</p>
                 <ul>
                   <li>Videos you created or recorded yourself</li>
                   <li>Videos for which you have explicit permission from the copyright owner</li>
@@ -106,7 +106,7 @@ export default function Terms() {
 
                 <h3>Limited License to Process</h3>
                 <p>
-                  By uploading content, you grant VidDonloader a limited, temporary, non-exclusive license to process your 
+                  By uploading content, you grant VidDownloader a limited, temporary, non-exclusive license to process your 
                   videos solely for the purpose of providing our service. This license expires when your files are 
                   automatically deleted after 12 hours.
                 </p>
@@ -146,7 +146,7 @@ export default function Terms() {
               </CardHeader>
               <CardContent className="prose dark:prose-invert max-w-none">
                 <p>
-                  VidDonloader is provided "as is" and "as available" without warranties of any kind. We expressly disclaim 
+                  VidDownloader is provided "as is" and "as available" without warranties of any kind. We expressly disclaim 
                   all warranties, including but not limited to:
                 </p>
                 <ul>
@@ -167,7 +167,7 @@ export default function Terms() {
               </CardHeader>
               <CardContent className="prose dark:prose-invert max-w-none">
                 <p>
-                  To the maximum extent permitted by law, VidDonloader shall not be liable for any indirect, incidental, 
+                  To the maximum extent permitted by law, VidDownloader shall not be liable for any indirect, incidental, 
                   special, consequential, or punitive damages, including but not limited to:
                 </p>
                 <ul>
@@ -201,7 +201,7 @@ export default function Terms() {
                   <li>Your physical or electronic signature</li>
                 </ul>
                 <p>
-                  DMCA notices can be sent to: dmca@viddonloader.com
+                  DMCA notices can be sent to: dmca@VidDownloader.com
                 </p>
               </CardContent>
             </Card>
@@ -232,7 +232,7 @@ export default function Terms() {
               </CardHeader>
               <CardContent className="prose dark:prose-invert max-w-none">
                 <p>
-                  You agree to indemnify, defend, and hold harmless VidDonloader and its affiliates from any claims, 
+                  You agree to indemnify, defend, and hold harmless VidDownloader and its affiliates from any claims, 
                   damages, losses, or expenses (including attorney fees) arising from:
                 </p>
                 <ul>
@@ -270,15 +270,15 @@ export default function Terms() {
                   If you have questions about these Terms or need to report violations, please contact us:
                 </p>
                 <ul>
-                  <li>Email: legal@viddonloader.com</li>
-                  <li>DMCA: dmca@viddonloader.com</li>
+                  <li>Email: legal@VidDownloader.com</li>
+                  <li>DMCA: dmca@VidDownloader.com</li>
                   <li>Contact Form: <a href="/contact" className="text-primary hover:text-primary/80">/contact</a></li>
                   <li>Report Issues: <a href="/report" className="text-primary hover:text-primary/80">/report</a></li>
                 </ul>
                 
                 <div className="mt-8 pt-8 border-t border-border text-center">
                   <p className="text-sm text-muted-foreground">
-                    © 2025 VidDonloader. All rights reserved. Not affiliated with any social media platforms.
+                    © 2025 VidDownloader. All rights reserved. Not affiliated with any social media platforms.
                   </p>
                 </div>
               </CardContent>

@@ -11,7 +11,7 @@ export default function FeatureRequests() {
                 <div className="max-w-4xl mx-auto">
                     <div className="text-center mb-12">
                         <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">Feature Requests</h1>
-                        <p className="text-muted-foreground text-lg">Help us shape the future of VidDonloader</p>
+                        <p className="text-muted-foreground text-lg">Help us shape the future of VidDownloader</p>
                     </div>
 
                     <div className="space-y-8 text-center">

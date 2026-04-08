@@ -21,7 +21,7 @@ export async function sendAdminNotification(data: { name: string; email: string;
   }
 
   const mailOptions = {
-    from: `"VidDonloader System" <${process.env.SMTP_USER}>`,
+    from: `"VidDownloader System" <${process.env.SMTP_USER}>`,
     to: process.env.CONTACT_EMAIL || process.env.SMTP_USER,
     subject: `New Contact Submission: ${data.subject}`,
     html: `
@@ -32,7 +32,7 @@ export async function sendAdminNotification(data: { name: string; email: string;
         <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;" />
         <p style="white-space: pre-wrap;">${data.message}</p>
         <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;" />
-        <p style="font-size: 12px; color: #64748b;">This message was sent from the VidDonloader contact form.</p>
+        <p style="font-size: 12px; color: #64748b;">This message was sent from the VidDownloader contact form.</p>
       </div>
     `,
   };
@@ -55,17 +55,17 @@ export async function sendUserConfirmation(data: { name: string; email: string }
   }
 
   const mailOptions = {
-    from: `"VidDonloader Team" <${process.env.SMTP_USER}>`,
+    from: `"VidDownloader Team" <${process.env.SMTP_USER}>`,
     to: data.email,
     subject: "We've received your message!",
     html: `
       <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 8px; padding: 24px;">
         <h2 style="color: #2563eb; margin-top: 0;">Hi ${data.name},</h2>
         <p>Thank you for reaching out to us. We've received your message and our team will get back to you shortly (usually within 12 hours).</p>
-        <p>We appreciate your patience and for being part of the VidDonloader community.</p>
+        <p>We appreciate your patience and for being part of the VidDownloader community.</p>
         <br />
         <p>Best regards,</p>
-        <p><strong>VidDonloader Team</strong></p>
+        <p><strong>VidDownloader Team</strong></p>
         <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;" />
         <p style="font-size: 12px; color: #64748b;">If you didn't send a message on our website, please ignore this email.</p>
       </div>

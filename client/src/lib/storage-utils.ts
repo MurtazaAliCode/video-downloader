@@ -18,9 +18,9 @@ export interface ProcessedFile {
 
 // Local storage utilities for client-side state management
 export class LocalStorageManager {
-  private static readonly UPLOAD_HISTORY_KEY = 'viddonloader_upload_history';
-  private static readonly PROCESSING_JOBS_KEY = 'viddonloader_processing_jobs';
-  private static readonly USER_PREFERENCES_KEY = 'viddonloader_preferences';
+  private static readonly UPLOAD_HISTORY_KEY = 'VidDownloader_upload_history';
+  private static readonly PROCESSING_JOBS_KEY = 'VidDownloader_processing_jobs';
+  private static readonly USER_PREFERENCES_KEY = 'VidDownloader_preferences';
 
   static saveUploadHistory(file: FileMetadata): void {
     try {
@@ -283,7 +283,7 @@ export function cleanupExpiredFiles(): void {
     
     if (validHistory.length !== history.length) {
       localStorage.setItem(
-        'viddonloader_upload_history',
+        'VidDownloader_upload_history',
         JSON.stringify(validHistory)
       );
     }
@@ -303,7 +303,7 @@ export function cleanupExpiredFiles(): void {
     
     if (Object.keys(validJobs).length !== Object.keys(jobs).length) {
       localStorage.setItem(
-        'viddonloader_processing_jobs',
+        'VidDownloader_processing_jobs',
         JSON.stringify(validJobs)
       );
     }

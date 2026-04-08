@@ -16,7 +16,7 @@ export default function About() {
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-16">
             <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
-              About VidDonloader
+              About VidDownloader
             </h1>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
               We're dedicated to providing free, secure, and easy-to-use video processing tools for everyone.
@@ -27,7 +27,7 @@ export default function About() {
             <div className="order-2 md:order-1">
               <img
                 src={teamPhoto}  // Fixed: Removed "/assets/"
-                alt="VidDonloader Team working collaboratively"
+                alt="VidDownloader Team working collaboratively"
                 className="w-full h-auto rounded-xl shadow-lg object-cover"
                 style={{ maxHeight: '400px' }}
 
@@ -37,7 +37,7 @@ export default function About() {
             <div className="order-1 md:order-2 space-y-6">
               <h2 className="text-2xl font-semibold text-foreground">Our Mission</h2>
               <p className="text-muted-foreground">
-                VidDonloader is a free online video processing tool built with React and Express for speed and privacy.
+                VidDownloader is a free online video processing tool built with React and Express for speed and privacy.
                 We believe everyone should have access to professional video editing capabilities without
                 the need for expensive software or complex installations.
               </p>

@@ -20,7 +20,7 @@ export default function DMCA() {
                             </CardHeader>
                             <CardContent className="prose dark:prose-invert max-w-none">
                                 <p>
-                                    VidDonloader respects the intellectual property rights of others and expects its users to do the same. In accordance with the Digital Millennium Copyright Act (DMCA), we will respond expeditiously to claims of copyright infringement.
+                                    VidDownloader respects the intellectual property rights of others and expects its users to do the same. In accordance with the Digital Millennium Copyright Act (DMCA), we will respond expeditiously to claims of copyright infringement.
                                 </p>
                             </CardContent>
                         </Card>

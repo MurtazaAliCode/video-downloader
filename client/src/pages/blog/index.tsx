@@ -19,7 +19,7 @@ const downloadGuideSteps = [
   {
     image: guide1,
     title: "Interface (First Look)",
-    desc: "Upon landing on the VidDonloader homepage, you will see this clean interface. Your entire downloading process starts right here.",
+    desc: "Upon landing on the VidDownloader homepage, you will see this clean interface. Your entire downloading process starts right here.",
   },
   {
     image: guide2,

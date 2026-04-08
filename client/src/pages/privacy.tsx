@@ -31,7 +31,7 @@ export default function Privacy() {
               </CardHeader>
               <CardContent className="prose dark:prose-invert max-w-none">
                 <p>
-                  At VidDonloader, we are committed to protecting your privacy and ensuring the security of your personal information. 
+                  At VidDownloader, we are committed to protecting your privacy and ensuring the security of your personal information. 
                   This Privacy Policy explains how we collect, use, and protect your information when you use our video processing service.
                 </p>
               </CardContent>
@@ -211,7 +211,7 @@ export default function Privacy() {
               <CardContent className="prose dark:prose-invert max-w-none">
                 <p>If you have any questions about this Privacy Policy, please contact us:</p>
                 <ul>
-                  <li>Email: privacy@viddonloader.com</li>
+                  <li>Email: privacy@VidDownloader.com</li>
                   <li>Contact Form: <a href="/contact" className="text-primary hover:text-primary/80">/contact</a></li>
                 </ul>
               </CardContent>

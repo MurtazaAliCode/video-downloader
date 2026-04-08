@@ -26,7 +26,7 @@ export const blogPosts = pgTable("blog_posts", {
   title: text("title").notNull(),
   excerpt: text("excerpt").notNull(),
   content: text("content").notNull(),
-  author: text("author").notNull().default('VidDonloader Team'),
+  author: text("author").notNull().default('VidDownloader Team'),
   published: boolean("published").notNull().default(true),
   readTime: integer("read_time").notNull(), // in minutes
   createdAt: timestamp("created_at").notNull().default(sql`now()`),

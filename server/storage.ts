@@ -65,7 +65,7 @@ Different platforms have different requirements:
 - Instagram: 1080x1080 for square videos
 - TikTok: 1080x1920 for vertical videos
 
-## Using VidDonloader for Compression
+## Using VidDownloader for Compression
 
 1. Upload your video file
 2. Select "Compress Video" option
@@ -132,7 +132,7 @@ Creating engaging social media content requires the right video format. Here's y
 4. **Keep videos mobile-friendly**
 5. **Test different aspect ratios**
 
-## Converting with VidDonloader
+## Converting with VidDownloader
 
 Use our format conversion tool to optimize your videos for any platform:
 
@@ -171,7 +171,7 @@ Need to cut your videos but don't want to install heavy software? Online video t
 - Remove mistakes or pauses
 - Split long videos into segments
 
-## How to Trim Videos with VidDonloader
+## How to Trim Videos with VidDownloader
 
 ### Step-by-Step Guide:
 
@@ -229,7 +229,7 @@ Need to cut your videos but don't want to install heavy software? Online video t
 4. **Removing important context**
 5. **Not previewing before download**
 
-Start trimming your videos efficiently with VidDonloader today!`,
+Start trimming your videos efficiently with VidDownloader today!`,
         readTime: 4,
         published: true,
       },
@@ -264,7 +264,7 @@ Need to extract audio from your videos? Whether it's for podcasts, music, or voi
 - **Quality**: Highest fidelity
 - **Compatibility**: Professional software
 
-## How to Extract Audio with VidDonloader
+## How to Extract Audio with VidDownloader
 
 ### Simple Process:
 
@@ -353,7 +353,7 @@ Need to extract audio from your videos? Whether it's for podcasts, music, or voi
 - Adjust bitrate settings
 - Consider compression
 
-Start extracting high-quality audio from your videos today with VidDonloader!`,
+Start extracting high-quality audio from your videos today with VidDownloader!`,
         readTime: 6,
         published: true,
       },
@@ -427,7 +427,7 @@ Protect your video content and build your brand with professional watermarks. He
 - **HD videos**: 3-7% of frame width
 - **4K videos**: 2-5% of frame width
 
-## Adding Watermarks with VidDonloader
+## Adding Watermarks with VidDownloader
 
 ### Text Watermark Process:
 
@@ -528,7 +528,7 @@ Protect your video content and build your brand with professional watermarks. He
 - Consider licensing options
 - Seek legal advice for valuable content
 
-Start protecting your video content with professional watermarks using VidDonloader today!`,
+Start protecting your video content with professional watermarks using VidDownloader today!`,
         readTime: 5,
         published: true,
       }
@@ -540,7 +540,7 @@ Start protecting your video content with professional watermarks using VidDonloa
     for (const post of posts) {
       await db.insert(blogPosts).values({
         ...post,
-        author: post.author || 'VidDonloader Team',
+        author: post.author || 'VidDownloader Team',
         published: post.published ?? true,
       });
     }
@@ -609,7 +609,7 @@ Start protecting your video content with professional watermarks using VidDonloa
   async createBlogPost(insertPost: InsertBlogPost): Promise<BlogPost> {
     const [post] = await db.insert(blogPosts).values({
       ...insertPost,
-      author: insertPost.author || 'VidDonloader Team',
+      author: insertPost.author || 'VidDownloader Team',
       published: insertPost.published ?? true,
     }).returning();
     return post;

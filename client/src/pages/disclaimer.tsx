@@ -20,7 +20,7 @@ export default function Disclaimer() {
                             </CardHeader>
                             <CardContent className="prose dark:prose-invert max-w-none">
                                 <p>
-                                    The information provided by VidDonloader is for general informational purposes only. All information on the site is provided in good faith, however we make no representation or warranty of any kind, express or implied, regarding the accuracy, adequacy, validity, reliability, or completeness of any information on the site.
+                                    The information provided by VidDownloader is for general informational purposes only. All information on the site is provided in good faith, however we make no representation or warranty of any kind, express or implied, regarding the accuracy, adequacy, validity, reliability, or completeness of any information on the site.
                                 </p>
                             </CardContent>
                         </Card>
@@ -31,7 +31,7 @@ export default function Disclaimer() {
                             </CardHeader>
                             <CardContent className="prose dark:prose-invert max-w-none">
                                 <p>
-                                    VidDonloader is intended for personal, non-commercial use only. Users are responsible for ensuring that their use of the service complies with the terms of service of the original content platforms (e.g., YouTube, Facebook, Instagram) and local copyright laws.
+                                    VidDownloader is intended for personal, non-commercial use only. Users are responsible for ensuring that their use of the service complies with the terms of service of the original content platforms (e.g., YouTube, Facebook, Instagram) and local copyright laws.
                                 </p>
                             </CardContent>
                         </Card>
