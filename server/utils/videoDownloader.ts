@@ -3,19 +3,19 @@ import youtubedl, { create } from 'youtube-dl-exec';
 import path from 'path';
 import fs from 'fs/promises';
 import https from 'https';
+import http from 'http';
 import { getCookieHeader } from './cookieHelper';
 
 // =====================================================
-// Binary setup for yt-dlp (Facebook/Instagram etc.)
+// Binary setup for yt-dlp
 // =====================================================
 const binPath = path.resolve(process.cwd(), 'yt-dlp');
 const cookiesPath = path.resolve(process.cwd(), 'cookies.txt');
 const ytdlp = process.env.NODE_ENV === 'production' ? create(binPath) : youtubedl;
 
 // =====================================================
-// RapidAPI - Social Download All In One
-// YouTube + TikTok ke liye (primary)
-// Facebook + Instagram ke liye (fallback when yt-dlp fails)
+// RapidAPI - SIRF YouTube + TikTok ke liye
+// Facebook/Instagram ke liye NAHI use hoga ab
 // =====================================================
 const RAPIDAPI_KEY = process.env.RAPIDAPI_KEY || '';
 const RAPIDAPI_HOST = 'social-download-all-in-one.p.rapidapi.com';
@@ -34,7 +34,7 @@ function getPlatformType(url: string): 'youtube' | 'tiktok' | 'facebook' | 'inst
 }
 
 // =====================================================
-// RapidAPI Helper Functions
+// RapidAPI Helper Functions (SIRF YouTube + TikTok)
 // =====================================================
 async function fetchVideoInfoFromAPI(videoUrl: string): Promise<any> {
     return new Promise((resolve, reject) => {
@@ -94,17 +94,15 @@ function selectBestDownloadUrl(
     };
     const targetHeight = qualityHeightMap[quality] || 720;
 
-    // More inclusive video detection (check flag, type, or extension)
     const videoExtensions = ['mp4', 'mov', 'avi', 'mkv', 'webm', 'ts', 'flv'];
-    const videoMedias = medias.filter((m: any) => 
-        m.videoAvailable === true || 
+    const videoMedias = medias.filter((m: any) =>
+        m.videoAvailable === true ||
         m.type === 'video' ||
         videoExtensions.includes((m.extension || '').toLowerCase())
     );
 
     if (videoMedias.length === 0) return null;
 
-    // Function to parse height from "720p", "SD", "HD", or number
     const parseHeight = (input: any): number => {
         if (!input) return 0;
         const s = String(input).toLowerCase();
@@ -118,7 +116,6 @@ function selectBestDownloadUrl(
 
     const sortedVideos = videoMedias.sort((a, b) => parseHeight(b.quality || b.height) - parseHeight(a.quality || a.height));
 
-    // Try to find matching height or lower
     const heightMedias = sortedVideos.filter((m: any) => {
         const h = parseHeight(m.quality || m.height);
         return h <= targetHeight && h > 0;
@@ -128,7 +125,6 @@ function selectBestDownloadUrl(
         return { url: heightMedias[0].url, ext: heightMedias[0].extension || 'mp4' };
     }
 
-    // Fail-safe: if no 360p found, just return the first available video (best/any)
     return { url: sortedVideos[0].url, ext: sortedVideos[0].extension || 'mp4' };
 }
 
@@ -142,7 +138,7 @@ async function downloadFileFromUrl(
             if (redirectCount > 5) return reject(new Error('Too many redirects'));
 
             const parsedUrl = new URL(url);
-            const lib = parsedUrl.protocol === 'https:' ? https : require('http');
+            const lib: any = parsedUrl.protocol === 'https:' ? https : http;
 
             const reqOptions = {
                 hostname: parsedUrl.hostname,
@@ -194,8 +190,7 @@ async function downloadFileFromUrl(
 }
 
 // =====================================================
-// RapidAPI - Download file server-side with proper headers
-// Falls back to directUrl if server download fails (403 etc)
+// RapidAPI Download - SIRF YouTube + TikTok
 // =====================================================
 async function downloadViaRapidAPI(
     videoUrl: string,
@@ -222,7 +217,6 @@ async function downloadViaRapidAPI(
     const finalOutputPath = outputPath.replace(/\.[^.]+$/, `.${selectedMedia.ext}`);
     const cdnUrl = selectedMedia.url;
 
-    // Determine Referer based on platform
     const parsedVideoUrl = new URL(videoUrl);
     const isYoutube = parsedVideoUrl.hostname.includes('youtube') || parsedVideoUrl.hostname.includes('youtu.be');
     const referer = isYoutube ? 'https://www.youtube.com/' : 'https://www.tiktok.com/';
@@ -230,7 +224,6 @@ async function downloadViaRapidAPI(
     console.log(`📥 RapidAPI: Attempting server-side download...`);
 
     try {
-        // Try server-side download with browser-like headers
         await downloadFileFromUrlWithHeaders(cdnUrl, finalOutputPath, referer, (progress) => {
             onProgress?.(40 + Math.floor(progress * 0.55));
         });
@@ -240,14 +233,13 @@ async function downloadViaRapidAPI(
         return { success: true, filePath: finalOutputPath, title };
 
     } catch (downloadErr) {
-        // Server download failed (403/IP restricted) — return directUrl as fallback
         console.warn(`⚠️ Server download failed: ${downloadErr instanceof Error ? downloadErr.message : 'unknown'}. Returning directUrl for client.`);
         onProgress?.(100);
         return { success: true, directUrl: cdnUrl, ext: selectedMedia.ext, title };
     }
 }
 
-// Download with custom Referer header (for CDN 403 workaround)
+// Download with custom Referer header
 async function downloadFileFromUrlWithHeaders(
     fileUrl: string,
     savePath: string,
@@ -259,7 +251,7 @@ async function downloadFileFromUrlWithHeaders(
             if (redirectCount > 5) return reject(new Error('Too many redirects'));
 
             const parsedUrl = new URL(url);
-            const lib = parsedUrl.protocol === 'https:' ? https : require('http');
+            const lib: any = parsedUrl.protocol === 'https:' ? https : http;
 
             lib.get({
                 hostname: parsedUrl.hostname,
@@ -310,22 +302,256 @@ async function downloadFileFromUrlWithHeaders(
 }
 
 
+// =====================================================
+// DIRECT SCRAPER - Facebook/Instagram ke liye
+// Bina kisi API ke, page se video URL extract karta hai
+// =====================================================
+async function fetchPageHtml(pageUrl: string): Promise<string> {
+    return new Promise((resolve, reject) => {
+        const makeRequest = (url: string, redirectCount = 0) => {
+            if (redirectCount > 5) return reject(new Error('Too many redirects'));
+
+            const parsedUrl = new URL(url);
+            const lib: any = parsedUrl.protocol === 'https:' ? https : http;
+
+            lib.get({
+                hostname: parsedUrl.hostname,
+                path: parsedUrl.pathname + parsedUrl.search,
+                headers: {
+                    'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1',
+                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                    'Accept-Language': 'en-US,en;q=0.9',
+                    'Cookie': getCookieHeader(url),
+                }
+            }, (res: any) => {
+                if ([301, 302, 307, 308].includes(res.statusCode)) {
+                    const location = res.headers.location;
+                    if (!location) return reject(new Error('Redirect with no location'));
+                    res.resume();
+                    const nextUrl = location.startsWith('http') ? location : new URL(location, url).toString();
+                    return makeRequest(nextUrl, redirectCount + 1);
+                }
+
+                if (res.statusCode !== 200) {
+                    res.resume();
+                    return reject(new Error(`HTTP ${res.statusCode}`));
+                }
+
+                let body = '';
+                res.on('data', (chunk: any) => { body += chunk; });
+                res.on('end', () => resolve(body));
+            }).on('error', (e: Error) => reject(e));
+        };
+        makeRequest(pageUrl);
+    });
+}
+
+// Extract video URLs from Facebook page HTML
+function extractFacebookVideoUrls(html: string): string[] {
+    const urls: string[] = [];
+
+    // Method 1: og:video meta tag
+    const ogVideoMatch = html.match(/<meta\s+property="og:video"\s+content="([^"]+)"/i) ||
+                          html.match(/<meta\s+content="([^"]+)"\s+property="og:video"/i);
+    if (ogVideoMatch && ogVideoMatch[1]) {
+        const decoded = ogVideoMatch[1].replace(/&amp;/g, '&');
+        urls.push(decoded);
+    }
+
+    // Method 2: og:video:url meta tag
+    const ogVideoUrlMatch = html.match(/<meta\s+property="og:video:url"\s+content="([^"]+)"/i) ||
+                             html.match(/<meta\s+content="([^"]+)"\s+property="og:video:url"/i);
+    if (ogVideoUrlMatch && ogVideoUrlMatch[1]) {
+        const decoded = ogVideoUrlMatch[1].replace(/&amp;/g, '&');
+        urls.push(decoded);
+    }
+
+    // Method 3: HD video source from embedded JSON
+    const hdMatches = html.match(/"hd_src"\s*:\s*"([^"]+)"/g) || [];
+    for (const m of hdMatches) {
+        const urlMatch = m.match(/"hd_src"\s*:\s*"([^"]+)"/);
+        if (urlMatch && urlMatch[1]) {
+            urls.push(urlMatch[1].replace(/\\/g, ''));
+        }
+    }
+
+    // Method 4: SD video source from embedded JSON
+    const sdMatches = html.match(/"sd_src"\s*:\s*"([^"]+)"/g) || [];
+    for (const m of sdMatches) {
+        const urlMatch = m.match(/"sd_src"\s*:\s*"([^"]+)"/);
+        if (urlMatch && urlMatch[1]) {
+            urls.push(urlMatch[1].replace(/\\/g, ''));
+        }
+    }
+
+    // Method 5: playable_url from JSON data
+    const playableMatches = html.match(/"playable_url(?:_quality_hd)?"\s*:\s*"([^"]+)"/g) || [];
+    for (const m of playableMatches) {
+        const urlMatch = m.match(/"playable_url(?:_quality_hd)?"\s*:\s*"([^"]+)"/);
+        if (urlMatch && urlMatch[1]) {
+            const cleaned = urlMatch[1].replace(/\\/g, '');
+            if (cleaned.startsWith('http')) {
+                urls.push(cleaned);
+            }
+        }
+    }
+
+    // Method 6: browser_native_hd_url / browser_native_sd_url
+    const nativeMatches = html.match(/"browser_native_(?:hd|sd)_url"\s*:\s*"([^"]+)"/g) || [];
+    for (const m of nativeMatches) {
+        const urlMatch = m.match(/"browser_native_(?:hd|sd)_url"\s*:\s*"([^"]+)"/);
+        if (urlMatch && urlMatch[1]) {
+            const cleaned = urlMatch[1].replace(/\\/g, '');
+            if (cleaned.startsWith('http')) {
+                urls.push(cleaned);
+            }
+        }
+    }
+
+    // Deduplicate
+    return Array.from(new Set(urls)).filter(u => u.startsWith('http'));
+}
+
+// Extract video URLs from Instagram page HTML
+function extractInstagramVideoUrls(html: string): string[] {
+    const urls: string[] = [];
+
+    // Method 1: og:video meta tag
+    const ogVideoMatch = html.match(/<meta\s+property="og:video"\s+content="([^"]+)"/i) ||
+                          html.match(/<meta\s+content="([^"]+)"\s+property="og:video"/i);
+    if (ogVideoMatch && ogVideoMatch[1]) {
+        urls.push(ogVideoMatch[1].replace(/&amp;/g, '&'));
+    }
+
+    // Method 2: og:video:url
+    const ogVideoUrlMatch = html.match(/<meta\s+property="og:video:url"\s+content="([^"]+)"/i) ||
+                             html.match(/<meta\s+content="([^"]+)"\s+property="og:video:url"/i);
+    if (ogVideoUrlMatch && ogVideoUrlMatch[1]) {
+        urls.push(ogVideoUrlMatch[1].replace(/&amp;/g, '&'));
+    }
+
+    // Method 3: video_url in embedded JSON
+    const videoUrlMatches = html.match(/"video_url"\s*:\s*"([^"]+)"/g) || [];
+    for (const m of videoUrlMatches) {
+        const urlMatch = m.match(/"video_url"\s*:\s*"([^"]+)"/);
+        if (urlMatch && urlMatch[1]) {
+            const cleaned = urlMatch[1].replace(/\\u0026/g, '&').replace(/\\/g, '');
+            if (cleaned.startsWith('http')) {
+                urls.push(cleaned);
+            }
+        }
+    }
+
+    // Method 4: .mp4 URLs in JSON data
+    const mp4Matches = html.match(/"(https?:[^"]*\.mp4[^"]*)"/g) || [];
+    for (const m of mp4Matches) {
+        const clean = m.replace(/"/g, '').replace(/\\u0026/g, '&').replace(/\\/g, '');
+        if (clean.startsWith('http') && clean.includes('.mp4')) {
+            urls.push(clean);
+        }
+    }
+
+    // Method 5: video_versions from JSON
+    const versionMatches = html.match(/"url"\s*:\s*"(https?:[^"]*scontent[^"]*)"/g) || [];
+    for (const m of versionMatches) {
+        const urlMatch = m.match(/"url"\s*:\s*"(https?:[^"]+)"/);
+        if (urlMatch && urlMatch[1]) {
+            const cleaned = urlMatch[1].replace(/\\u0026/g, '&').replace(/\\/g, '');
+            if (cleaned.includes('scontent') && (cleaned.includes('.mp4') || cleaned.includes('video'))) {
+                urls.push(cleaned);
+            }
+        }
+    }
+
+    return Array.from(new Set(urls)).filter(u => u.startsWith('http'));
+}
+
+// Direct scraper download for Facebook/Instagram
+async function downloadViaScraper(
+    videoUrl: string,
+    outputPath: string,
+    downloadFormat: string,
+    onProgress?: (progress: number) => void,
+    quality: string = 'high'
+): Promise<{ success: boolean; filePath?: string; directUrl?: string; title?: string; error?: string }> {
+    const platform = getPlatformType(videoUrl);
+    console.log(`🔍 DirectScraper: Fetching page HTML for ${platform}: ${videoUrl}`);
+    onProgress?.(10);
+
+    try {
+        const html = await fetchPageHtml(videoUrl);
+        onProgress?.(30);
+
+        // Extract title from page
+        const titleMatch = html.match(/<meta\s+property="og:title"\s+content="([^"]+)"/i) ||
+                           html.match(/<title>([^<]+)<\/title>/i);
+        const title = titleMatch ? titleMatch[1].replace(/&amp;/g, '&').replace(/&quot;/g, '"').trim() : 'Downloaded Video';
+
+        // Extract video URLs based on platform
+        let videoUrls: string[] = [];
+        if (platform === 'facebook') {
+            videoUrls = extractFacebookVideoUrls(html);
+        } else if (platform === 'instagram') {
+            videoUrls = extractInstagramVideoUrls(html);
+        }
+
+        if (videoUrls.length === 0) {
+            return { success: false, error: `DirectScraper: No video URLs found in ${platform} page` };
+        }
+
+        console.log(`✅ DirectScraper: Found ${videoUrls.length} video URL(s) for ${platform}`);
+        onProgress?.(50);
+
+        // Try downloading the first valid video URL
+        for (const cdnUrl of videoUrls) {
+            try {
+                console.log(`📥 DirectScraper: Trying to download from: ${cdnUrl.substring(0, 80)}...`);
+
+                const referer = platform === 'facebook'
+                    ? 'https://www.facebook.com/'
+                    : 'https://www.instagram.com/';
+
+                await downloadFileFromUrlWithHeaders(cdnUrl, outputPath, referer, (progress) => {
+                    onProgress?.(50 + Math.floor(progress * 0.45));
+                });
+
+                onProgress?.(100);
+                console.log(`✅ DirectScraper: Download complete: ${outputPath}`);
+                return { success: true, filePath: outputPath, title };
+
+            } catch (dlErr) {
+                console.warn(`⚠️ DirectScraper: Failed to download from URL, trying next...`);
+                continue;
+            }
+        }
+
+        // Server download failed, return directUrl for client-side redirect
+        console.log(`⚠️ DirectScraper: Server downloads failed, returning direct URL for client`);
+        return { success: true, directUrl: videoUrls[0], title };
+
+    } catch (err) {
+        return {
+            success: false,
+            error: `DirectScraper failed: ${err instanceof Error ? err.message : 'Unknown error'}`
+        };
+    }
+}
+
 
 // =====================================================
-// yt-dlp Download (Facebook/Instagram/Others)
+// yt-dlp Download (Facebook/Instagram/Others - PRIMARY)
 // =====================================================
 function getFormatByQuality(quality: string, downloadFormat: string): string {
     if (downloadFormat === 'mp3') return 'bestaudio/best';
-    
-    // yt-dlp format strings with strict video enforcement and quality-specific fallbacks
+
     switch (quality) {
-        case 'low': 
+        case 'low':
             return 'best[height<=360][vcodec!=none][acodec!=none]/best[height<=360][vcodec!=none]/best[vcodec!=none][acodec!=none]/best[vcodec!=none]/best';
-        case 'medium': 
+        case 'medium':
             return 'best[height<=480][vcodec!=none][acodec!=none]/best[height<=480][vcodec!=none]/best[vcodec!=none][acodec!=none]/best[vcodec!=none]/best';
         case 'high':
         case 'highest':
-        default: 
+        default:
             return 'best[height<=720][vcodec!=none][acodec!=none]/best[vcodec!=none][ext=mp4]/best[vcodec!=none]/best';
     }
 }
@@ -382,8 +608,8 @@ async function downloadViaYtDlp(
 
 // =====================================================
 // MAIN EXPORT: Smart Download Logic
-// YouTube/TikTok → RapidAPI only
-// Facebook/Instagram → yt-dlp first, RapidAPI fallback
+// YouTube/TikTok → RapidAPI primary, yt-dlp fallback
+// Facebook/Instagram → yt-dlp primary, DirectScraper fallback (NO RAPIDAPI!)
 // Others → yt-dlp only
 // =====================================================
 export async function downloadVideoWithYtDlp(
@@ -398,22 +624,79 @@ export async function downloadVideoWithYtDlp(
         const platform = getPlatformType(videoUrl);
         console.log(`🎯 Platform detected: ${platform}`);
 
-        // All platforms: Try yt-dlp first for reliable local downloading
-        console.log(`🔄 ${platform}: Trying yt-dlp first...`);
-        try {
-            onProgress?.(5);
-            const result = await downloadViaYtDlp(videoUrl, outputPath, downloadFormat, onProgress, quality);
-            if (result.success) {
-                console.log(`✅ ${platform}: yt-dlp worked!`);
-                return result;
+        // ============================================
+        // YOUTUBE / TIKTOK → RapidAPI primary, yt-dlp fallback
+        // ============================================
+        if (platform === 'youtube' || platform === 'tiktok') {
+            console.log(`🚀 ${platform}: Trying RapidAPI first...`);
+            try {
+                onProgress?.(5);
+                const rapidResult = await downloadViaRapidAPI(videoUrl, outputPath, downloadFormat, onProgress, quality);
+                if (rapidResult.success) {
+                    console.log(`✅ ${platform}: RapidAPI worked!`);
+                    return rapidResult;
+                }
+            } catch (rapidErr) {
+                console.warn(`⚠️ ${platform}: RapidAPI failed: ${rapidErr instanceof Error ? rapidErr.message : 'unknown'}`);
             }
-        } catch (ytdlpErr) {
-            console.warn(`⚠️ ${platform}: yt-dlp failed. Falling back to RapidAPI...`);
+
+            // Fallback to yt-dlp
+            console.log(`🔄 ${platform}: Falling back to yt-dlp...`);
+            try {
+                onProgress?.(5);
+                const ytResult = await downloadViaYtDlp(videoUrl, outputPath, downloadFormat, onProgress, quality);
+                if (ytResult.success) {
+                    console.log(`✅ ${platform}: yt-dlp fallback worked!`);
+                    return ytResult;
+                }
+            } catch (ytErr) {
+                console.error(`❌ ${platform}: yt-dlp also failed: ${ytErr instanceof Error ? ytErr.message : 'unknown'}`);
+            }
+
+            throw new Error(`Both RapidAPI and yt-dlp failed for ${platform}`);
         }
 
-        // Fallback to RapidAPI if yt-dlp fails
-        console.log(`🚀 ${platform}: Falling back to RapidAPI`);
-        return await downloadViaRapidAPI(videoUrl, outputPath, downloadFormat, onProgress, quality);
+        // ============================================
+        // FACEBOOK / INSTAGRAM → yt-dlp primary, DirectScraper fallback
+        // ❌ NO RAPIDAPI - saves cost!
+        // ============================================
+        if (platform === 'facebook' || platform === 'instagram') {
+            console.log(`🔧 ${platform}: Using yt-dlp (NO RapidAPI - cost saving mode)`);
+
+            // Try 1: yt-dlp
+            try {
+                onProgress?.(5);
+                const ytResult = await downloadViaYtDlp(videoUrl, outputPath, downloadFormat, onProgress, quality);
+                if (ytResult.success) {
+                    console.log(`✅ ${platform}: yt-dlp worked!`);
+                    return ytResult;
+                }
+            } catch (ytErr) {
+                console.warn(`⚠️ ${platform}: yt-dlp failed: ${ytErr instanceof Error ? ytErr.message : 'unknown'}`);
+            }
+
+            // Try 2: Direct page scraper (extract video URLs from page HTML)
+            console.log(`🔄 ${platform}: Falling back to DirectScraper...`);
+            try {
+                onProgress?.(5);
+                const scraperResult = await downloadViaScraper(videoUrl, outputPath, downloadFormat, onProgress, quality);
+                if (scraperResult.success) {
+                    console.log(`✅ ${platform}: DirectScraper worked!`);
+                    return scraperResult;
+                }
+            } catch (scraperErr) {
+                console.error(`❌ ${platform}: DirectScraper also failed: ${scraperErr instanceof Error ? scraperErr.message : 'unknown'}`);
+            }
+
+            throw new Error(`All methods failed for ${platform} (yt-dlp + DirectScraper). No RapidAPI used.`);
+        }
+
+        // ============================================
+        // OTHERS → yt-dlp only
+        // ============================================
+        console.log(`🔧 ${platform}: Using yt-dlp only`);
+        onProgress?.(5);
+        return await downloadViaYtDlp(videoUrl, outputPath, downloadFormat, onProgress, quality);
 
     } catch (error) {
         console.error('💥 Download failed:', error);
@@ -451,7 +734,7 @@ export async function getTitleFromYtDlp(videoUrl: string): Promise<string | null
         }
     }
 
-    // Facebook/Instagram/Others → yt-dlp se title lo
+    // Facebook/Instagram/Others → yt-dlp se title lo (NO RapidAPI!)
     try {
         const options: any = {
             dumpSingleJson: true,
@@ -476,6 +759,19 @@ export async function getTitleFromYtDlp(videoUrl: string): Promise<string | null
         return jsonOutput.title || 'Unknown Title';
     } catch (error) {
         console.error('yt-dlp title fetch error:', error);
+
+        // Fallback: try getting title from page HTML (for FB/IG)
+        if (platform === 'facebook' || platform === 'instagram') {
+            try {
+                const html = await fetchPageHtml(videoUrl);
+                const titleMatch = html.match(/<meta\s+property="og:title"\s+content="([^"]+)"/i) ||
+                                   html.match(/<title>([^<]+)<\/title>/i);
+                if (titleMatch) {
+                    return titleMatch[1].replace(/&amp;/g, '&').replace(/&quot;/g, '"').trim();
+                }
+            } catch { }
+        }
+
         return 'Downloaded Video';
     }
 }
