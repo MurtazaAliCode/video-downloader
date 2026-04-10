@@ -3,6 +3,7 @@ import { useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { AdBanner, AdInContent, AdSocialBar, AdStickyFooter } from "@/components/layout/AdSlots";
 import { ProgressBar } from "@/components/ui/progress-bar";
 import { DownloadLink } from "@/components/video/download-link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -81,8 +82,9 @@ export default function Processing({ params }: ProcessingPageProps) {
       </div>
 
       <Header />
+      <AdBanner />
       
-      <div className="container relative z-10 mx-auto px-4 py-20">
+      <div className="container relative z-10 mx-auto px-4 py-8">
         <div className="max-w-2xl mx-auto space-y-12">
           <div className="text-center space-y-4 animate-in fade-in slide-in-from-top-4 duration-1000">
             <h1 className="text-4xl md:text-5xl font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-gray-900 via-gray-700 to-gray-900 dark:from-white dark:via-gray-300 dark:to-white">
@@ -165,10 +167,16 @@ export default function Processing({ params }: ProcessingPageProps) {
               </CardContent>
             </Card>
           )}
+
+          <div className="mt-8 flex flex-col items-center">
+            <small className="text-muted-foreground/60 uppercase text-[9px] font-bold mb-2 tracking-widest">Recommended for you</small>
+            <AdInContent />
+          </div>
         </div>
       </div>
 
       <Footer />
+      <AdStickyFooter />
     </div>
   );
 }

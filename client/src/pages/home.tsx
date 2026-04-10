@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useLocation } from "wouter";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
-import { AdBanner, AdSidebar, AdInContent } from "@/components/layout/AdSlots";
+import { AdBanner, AdSidebar, AdInContent, AdSocialBar, AdStickyFooter } from "@/components/layout/AdSlots";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -400,6 +400,13 @@ export default function Home() {
         <AdInContent />
       </div>
 
+      <div className="container mx-auto px-4 max-w-4xl mt-12">
+        <div className="bg-muted p-3 rounded-lg flex flex-col items-center">
+           <small className="text-muted-foreground/60 uppercase text-[9px] font-bold mb-2">Recommended Service</small>
+           <AdInContent />
+        </div>
+      </div>
+
       {/* Features Section */}
       <section className="py-24 bg-background relative">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -484,6 +491,7 @@ export default function Home() {
       </section>
 
       <Footer />
+      <AdStickyFooter />
     </div>
   );
 }

@@ -64,3 +64,29 @@ export function AdSocialBar() {
 
   return null;
 }
+
+export function AdStickyFooter() {
+  return (
+    <div className="fixed bottom-0 left-0 w-full z-50 bg-background/95 backdrop-blur-md border-t border-border shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.3)] flex flex-col items-center py-2 animate-in slide-in-from-bottom duration-500">
+      <div className="flex justify-between items-center w-full px-4 mb-1">
+        <small className="text-muted-foreground/60 uppercase text-[9px] tracking-widest font-bold">Recommended for you</small>
+        <button 
+          onClick={(e) => {
+            const el = e.currentTarget.parentElement?.parentElement;
+            if (el) el.style.display = 'none';
+          }}
+          className="text-[10px] text-muted-foreground hover:text-foreground transition-colors font-bold bg-muted px-2 py-0.5 rounded"
+        >
+          CLOSE
+        </button>
+      </div>
+      <div className="w-full flex justify-center overflow-hidden">
+        <AdComponent 
+          id="17fabec5c7b61662844da4c1bb680fea" 
+          type="banner"
+          placeholderText="Sticky Footer Ad (728x90)"
+        />
+      </div>
+    </div>
+  );
+}
