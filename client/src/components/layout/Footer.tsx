@@ -1,8 +1,21 @@
 import { Link } from "wouter";
-import { Folder, Heart } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { Folder, Heart, BarChart3 } from "lucide-react";
+
+interface ApiUsageStats {
+  count: number;
+  limit: number;
+  monthYear: string;
+}
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
+
+  // Fetch API usage stats
+  const { data: usage } = useQuery<ApiUsageStats>({
+    queryKey: ["/api/usage"],
+    refetchInterval: 30000,
+  });
 
   return (
     <footer className="bg-card border-t border-border">
@@ -21,6 +34,31 @@ export function Footer() {
             <p className="text-sm text-muted-foreground mb-4">
               Free online video processing tool for personal use. Safe, secure, and privacy-focused.
             </p>
+            
+            {/* API USAGE TRACKER (Added) */}
+            {usage && (
+              <div className="mb-6 p-3 bg-muted/30 rounded-lg border border-border/50">
+                <div className="flex justify-between items-center mb-1.5">
+                  <div className="flex items-center space-x-1.5">
+                    <BarChart3 className="w-3.5 h-3.5 text-primary" />
+                    <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">API Credits</span>
+                  </div>
+                  <span className="text-[11px] font-bold text-foreground">
+                    {usage.count.toLocaleString()} / {usage.limit.toLocaleString()}
+                  </span>
+                </div>
+                <div className="w-full h-1.5 bg-background rounded-full overflow-hidden border border-border/20">
+                  <div 
+                    className="h-full bg-gradient-to-r from-primary to-accent transition-all duration-1000"
+                    style={{ width: `${Math.min(100, (usage.count / usage.limit) * 100)}%` }}
+                  />
+                </div>
+                <p className="text-[10px] text-muted-foreground/60 mt-1.5 text-right italic">
+                  Resets monthly: {usage.monthYear}
+                </p>
+              </div>
+            )}
+
             <p className="text-xs text-muted-foreground">
               © {currentYear} VidDownloader. All rights reserved.
             </p>

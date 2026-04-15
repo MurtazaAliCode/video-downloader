@@ -1,4 +1,4 @@
-import { jobs, blogPosts, contactMessages, type Job, type InsertJob, type BlogPost, type InsertBlogPost, type ContactMessage, type InsertContactMessage } from "../shared/schema.js";
+import { jobs, blogPosts, contactMessages, apiUsage, type Job, type InsertJob, type BlogPost, type InsertBlogPost, type ContactMessage, type InsertContactMessage, type ApiUsage } from "../shared/schema.js";
 import { randomUUID } from "crypto";
 import { db } from "./db.js";
 import { eq, lt, desc } from "drizzle-orm";
@@ -24,6 +24,10 @@ export interface IStorage {
   // Contact Messages
   createContactMessage(message: InsertContactMessage): Promise<ContactMessage>;
   getContactMessages(): Promise<ContactMessage[]>;
+
+  // API Usage Tracking
+  getApiUsage(): Promise<ApiUsage | undefined>;
+  incrementApiUsage(): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -629,6 +633,30 @@ Start protecting your video content with professional watermarks using VidDownlo
 
   async getContactMessages(): Promise<ContactMessage[]> {
     return await db.select().from(contactMessages).orderBy(desc(contactMessages.createdAt));
+  }
+
+  // API Usage Tracking implementation
+  async getApiUsage(): Promise<ApiUsage | undefined> {
+    const monthYear = new Date().toISOString().substring(0, 7); // "YYYY-MM"
+    const [usage] = await db.select().from(apiUsage).where(eq(apiUsage.monthYear, monthYear));
+    return usage;
+  }
+
+  async incrementApiUsage(): Promise<void> {
+    const monthYear = new Date().toISOString().substring(0, 7);
+    const [existing] = await db.select().from(apiUsage).where(eq(apiUsage.monthYear, monthYear));
+
+    if (existing) {
+      await db.update(apiUsage)
+        .set({ count: existing.count + 1, updatedAt: new Date() })
+        .where(eq(apiUsage.id, existing.id));
+    } else {
+      await db.insert(apiUsage).values({
+        monthYear,
+        count: 1,
+        updatedAt: new Date()
+      });
+    }
   }
 }
 

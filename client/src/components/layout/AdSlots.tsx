@@ -51,6 +51,24 @@ export function AdInContent() {
   );
 }
 
+/**
+ * AdRecommended: Specially styled banner for the 'Recommended Service' section
+ * Uses the same stable Banner ID as AdBanner
+ */
+export function AdRecommended() {
+  return (
+    <div className="w-full flex justify-center py-4">
+      <div className="max-w-full overflow-x-auto custom-scrollbar">
+        <AdComponent 
+          id="17fabec5c7b61662844da4c1bb680fea"
+          type="banner"
+          placeholderText="Recommended Banner Ad (728x90)"
+        />
+      </div>
+    </div>
+  );
+}
+
 export function AdSocialBar() {
   useEffect(() => {
     // Only inject if it doesn't already exist to prevent duplicates

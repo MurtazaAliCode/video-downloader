@@ -42,6 +42,13 @@ export const contactMessages = pgTable("contact_messages", {
   createdAt: timestamp("created_at").notNull().default(sql`now()`),
 });
 
+export const apiUsage = pgTable("api_usage", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  count: integer("count").notNull().default(0),
+  monthYear: text("month_year").notNull(), // format: "YYYY-MM"
+  updatedAt: timestamp("updated_at").notNull().default(sql`now()`),
+});
+
 export const insertJobSchema = createInsertSchema(jobs).omit({
   id: true,
   createdAt: true,
@@ -66,6 +73,9 @@ export type InsertBlogPost = z.infer<typeof insertBlogPostSchema>;
 export type BlogPost = typeof blogPosts.$inferSelect;
 export type InsertContactMessage = z.infer<typeof insertContactMessageSchema>;
 export type ContactMessage = typeof contactMessages.$inferSelect;
+export const insertApiUsageSchema = createInsertSchema(apiUsage);
+export type ApiUsage = typeof apiUsage.$inferSelect;
+export type InsertApiUsage = z.infer<typeof insertApiUsageSchema>;
 
 // Download options schemas
 export const downloadOptionsSchema = z.object({

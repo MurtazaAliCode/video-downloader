@@ -5,6 +5,7 @@ import fs from 'fs/promises';
 import https from 'https';
 import http from 'http';
 import { getCookieHeader } from './cookieHelper';
+import { storage } from '../storage';
 
 // =====================================================
 // Binary setup for yt-dlp
@@ -207,6 +208,9 @@ async function downloadViaRapidAPI(
     onProgress?.(20);
 
     const apiResponse = await fetchVideoInfoFromAPI(videoUrl);
+    // Increment usage since RapidAPI call was successful
+    storage.incrementApiUsage().catch(err => console.error('Error incrementing API usage:', err));
+
     const title = apiResponse?.title || apiResponse?.author || 'Downloaded Video';
     console.log(`✅ RapidAPI: Got info. Title: ${title}`);
     onProgress?.(40);
