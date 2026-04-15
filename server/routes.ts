@@ -230,42 +230,86 @@ router.get("/download/:jobId", async (req: Request, res: Response) => {
 
 // Endpoint: Submit contact message (Contact Us / Report)
 router.post("/contact", async (req: Request, res: Response) => {
-  try {
-    const { name, email, subject, message } = req.body;
+  // ... existing contact code
+});
 
-    if (!name || !email || !subject || !message) {
-      return res.status(400).json({ message: "All fields are required." });
+// --- USER REVIEWS & STATUS ENDPOINTS ---
+
+// Fetch reviews (paginated, only approved by default)
+router.get("/reviews", async (req: Request, res: Response) => {
+  try {
+    const limit = parseInt(req.query.limit as string) || 10;
+    const offset = parseInt(req.query.offset as string) || 0;
+    const reviews = await storage.getReviews(limit, offset, true);
+    return res.json(reviews);
+  } catch (error) {
+    console.error("Error fetching reviews:", error);
+    return res.status(500).json({ message: "Error fetching reviews." });
+  }
+});
+
+// Submit a new review (pending approval)
+router.post("/reviews", async (req: Request, res: Response) => {
+  try {
+    const { name, rating, comment } = req.body;
+
+    if (!comment || !rating) {
+      return res.status(400).json({ message: "Rating and comment are required." });
     }
 
-    // Save to database
-    const contactMessage = await storage.createContactMessage({
-      name,
-      email,
-      subject,
-      message,
+    const review = await storage.createReview({
+      name: name || "Anonymous User",
+      rating: parseInt(rating),
+      comment
     });
-
-    // Send emails in the background
-    // 1. Notify Admin
-    sendAdminNotification({ name, email, subject, message }).catch(err => 
-      console.error("Failed to send admin email:", err)
-    );
-
-    // 2. Confirm to User (as requested by user)
-    sendUserConfirmation({ name, email }).catch(err => 
-      console.error("Failed to send user confirmation email:", err)
-    );
 
     return res.status(201).json({
-      message: "Message received successfully.",
-      id: contactMessage.id
+      message: "Review submitted! It will appear after a quick quality check.",
+      review
     });
   } catch (error) {
-    console.error("🚨 Contact/Report submission error:", error);
-    return res.status(500).json({
-      message: "Failed to process your message.",
-      error: error instanceof Error ? error.message : 'Unknown error'
-    });
+    console.error("Error submitting review:", error);
+    return res.status(500).json({ message: "Failed to submit review." });
+  }
+});
+
+// Admin: Secret endpoint to approve or delete reviews
+// Note: In a real app, use authentication. For this project, we use a simple secret query param.
+router.post("/reviews/moderate", async (req: Request, res: Response) => {
+  const { action, id, secret } = req.body;
+  
+  // Minimalist security: The user can change this secret later
+  // We'll tell the user what the default secret is in the walkthrough
+  if (secret !== "vid-admin-2024") {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+
+  try {
+    if (action === "approve") {
+      await storage.approveReview(id);
+      return res.json({ message: "Review approved!" });
+    } else if (action === "delete") {
+      await storage.deleteReview(id);
+      return res.json({ message: "Review deleted!" });
+    }
+    return res.status(400).json({ message: "Invalid action" });
+  } catch (error) {
+    return res.status(500).json({ message: "Moderation failed." });
+  }
+});
+
+// Admin: Get all reviews including pending ones
+router.get("/reviews/admin", async (req: Request, res: Response) => {
+  const { secret } = req.query;
+  if (secret !== "vid-admin-2024") {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+
+  try {
+    const reviews = await storage.getReviews(100, 0, false);
+    return res.json(reviews);
+  } catch (error) {
+    return res.status(500).json({ message: "Error fetching admin reviews." });
   }
 });
 

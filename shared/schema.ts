@@ -49,6 +49,15 @@ export const apiUsage = pgTable("api_usage", {
   updatedAt: timestamp("updated_at").notNull().default(sql`now()`),
 });
 
+export const reviews = pgTable("reviews", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull().default('Anonymous User'),
+  rating: integer("rating").notNull().default(5),
+  comment: text("comment").notNull(),
+  isApproved: boolean("is_approved").notNull().default(false),
+  createdAt: timestamp("created_at").notNull().default(sql`now()`),
+});
+
 export const insertJobSchema = createInsertSchema(jobs).omit({
   id: true,
   createdAt: true,
@@ -74,8 +83,16 @@ export type BlogPost = typeof blogPosts.$inferSelect;
 export type InsertContactMessage = z.infer<typeof insertContactMessageSchema>;
 export type ContactMessage = typeof contactMessages.$inferSelect;
 export const insertApiUsageSchema = createInsertSchema(apiUsage);
+export const insertReviewSchema = createInsertSchema(reviews).omit({
+  id: true,
+  createdAt: true,
+  isApproved: true,
+});
+
 export type ApiUsage = typeof apiUsage.$inferSelect;
 export type InsertApiUsage = z.infer<typeof insertApiUsageSchema>;
+export type Review = typeof reviews.$inferSelect;
+export type InsertReview = z.infer<typeof insertReviewSchema>;
 
 // Download options schemas
 export const downloadOptionsSchema = z.object({

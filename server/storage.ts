@@ -1,7 +1,7 @@
-import { jobs, blogPosts, contactMessages, apiUsage, type Job, type InsertJob, type BlogPost, type InsertBlogPost, type ContactMessage, type InsertContactMessage, type ApiUsage } from "../shared/schema.js";
+import { jobs, blogPosts, contactMessages, apiUsage, reviews, type Job, type InsertJob, type BlogPost, type InsertBlogPost, type ContactMessage, type InsertContactMessage, type ApiUsage, type Review, type InsertReview } from "../shared/schema.js";
 import { randomUUID } from "crypto";
 import { db } from "./db.js";
-import { eq, lt, desc } from "drizzle-orm";
+import { eq, lt, desc, and } from "drizzle-orm";
 
 export interface IStorage {
   // Jobs
@@ -28,6 +28,12 @@ export interface IStorage {
   // API Usage Tracking
   getApiUsage(): Promise<ApiUsage | undefined>;
   incrementApiUsage(): Promise<void>;
+
+  // User Reviews
+  createReview(review: InsertReview): Promise<Review>;
+  getReviews(limit: number, offset: number, onlyApproved?: boolean): Promise<Review[]>;
+  approveReview(id: string): Promise<void>;
+  deleteReview(id: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -657,6 +663,38 @@ Start protecting your video content with professional watermarks using VidDownlo
         updatedAt: new Date()
       });
     }
+  }
+
+  // User Review methods
+  async createReview(insertReview: InsertReview): Promise<Review> {
+    const [review] = await db.insert(reviews).values({
+      ...insertReview,
+      isApproved: false, // Moderation required
+    }).returning();
+    return review;
+  }
+
+  async getReviews(limit: number, offset: number, onlyApproved: boolean = true): Promise<Review[]> {
+    const query = db.select().from(reviews);
+    
+    if (onlyApproved) {
+      query.where(eq(reviews.isApproved, true));
+    }
+
+    return await query
+      .limit(limit)
+      .offset(offset)
+      .orderBy(desc(reviews.createdAt));
+  }
+
+  async approveReview(id: string): Promise<void> {
+    await db.update(reviews)
+      .set({ isApproved: true })
+      .where(eq(reviews.id, id));
+  }
+
+  async deleteReview(id: string): Promise<void> {
+    await db.delete(reviews).where(eq(reviews.id, id));
   }
 }
 
