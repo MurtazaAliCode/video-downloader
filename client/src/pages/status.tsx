@@ -9,7 +9,6 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Star, MessageSquare, CheckCircle, Clock } from "lucide-react";
-import { format } from "date-fns";
 import type { Review } from "@shared/schema";
 
 export default function Status() {
@@ -105,7 +104,7 @@ export default function Status() {
                             <Card className="bg-primary/5 border-primary/20">
                                 <CardContent className="p-4">
                                     <p className="text-xs text-muted-foreground">
-                                        Our systems are monitored 24/7. Last check: {format(new Date(), 'HH:mm')}
+                                        Our systems are monitored 24/7. Last check: {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                     </p>
                                 </CardContent>
                             </Card>
@@ -209,7 +208,7 @@ export default function Status() {
                                                     <h4 className="font-bold text-foreground">{review.name}</h4>
                                                     <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                                                         <Clock className="w-3 h-3" />
-                                                        {format(new Date(review.createdAt), 'MMM dd, yyyy')}
+                                                        {new Date(review.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
                                                     </div>
                                                 </div>
                                             </div>
