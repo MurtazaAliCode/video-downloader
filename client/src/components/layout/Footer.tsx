@@ -1,6 +1,7 @@
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
-import { Folder, Heart, BarChart3 } from "lucide-react";
+import { Heart, BarChart3 } from "lucide-react";
+import logoUrl from "@/assets/viddownloader-logo.png";
 
 interface ApiUsageStats {
   count: number;
@@ -24,9 +25,7 @@ export function Footer() {
           {/* Logo and Description */}
           <div className="md:col-span-1">
             <div className="flex items-center space-x-2 mb-4">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-                <Folder className="w-5 h-5 text-primary-foreground" />
-              </div>
+              <img src={logoUrl} alt="VidDownloader Logo" className="w-8 h-8 rounded-lg shadow-sm" />
               <span className="text-lg font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
                 VidDownloader
               </span>

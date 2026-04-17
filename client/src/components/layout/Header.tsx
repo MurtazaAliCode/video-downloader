@@ -1,8 +1,9 @@
 import { Link, useLocation } from "wouter";
 import { useTheme } from "@/components/ui/theme-provider";
 import { Button } from "@/components/ui/button";
-import { Moon, Sun, Menu, Folder } from "lucide-react";
+import { Moon, Sun, Menu } from "lucide-react";
 import { useState } from "react";
+import logoUrl from "@/assets/viddownloader-logo.png";
 
 export function Header() {
   const { theme, toggleTheme } = useTheme();
@@ -29,9 +30,7 @@ export function Header() {
           {/* Logo */}
           <Link href="/">
             <div className="flex items-center space-x-2 cursor-pointer" data-testid="logo-link">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-                <Folder className="w-5 h-5 text-primary-foreground" />
-              </div>
+              <img src={logoUrl} alt="VidDownloader Logo" className="w-8 h-8 rounded-lg shadow-sm" />
               <span className="text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
                 VidDownloader
               </span>
