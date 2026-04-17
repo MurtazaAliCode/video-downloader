@@ -457,12 +457,6 @@ export default function Home() {
                 features: ["No registration", "Unlimited downloads", "Fast processing"],
                 color: "purple",
               },
-              {
-                title: "Safe & Secure",
-                desc: "No malware, no viruses, no data collection. Your privacy is our priority.",
-                features: ["No malware", "Privacy focused", "Secure downloads"],
-                color: "yellow",
-              },
             ].map((feature, index) => (
               <div key={index}>
                 <Card className="card-hover border-border/50 group h-full">

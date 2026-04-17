@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -33,7 +33,7 @@ export default function Status() {
         },
         onSuccess: (data) => {
             toast({
-                title: "Feedback Recieved!",
+                title: "Feedback Received!",
                 description: data.message,
             });
             setName("");
@@ -202,10 +202,10 @@ export default function Status() {
                                         <div className="flex justify-between items-start mb-4">
                                             <div className="flex items-center gap-3">
                                                 <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
-                                                    {review.name.charAt(0).toUpperCase()}
+                                                    {(review.name || "A").charAt(0).toUpperCase()}
                                                 </div>
                                                 <div>
-                                                    <h4 className="font-bold text-foreground">{review.name}</h4>
+                                                    <h4 className="font-bold text-foreground">{review.name || "Anonymous User"}</h4>
                                                     <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                                                         <Clock className="w-3 h-3" />
                                                         {new Date(review.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
