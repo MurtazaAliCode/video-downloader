@@ -120,7 +120,7 @@ export function DownloadLink({ jobId, fileName, platform, onProcessAnother }: Do
                 ? (
                   <>
                     Your video has been saved successfully.
-                    {(platform === 'youtube' || platform === 'tiktok') && (
+                    {platform === 'youtube' && (
                       <span className="block mt-1 text-xs text-blue-500 font-bold">
                         (Click the 3-dots ⋮ on video to download)
                       </span>
@@ -138,17 +138,17 @@ export function DownloadLink({ jobId, fileName, platform, onProcessAnother }: Do
         {downloaded && (
           <div className="space-y-3">
             <div className={`border rounded-xl p-4 text-center transition-all duration-300 ${
-              (platform === 'youtube' || platform === 'tiktok')
+              platform === 'youtube'
                 ? 'bg-blue-500/10 border-blue-500/30 shadow-sm'
                 : 'bg-green-500/10 border-green-500/30'
             }`}>
               <p className={`text-sm font-bold ${
-                (platform === 'youtube' || platform === 'tiktok') ? 'text-blue-700 dark:text-blue-400' : 'text-green-700 dark:text-green-400'
+                platform === 'youtube' ? 'text-blue-700 dark:text-blue-400' : 'text-green-700 dark:text-green-400'
               }`}>
                 ✅ Video Processed Successfully!
               </p>
               
-              {(platform === 'youtube' || platform === 'tiktok') && (
+              {platform === 'youtube' && (
                 <div className="mt-4 space-y-3 animate-in fade-in zoom-in-95 duration-500 text-center">
                   <p className="text-xs text-blue-700 dark:text-blue-300 font-bold uppercase tracking-tight">
                     👇 Easy Instruction:
@@ -164,7 +164,7 @@ export function DownloadLink({ jobId, fileName, platform, onProcessAnother }: Do
             </div>
 
             {/* Platform Specific Instruction for YouTube/TikTok (Consolidated) */}
-            {(platform === 'youtube' || platform === 'tiktok') && (
+            {platform === 'youtube' && (
               <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-4 shadow-sm">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-yellow-500/20 flex items-center justify-center shrink-0">
