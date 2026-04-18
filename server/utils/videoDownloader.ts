@@ -96,11 +96,20 @@ function selectBestDownloadUrl(
     const targetHeight = qualityHeightMap[quality] || 720;
 
     const videoExtensions = ['mp4', 'mov', 'avi', 'mkv', 'webm', 'ts', 'flv'];
-    const videoMedias = medias.filter((m: any) =>
-        m.videoAvailable === true ||
-        m.type === 'video' ||
-        videoExtensions.includes((m.extension || '').toLowerCase())
-    );
+    
+    // Attempt to filter out video streams that explicitly state they have no audio
+    let videoMedias = medias.filter((m: any) => {
+        const isVideo = m.videoAvailable === true || m.type === 'video' || videoExtensions.includes((m.extension || '').toLowerCase());
+        const hasNoAudio = m.audioAvailable === false || m.hasAudio === false || m.audio === false || m.no_audio === true;
+        return isVideo && !hasNoAudio;
+    });
+
+    // If somehow all videos state they have no audio, fallback to any video available
+    if (videoMedias.length === 0) {
+        videoMedias = medias.filter((m: any) =>
+            m.videoAvailable === true || m.type === 'video' || videoExtensions.includes((m.extension || '').toLowerCase())
+        );
+    }
 
     if (videoMedias.length === 0) return null;
 
