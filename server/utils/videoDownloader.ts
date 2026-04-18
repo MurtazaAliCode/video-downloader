@@ -97,19 +97,18 @@ function selectBestDownloadUrl(
 
     const videoExtensions = ['mp4', 'mov', 'avi', 'mkv', 'webm', 'ts', 'flv'];
     
+    // Known YouTube DASH video-only format IDs
+    const videoOnlyItags = ['137', '248', '136', '247', '135', '244', '134', '243', '133', '242', '160', '278', '313', '271', '400', '401', '399', '398', '397', '396', '395', '394'];
+    
     // Attempt to filter out video streams that explicitly state they have no audio
+    // or are known to be video-only DASH streams.
     let videoMedias = medias.filter((m: any) => {
         const isVideo = m.videoAvailable === true || m.type === 'video' || videoExtensions.includes((m.extension || '').toLowerCase());
-        const hasNoAudio = m.audioAvailable === false || m.hasAudio === false || m.audio === false || m.no_audio === true;
-        return isVideo && !hasNoAudio;
+        const hasNoAudioFlag = m.audioAvailable === false || m.hasAudio === false || m.audio === false || m.no_audio === true;
+        const isVideoOnlyItag = videoOnlyItags.includes(String(m.formatId || m.itag || ''));
+        
+        return isVideo && !hasNoAudioFlag && !isVideoOnlyItag;
     });
-
-    // If somehow all videos state they have no audio, fallback to any video available
-    if (videoMedias.length === 0) {
-        videoMedias = medias.filter((m: any) =>
-            m.videoAvailable === true || m.type === 'video' || videoExtensions.includes((m.extension || '').toLowerCase())
-        );
-    }
 
     if (videoMedias.length === 0) return null;
 
