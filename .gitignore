@@ -14,3 +14,13 @@ tmp
 .gemini
 .env
 cookies.txt
+
+# Binaries
+ffmpeg
+ffprobe
+ffmpeg.exe
+ffprobe.exe
+yt-dlp
+yt-dlp.exe
+ffmpeg-8.1-essentials_build/
+scratch/

@@ -76,16 +76,35 @@ async function fetchVideoInfoFromAPI(videoUrl: string): Promise<any> {
     });
 }
 
+/**
+ * Intelligently finds the FFmpeg path for Windows/Linux.
+ */
+async function getFfmpegPath(): Promise<string | undefined> {
+    const isWindows = process.platform === 'win32';
+    const localFfmpeg = path.join(process.cwd(), isWindows ? 'ffmpeg.exe' : 'ffmpeg');
+    
+    try {
+        await fs.access(localFfmpeg);
+        console.log(`🎬 FFmpeg found at local path: ${localFfmpeg}`);
+        return localFfmpeg;
+    } catch {
+        // Fallback to system path if allowed (some hosting providers have it pre-installed)
+        return undefined; // Let yt-dlp try to find it in PATH
+    }
+}
+
 function selectBestDownloadUrl(
     apiResponse: any,
     downloadFormat: string,
-    quality: string
+    quality: string,
+    videoUrl: string
 ): { url: string; ext: string } | null {
+    const platform = getPlatformType(videoUrl);
     const medias: any[] = apiResponse?.medias || [];
     if (!medias || medias.length === 0) return null;
 
     if (downloadFormat === 'mp3') {
-        const audioMedia = medias.find((m: any) => m.extension === 'mp3' || m.audioAvailable === true);
+        const audioMedia = medias.find((m: any) => m.extension === 'mp3' || m.audioAvailable === true || m.type === 'audio');
         if (audioMedia) return { url: audioMedia.url, ext: 'mp3' };
         return { url: medias[0].url, ext: medias[0].extension || 'mp4' };
     }
@@ -95,46 +114,56 @@ function selectBestDownloadUrl(
     };
     const targetHeight = qualityHeightMap[quality] || 720;
 
-    const videoExtensions = ['mp4', 'mov', 'avi', 'mkv', 'webm', 'ts', 'flv'];
-    
-    // Known YouTube DASH video-only format IDs
-    const videoOnlyItags = ['137', '248', '136', '247', '135', '244', '134', '243', '133', '242', '160', '278', '313', '271', '400', '401', '399', '398', '397', '396', '395', '394'];
-    
-    // Attempt to filter out video streams that explicitly state they have no audio
-    // or are known to be video-only DASH streams.
-    let videoMedias = medias.filter((m: any) => {
-        const isVideo = m.videoAvailable === true || m.type === 'video' || videoExtensions.includes((m.extension || '').toLowerCase());
-        const hasNoAudioFlag = m.audioAvailable === false || m.hasAudio === false || m.audio === false || m.no_audio === true;
-        const isVideoOnlyItag = videoOnlyItags.includes(String(m.formatId || m.itag || ''));
-        
-        return isVideo && !hasNoAudioFlag && !isVideoOnlyItag;
-    });
-
-    if (videoMedias.length === 0) return null;
-
     const parseHeight = (input: any): number => {
         if (!input) return 0;
         const s = String(input).toLowerCase();
         if (s.includes('4k')) return 2160;
-        if (s.includes('2k')) return 1440;
-        if (s.includes('hd')) return 720;
-        if (s.includes('sd')) return 480;
+        if (s.includes('2k') || s.includes('1440')) return 1440;
+        if (s.includes('1080')) return 1080;
+        if (s.includes('720')) return 720;
+        if (s.includes('480')) return 480;
+        if (s.includes('360')) return 360;
         const num = parseInt(s.replace(/[^\d]/g, ''), 10);
         return isNaN(num) ? 0 : num;
     };
 
-    const sortedVideos = videoMedias.sort((a, b) => parseHeight(b.quality || b.height) - parseHeight(a.quality || a.height));
+    // ─── YOUTUBE SPECIAL HANDLING ──────────────────────────────────────────
+    if (platform === 'youtube') {
+        const muxedItags = new Set(['18', '22', '37', '38', '43', '44', '45', '46', '59', '78']);
+        
+        const muxedStreams = medias.filter((m: any) => {
+            const itag = String(m.formatId || m.itag || '');
+            // FOR YOUTUBE: ONLY trust the hardcoded muxed itags list. 
+            // DASH video-only streams (like 779/787) sometimes report having audio but fail.
+            return muxedItags.has(itag);
+        });
 
-    const heightMedias = sortedVideos.filter((m: any) => {
-        const h = parseHeight(m.quality || m.height);
-        return h <= targetHeight && h > 0;
-    });
+        if (muxedStreams.length === 0) {
+            console.warn('⚠️ YouTube: No guaranteed muxed streams found in RapidAPI. Switching to yt-dlp fallback.');
+            return null;
+        }
 
-    if (heightMedias.length > 0) {
-        return { url: heightMedias[0].url, ext: heightMedias[0].extension || 'mp4' };
+        const sorted = muxedStreams.sort((a, b) => parseHeight(b.quality || b.height) - parseHeight(a.quality || a.height));
+        // Pick best fit <= targetHeight, or fallback to best available muxed stream
+        const best = sorted.find(m => parseHeight(m.quality || m.height) <= targetHeight) || sorted[0];
+        
+        console.log(`✅ YouTube: Selected guaranteed muxed stream (formatId=${best.formatId}) ${best.quality}`);
+        return { url: best.url, ext: best.ext || best.extension || 'mp4' };
     }
 
-    return { url: sortedVideos[0].url, ext: sortedVideos[0].extension || 'mp4' };
+    // ─── GENERAL HANDLING (TikTok/FB/IG) ───────────────────────────────────
+    const videos = medias.filter(m => {
+        const isVideo = m.type === 'video' || m.extension === 'mp4' || m.ext === 'mp4';
+        const noAudio = m.audioAvailable === false || m.hasAudio === false || m.no_audio === true;
+        return isVideo && !noAudio;
+    });
+
+    if (videos.length === 0) return { url: medias[0].url, ext: medias[0].extension || 'mp4' };
+
+    const sorted = videos.sort((a, b) => parseHeight(b.quality || b.height) - parseHeight(a.quality || a.height));
+    const bestMatch = sorted.find(m => parseHeight(m.quality || m.height) <= targetHeight) || sorted[0];
+
+    return { url: bestMatch.url, ext: bestMatch.ext || bestMatch.extension || 'mp4' };
 }
 
 async function downloadFileFromUrl(
@@ -223,7 +252,7 @@ async function downloadViaRapidAPI(
     console.log(`✅ RapidAPI: Got info. Title: ${title}`);
     onProgress?.(40);
 
-    const selectedMedia = selectBestDownloadUrl(apiResponse, downloadFormat, quality);
+    const selectedMedia = selectBestDownloadUrl(apiResponse, downloadFormat, quality, videoUrl);
     if (!selectedMedia) throw new Error('No downloadable media found in API response');
 
     const finalOutputPath = outputPath.replace(/\.[^.]+$/, `.${selectedMedia.ext}`);
@@ -615,7 +644,12 @@ async function downloadViaYtDlp(
         options['cookies'] = cookiesPath;
     } catch { /* cookies.txt not found, skip */ }
 
-    console.log(`🔧 yt-dlp: Starting download with impersonation for ${videoUrl}`);
+    console.log(`🔧 yt-dlp: Starting download for ${videoUrl}`);
+    const ffmpegPath = await getFfmpegPath();
+    if (ffmpegPath) {
+        options['ffmpeg-location'] = ffmpegPath;
+    }
+    
     await ytdlp(videoUrl, options);
     await fs.access(outputPath);
     onProgress?.(100);
