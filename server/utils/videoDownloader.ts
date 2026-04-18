@@ -116,13 +116,24 @@ function selectBestDownloadUrl(
 
     const parseHeight = (input: any): number => {
         if (!input) return 0;
-        const s = String(input).toLowerCase();
+        let s = String(input).toLowerCase();
+        
+        // Remove common extensions that might contain numbers (mp4, m4a, 3gp)
+        s = s.replace(/\.(mp4|m4a|3gp|webm|mkv|avi|flv)/g, '');
+        
         if (s.includes('4k')) return 2160;
         if (s.includes('2k') || s.includes('1440')) return 1440;
         if (s.includes('1080')) return 1080;
         if (s.includes('720')) return 720;
         if (s.includes('480')) return 480;
         if (s.includes('360')) return 360;
+        if (s.includes('240')) return 240;
+        if (s.includes('144')) return 144;
+
+        // Try to find any 3-4 digit number (likely resolution)
+        const match = s.match(/(\d{3,4})/);
+        if (match) return parseInt(match[1], 10);
+
         const num = parseInt(s.replace(/[^\d]/g, ''), 10);
         return isNaN(num) ? 0 : num;
     };
@@ -153,8 +164,14 @@ function selectBestDownloadUrl(
 
     // ─── GENERAL HANDLING (TikTok/FB/IG) ───────────────────────────────────
     const videos = medias.filter(m => {
+        // Strict check: Must not be audio type
+        if (m.type === 'audio') return false;
+
         const isVideo = m.type === 'video' || m.extension === 'mp4' || m.ext === 'mp4';
         const noAudio = m.audioAvailable === false || m.hasAudio === false || m.no_audio === true;
+        
+        // Additional protection for DASH/Legacy itags
+        // If it's labeled as having NO audio, reject it for general use
         return isVideo && !noAudio;
     });
 
