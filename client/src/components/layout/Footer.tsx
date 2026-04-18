@@ -1,7 +1,7 @@
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { Heart, BarChart3 } from "lucide-react";
-import logoUrl from "@/assets/viddownloader-logo.png";
+import logoUrl from "@/assets/viddownloader-logo-new.png";
 
 interface ApiUsageStats {
   count: number;
@@ -24,9 +24,9 @@ export function Footer() {
         <div className="grid md:grid-cols-4 gap-8">
           {/* Logo and Description */}
           <div className="md:col-span-1">
-            <div className="flex items-center space-x-2 mb-4">
-              <img src={logoUrl} alt="VidDownloader Logo" className="w-8 h-8 rounded-lg shadow-sm" />
-              <span className="text-lg font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+            <div className="flex items-center space-x-3 mb-5">
+              <img src={logoUrl} alt="VidDownloader Logo" className="w-12 h-12 drop-shadow-md" />
+              <span className="text-xl font-extrabold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent tracking-tight">
                 VidDownloader
               </span>
             </div>

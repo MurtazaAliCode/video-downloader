@@ -3,7 +3,7 @@ import { useTheme } from "@/components/ui/theme-provider";
 import { Button } from "@/components/ui/button";
 import { Moon, Sun, Menu } from "lucide-react";
 import { useState } from "react";
-import logoUrl from "@/assets/viddownloader-logo.png";
+import logoUrl from "@/assets/viddownloader-logo-new.png";
 
 export function Header() {
   const { theme, toggleTheme } = useTheme();
@@ -29,9 +29,9 @@ export function Header() {
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <Link href="/">
-            <div className="flex items-center space-x-2 cursor-pointer" data-testid="logo-link">
-              <img src={logoUrl} alt="VidDownloader Logo" className="w-8 h-8 rounded-lg shadow-sm" />
-              <span className="text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+            <div className="flex items-center space-x-3 cursor-pointer" data-testid="logo-link">
+              <img src={logoUrl} alt="VidDownloader Logo" className="w-12 h-12 hover:scale-105 transition-transform duration-300 drop-shadow-md" />
+              <span className="text-2xl font-extrabold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent tracking-tight">
                 VidDownloader
               </span>
             </div>
