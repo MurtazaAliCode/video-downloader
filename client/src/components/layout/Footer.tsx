@@ -31,7 +31,7 @@ export function Footer() {
               </span>
             </div>
             <p className="text-sm text-muted-foreground mb-4">
-              Free online video processing tool for personal use. Safe, secure, and privacy-focused.
+              Free online video downloader and MP3 converter for personal use. Safe, secure, and privacy-focused.
             </p>
             
             {/* API USAGE TRACKER (Added) */}
@@ -65,31 +65,31 @@ export function Footer() {
 
           {/* Product Links */}
           <div>
-            <h3 className="font-semibold text-card-foreground mb-4">Features</h3>
+            <h3 className="font-semibold text-card-foreground mb-4">Downloaders</h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li>
-                <Link href="/features/compression">
-                  <a className="hover:text-primary transition-colors">Video Compression</a>
+                <Link href="/">
+                  <a className="hover:text-primary transition-colors">YouTube Downloader</a>
                 </Link>
               </li>
               <li>
-                <Link href="/features/conversion">
-                  <a className="hover:text-primary transition-colors">Format Conversion</a>
+                <Link href="/">
+                  <a className="hover:text-primary transition-colors">TikTok Downloader</a>
                 </Link>
               </li>
               <li>
-                <Link href="/features/trimming">
-                  <a className="hover:text-primary transition-colors">Video Trimming</a>
+                <Link href="/">
+                  <a className="hover:text-primary transition-colors">Facebook Downloader</a>
                 </Link>
               </li>
               <li>
-                <Link href="/features/audio">
-                  <a className="hover:text-primary transition-colors">Audio Extraction</a>
+                <Link href="/">
+                  <a className="hover:text-primary transition-colors">Instagram Downloader</a>
                 </Link>
               </li>
               <li>
-                <Link href="/features/watermarks">
-                  <a className="hover:text-primary transition-colors">Add Watermarks</a>
+                <Link href="/">
+                  <a className="hover:text-primary transition-colors">MP3 Converter</a>
                 </Link>
               </li>
             </ul>

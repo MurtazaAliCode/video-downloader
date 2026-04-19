@@ -8,6 +8,7 @@ import { sendAdminNotification, sendUserConfirmation } from "./email.js";
 import fs from 'fs';
 import path from 'path';
 import { getCookieHeader } from "./utils/cookieHelper.js";
+import { fetchVideoMetadata } from "./utils/videoDownloader.js";
 
 // Setup Express Router
 export const router = Router();
@@ -24,6 +25,21 @@ router.get("/usage", async (_req: Request, res: Response) => {
   } catch (error) {
     console.error("Error fetching API usage:", error);
     return res.status(500).json({ message: "Error fetching usage data." });
+  }
+});
+
+router.get("/fetch-metadata", async (req: Request, res: Response) => {
+  const { url } = req.query;
+  if (!url || typeof url !== 'string') {
+    return res.status(400).json({ message: "URL is required" });
+  }
+
+  try {
+    const metadata = await fetchVideoMetadata(url);
+    return res.json(metadata);
+  } catch (error) {
+    console.error("Error fetching metadata:", error);
+    return res.status(500).json({ message: "Failed to fetch video details." });
   }
 });
 

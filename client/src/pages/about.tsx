@@ -37,13 +37,13 @@ export default function About() {
             <div className="order-1 md:order-2 space-y-6">
               <h2 className="text-2xl font-semibold text-foreground">Our Mission</h2>
               <p className="text-muted-foreground">
-                VidDownloader is a free online video processing tool built with React and Express for speed and privacy.
-                We believe everyone should have access to professional video editing capabilities without
-                the need for expensive software or complex installations.
+                VidDownloader is a professional, high-speed video downloader and MP3 converter built for convenience and privacy.
+                We believe everyone should have access to high-quality media content for offline viewing without
+                complex setups or security risks.
               </p>
               <p className="text-muted-foreground">
-                Our platform focuses exclusively on processing your own content - no external downloads,
-                no copyright violations, just pure video editing power at your fingertips.
+                Our platform allows you to download videos from your favorite social media platforms in 
+                HD quality, or extract high-fidelity MP3 audio instantly.
               </p>
 
               <div className="space-y-4">
@@ -81,37 +81,37 @@ export default function About() {
             <div className="grid md:grid-cols-3 gap-8">
               {[
                 {
-                  title: "Video Compression",
-                  desc: "Reduce file sizes while maintaining quality for easy sharing and storage.",
-                  icon: "Video"
+                  title: "HD Video Downloads",
+                  desc: "Save your favorite videos in original high-quality (up to 4K) from major social platforms.",
+                  icon: "📺"
                 },
                 {
-                  title: "Format Conversion",
-                  desc: "Convert between MP4, AVI, MOV and create GIFs from video clips.",
-                  icon: "Convert"
+                  title: "MP3 Audio Extraction",
+                  desc: "Convert any video link into a high-quality audio file (MP3) instantly.",
+                  icon: "🎵"
                 },
                 {
-                  title: "Video Trimming",
-                  desc: "Cut and trim videos with precision to remove unwanted sections.",
-                  icon: "Trim"
+                  title: "Multi-Platform Support",
+                  desc: "Fully compatible with YouTube, Facebook, Instagram, and TikTok links.",
+                  icon: "🚀"
                 },
                 {
-                  title: "Audio Extraction",
-                  desc: "Extract high-quality audio tracks in MP3 or WAV format.",
-                  icon: "Audio"
+                  title: "Privacy Focused",
+                  desc: "No user tracking. Your files are automatically deleted after 12 hours for security.",
+                  icon: "🛡️"
                 },
                 {
-                  title: "Watermarking",
-                  desc: "Add text or logo watermarks to protect your content.",
-                  icon: "Watermark"
+                  title: "Ultra Fast Servers",
+                  desc: "Optimized processing engines ensure your downloads start in seconds, not minutes.",
+                  icon: "⚡"
                 },
                 {
-                  title: "Privacy Protection",
-                  desc: "Secure processing with automatic file deletion after 12 hours.",
-                  icon: "Privacy"
+                  title: "Ad-Lite Experience",
+                  desc: "A clean, professional interface designed for user convenience without intrusive pop-ups.",
+                  icon: "✨"
                 }
               ].map((feature, index) => (
-                <Card key={index}>
+                <Card key={index} className="border-white/10 bg-card/50 backdrop-blur-sm hover:border-primary/50 transition-colors">
                   <CardContent className="p-6 text-center">
                     <div className="text-4xl mb-4">{feature.icon}</div>
                     <h3 className="text-lg font-semibold text-card-foreground mb-2">

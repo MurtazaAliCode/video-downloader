@@ -57,20 +57,34 @@ export function Header() {
 
           {/* Actions */}
           <div className="flex items-center space-x-4">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={toggleTheme}
-              data-testid="theme-toggle"
-              className="rounded-lg bg-secondary hover:bg-accent"
-            >
-              {theme === "dark" ? (
-                <Sun className="w-5 h-5" />
-              ) : (
-                <Moon className="w-5 h-5" />
-              )}
-              <span className="sr-only">Toggle theme</span>
-            </Button>
+            <div className="flex items-center bg-secondary/50 p-1 rounded-full border border-border">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => theme === "light" && toggleTheme()}
+                className={`rounded-full px-4 py-1 h-8 text-xs font-bold transition-all duration-300 ${
+                  theme === "dark" 
+                    ? "bg-primary text-primary-foreground shadow-lg" 
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <Moon className="w-3.5 h-3.5 mr-1.5" />
+                DARK
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => theme === "dark" && toggleTheme()}
+                className={`rounded-full px-4 py-1 h-8 text-xs font-bold transition-all duration-300 ${
+                  theme === "light" 
+                    ? "bg-primary text-primary-foreground shadow-lg" 
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <Sun className="w-3.5 h-3.5 mr-1.5" />
+                LIGHT
+              </Button>
+            </div>
 
             {/* Mobile Menu Button */}
             <Button

@@ -798,6 +798,53 @@ export async function downloadVideoWithYtDlp(
 }
 
 // =====================================================
+// METADATA FETCHING: For showing preview to user
+// =====================================================
+export async function fetchVideoMetadata(videoUrl: string): Promise<{ title: string; thumbnail: string; duration?: string; success: boolean; error?: string }> {
+    try {
+        const platform = getPlatformType(videoUrl);
+        
+        // Try RapidAPI first if configured (Faster usually)
+        if (RAPIDAPI_KEY && (platform === 'youtube' || platform === 'tiktok')) {
+            try {
+                const info = await fetchVideoInfoFromAPI(videoUrl);
+                return {
+                    title: info.title || 'Video',
+                    thumbnail: info.thumbnail || info.picture || '',
+                    duration: info.duration || '',
+                    success: true
+                };
+            } catch (rapidErr) {
+                console.warn('RapidAPI Metadata failed, falling back to yt-dlp:', rapidErr);
+            }
+        }
+
+        // Fallback or Primary for FB/IG/Others: yt-dlp dump-json
+        const options: any = {
+            dumpJson: true,
+            'no-playlist': true,
+        };
+
+        const ffmpegPath = await getFfmpegPath();
+        if (ffmpegPath) options['ffmpeg-location'] = ffmpegPath;
+
+        const info = await ytdlp(videoUrl, options);
+        return {
+            title: info.title || 'Video',
+            thumbnail: info.thumbnail || '',
+            duration: info.duration_string || '',
+            success: true
+        };
+    } catch (err) {
+        return {
+            title: '',
+            thumbnail: '',
+            success: false,
+            error: err instanceof Error ? err.message : 'Failed to fetch metadata'
+        };
+    }
+}
+
 // MAIN EXPORT: Smart Title Fetch
 // =====================================================
 export async function getTitleFromYtDlp(videoUrl: string): Promise<string | null> {

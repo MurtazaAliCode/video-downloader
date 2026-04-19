@@ -31,21 +31,21 @@ export default function Privacy() {
               </CardHeader>
               <CardContent className="prose dark:prose-invert max-w-none">
                 <p>
-                  At VidDownloader, we are committed to protecting your privacy and ensuring the security of your personal information. 
-                  This Privacy Policy explains how we collect, use, and protect your information when you use our video processing service.
+                  At VidDownloader, we are committed to protecting your privacy and ensuring the security of your information. 
+                  This Privacy Policy explains how we handle data when you use our video downloader and conversion service.
                 </p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader>
-                <CardTitle>Information We Collect</CardTitle>
+                <CardTitle>Information We Handle</CardTitle>
               </CardHeader>
               <CardContent className="prose dark:prose-invert max-w-none">
-                <h3>Video Files</h3>
+                <h3>Video Content</h3>
                 <p>
-                  When you upload videos to our service, we temporarily store them on our servers for processing purposes only. 
-                  We do not access, view, or analyze the content of your videos.
+                  When you use our service to download videos or extract audio, we may temporarily process the content on our servers. 
+                  We do not access, view, or store the content of your downloads for longer than necessary to provide the file to you.
                 </p>
                 
                 <h3>Technical Information</h3>
@@ -53,7 +53,7 @@ export default function Privacy() {
                 <ul>
                   <li>IP address (for rate limiting and abuse prevention)</li>
                   <li>Browser type and version</li>
-                  <li>Processing timestamps and file sizes</li>
+                  <li>Processing timestamps</li>
                   <li>Error logs (for service improvement)</li>
                 </ul>
 
@@ -67,12 +67,12 @@ export default function Privacy() {
 
             <Card>
               <CardHeader>
-                <CardTitle>How We Use Your Information</CardTitle>
+                <CardTitle>How We Use Information</CardTitle>
               </CardHeader>
               <CardContent className="prose dark:prose-invert max-w-none">
-                <p>We use the collected information for the following purposes:</p>
+                <p>We use information for the following purposes:</p>
                 <ul>
-                  <li><strong>Video Processing:</strong> To convert, compress, trim, or otherwise process your uploaded videos</li>
+                  <li><strong>Service Delivery:</strong> To facilitate the downloading and conversion of online media links</li>
                   <li><strong>Service Operation:</strong> To maintain and improve our service functionality</li>
                   <li><strong>Support:</strong> To respond to your questions and provide customer support</li>
                   <li><strong>Security:</strong> To prevent abuse and ensure service security</li>
@@ -172,7 +172,7 @@ export default function Privacy() {
               <CardContent className="prose dark:prose-invert max-w-none">
                 <p>We process your data based on:</p>
                 <ul>
-                  <li><strong>Legitimate Interest:</strong> To provide video processing services</li>
+                  <li><strong>Legitimate Interest:</strong> To provide media downloading and conversion services</li>
                   <li><strong>Consent:</strong> When you voluntarily contact us or use our service</li>
                   <li><strong>Legal Obligation:</strong> To comply with applicable laws and regulations</li>
                 </ul>

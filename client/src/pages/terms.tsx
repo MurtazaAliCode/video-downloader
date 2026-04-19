@@ -31,7 +31,7 @@ export default function Terms() {
               </CardHeader>
               <CardContent className="prose dark:prose-invert max-w-none">
                 <p>
-                  Welcome to VidDownloader. By accessing or using our video processing service, you agree to comply with 
+                  Welcome to VidDownloader. By accessing or using our video downloader and conversion service, you agree to comply with 
                   and be bound by these Terms of Service ("Terms"). If you do not agree to these Terms, please do not use our service.
                 </p>
                 <p>
@@ -47,18 +47,17 @@ export default function Terms() {
               </CardHeader>
               <CardContent className="prose dark:prose-invert max-w-none">
                 <p>
-                  VidDownloader is a free online video processing tool that allows users to:
+                  VidDownloader is a professional video downloader and conversion tool that allows users to:
                 </p>
                 <ul>
-                  <li>Compress video files to reduce file size</li>
-                  <li>Convert videos between different formats (MP4, AVI, MOV, GIF)</li>
-                  <li>Trim and cut video segments</li>
-                  <li>Extract audio from video files</li>
-                  <li>Add text or logo watermarks to videos</li>
+                  <li>Download high-quality videos from various supported social media platforms</li>
+                  <li>Convert online videos to high-quality MP3 audio files</li>
+                  <li>Select from different available resolutions and formats</li>
+                  <li>Extract audio instantly from video links</li>
                 </ul>
                 <p>
-                  Our service is provided "as is" for personal, non-commercial use only. All processing is performed on 
-                  user-uploaded content, and we do not provide tools for downloading content from external platforms.
+                  Our service is provided "as is" for personal, non-commercial use only. Our tool helps users access 
+                  publicly available content for offline viewing and personal use.
                 </p>
               </CardContent>
             </Card>

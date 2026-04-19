@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
@@ -44,6 +44,8 @@ export default function Home() {
   const [isQualityDialogOpen, setIsQualityDialogOpen] = useState(false);
   const [detectedPlatform, setDetectedPlatform] = useState<string>("");
   const [selectedQualityToUnlock, setSelectedQualityToUnlock] = useState<string | null>(null);
+  const [metadata, setMetadata] = useState<{ title: string, thumbnail: string, duration?: string } | null>(null);
+  const [isFetchingMetadata, setIsFetchingMetadata] = useState(false);
 
   const smartlinkUrl = "https://www.profitablecpmratenetwork.com/phb566a4t2?key=353d9eacad54473bb5e47ab851a76327";
 
@@ -67,6 +69,31 @@ export default function Home() {
       return { valid: false, message: 'Please enter a valid URL' };
     }
   };
+
+  // Automatic metadata fetching
+  useEffect(() => {
+    const handler = setTimeout(async () => {
+      if (videoUrl && validateUrl(videoUrl).valid) {
+        setIsFetchingMetadata(true);
+        try {
+          const res = await fetch(`/api/fetch-metadata?url=${encodeURIComponent(videoUrl)}`);
+          const data = await res.json();
+          if (data.success) {
+            setMetadata(data);
+          }
+        } catch (err) {
+          console.error("Metadata fetch error:", err);
+          setMetadata(null);
+        } finally {
+          setIsFetchingMetadata(false);
+        }
+      } else {
+        setMetadata(null);
+      }
+    }, 1000);
+
+    return () => clearTimeout(handler);
+  }, [videoUrl]);
 
   const handleInitialClick = () => {
     if (!videoUrl.trim()) {
@@ -94,9 +121,14 @@ export default function Home() {
   };
 
   const handleQualitySelection = (qualityId: string) => {
-    if (qualityId === 'high' || qualityId === 'highest') {
+    if (qualityId === 'mp3') {
+      setDownloadFormat('mp3');
+      startDownload('high'); // Default audio quality
+    } else if (qualityId === 'high' || qualityId === 'highest') {
+      setDownloadFormat('mp4');
       setSelectedQualityToUnlock(qualityId);
     } else {
+      setDownloadFormat('mp4');
       startDownload(qualityId);
     }
   };
@@ -165,12 +197,19 @@ export default function Home() {
       desc: 'Smallest file size',
       icon: <Smartphone className="w-5 h-5" />,
     },
+    {
+      id: 'mp3',
+      label: 'MP3 Audio Only',
+      desc: 'Extract high quality audio',
+      icon: <Monitor className="w-5 h-5" />,
+      tag: 'New'
+    },
   ];
 
   return (
     <div className="min-h-screen bg-background text-foreground selection:bg-primary selection:text-white">
       <Header />
-      <AdBanner />
+      {/* <AdBanner /> */}
 
       {/* Hero Section */}
       <section className="min-h-screen dark:gradient-bg-dark gradient-bg relative overflow-hidden flex items-center">
@@ -235,26 +274,52 @@ export default function Home() {
                         data-testid="video-url-input"
                       />
 
-                      {/* Platform Logos */}
+                      {/* Metadata Preview Card */}
+                      {isFetchingMetadata ? (
+                        <div className="w-full h-24 bg-white/5 rounded-xl animate-pulse flex items-center justify-center border border-white/10">
+                          <p className="text-sm text-muted-foreground">Fetching video details...</p>
+                        </div>
+                      ) : metadata && (
+                        <motion.div 
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="flex flex-col sm:flex-row items-center gap-4 p-4 rounded-xl border border-white/20 bg-white/5 backdrop-blur-md"
+                        >
+                          <img 
+                            src={metadata.thumbnail} 
+                            alt={metadata.title} 
+                            className="w-full sm:w-32 h-20 object-cover rounded-lg shadow-md"
+                          />
+                          <div className="flex-1 text-center sm:text-left overflow-hidden">
+                            <h4 className="font-bold text-white truncate">{metadata.title}</h4>
+                            <p className="text-xs text-white/60 mt-1 uppercase tracking-wider">{metadata.duration ? `Duration: ${metadata.duration}` : 'Connected'}</p>
+                          </div>
+                        </motion.div>
+                      )}
+
                       <div className="text-center">
-                        <p className="text-sm text-muted-foreground mb-3">Supported platforms:</p>
-                        <div className="flex flex-wrap justify-center items-center gap-4 sm:gap-8">
-                          <div className="flex flex-col items-center space-y-2 min-w-[70px]">
-                            <img src={youtubeLogo} alt="YouTube" className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg transition-transform hover:scale-110" />
-                            <span className="text-[10px] sm:text-xs text-muted-foreground">YouTube</span>
-                          </div>
-                          <div className="flex flex-col items-center space-y-2 min-w-[70px]">
-                            <img src={facebookLogo} alt="Facebook" className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg transition-transform hover:scale-110" />
-                            <span className="text-[10px] sm:text-xs text-muted-foreground">Facebook</span>
-                          </div>
-                          <div className="flex flex-col items-center space-y-2 min-w-[70px]">
-                            <img src={instagramLogo} alt="Instagram" className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg transition-transform hover:scale-110" />
-                            <span className="text-[10px] sm:text-xs text-muted-foreground">Instagram</span>
-                          </div>
-                          <div className="flex flex-col items-center space-y-2 min-w-[70px]">
-                            <img src={tiktokLogo} alt="TikTok" className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg object-contain bg-white p-1 transition-transform hover:scale-110" />
-                            <span className="text-[10px] sm:text-xs text-muted-foreground">TikTok</span>
-                          </div>
+                        <p className="text-sm text-muted-foreground mb-4 uppercase tracking-widest font-semibold opacity-60">Compatible Platforms</p>
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-xl mx-auto">
+                          {[
+                            { name: "YouTube", logo: youtubeLogo, color: "hover:bg-red-500/10 hover:border-red-500/30" },
+                            { name: "Facebook", logo: facebookLogo, color: "hover:bg-blue-500/10 hover:border-blue-500/30" },
+                            { name: "Instagram", logo: instagramLogo, color: "hover:bg-pink-500/10 hover:border-pink-500/30" },
+                            { name: "TikTok", logo: tiktokLogo, color: "hover:bg-black/10 hover:border-black/30", extraClass: "bg-white p-1" },
+                          ].map((platform) => (
+                            <div 
+                              key={platform.name}
+                              className={`flex flex-col items-center p-4 rounded-2xl border border-white/5 bg-white/5 backdrop-blur-sm transition-all duration-300 group cursor-default ${platform.color}`}
+                            >
+                              <img 
+                                src={platform.logo} 
+                                alt={platform.name} 
+                                className={`w-10 h-10 sm:w-12 sm:h-12 rounded-lg transition-all duration-500 group-hover:scale-110 group-hover:rotate-3 shadow-sm ${platform.extraClass || ""}`} 
+                              />
+                              <span className="text-[10px] sm:text-xs font-bold mt-3 text-muted-foreground group-hover:text-foreground transition-colors uppercase tracking-tight">
+                                {platform.name}
+                              </span>
+                            </div>
+                          ))}
                         </div>
                       </div>
 
@@ -275,7 +340,7 @@ export default function Home() {
 
             {/* Sidebar with Ads and Features */}
             <div className="lg:col-span-1 space-y-6">
-              <AdSidebar />
+              {/* <AdSidebar /> */}
 
               <Card className="glass-card border-white/20">
                 <CardHeader>
@@ -395,17 +460,16 @@ export default function Home() {
         </DialogContent>
       </Dialog>
 
-      {/* Native Ad Placement */}
-      <div className="container mx-auto px-4 max-w-4xl pt-8">
+      {/* <div className="container mx-auto px-4 max-w-4xl pt-8">
         <AdInContent />
-      </div>
+      </div> */}
 
-      <div className="container mx-auto px-4 max-w-4xl mt-12">
+      {/* <div className="container mx-auto px-4 max-w-4xl mt-12">
         <div className="bg-muted p-3 rounded-lg flex flex-col items-center">
            <small className="text-muted-foreground/60 uppercase text-[9px] font-bold mb-2">Recommended Service</small>
            <AdRecommended />
         </div>
-      </div>
+      </div> */}
 
       {/* Features Section */}
       <section className="py-24 bg-background relative">
@@ -484,8 +548,61 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Comparison Section (Better Alternative) */}
+      <section className="py-24 bg-muted/50 border-t border-border">
+        <div className="container mx-auto px-4 max-w-5xl">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+              Why Choose Vid-Downloader-Pro?
+            </h2>
+            <p className="text-muted-foreground">The safer, faster, and more private alternative to legacy downloaders.</p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-8">
+            <Card className="border-red-500/20 bg-red-500/5 backdrop-blur-sm">
+              <CardHeader>
+                <CardTitle className="text-red-500 flex items-center gap-2">
+                  Legacy Tools (e.g. Y2Mate)
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4 text-sm opacity-70">
+                <p className="flex items-center gap-2 text-red-600 dark:text-red-400">❌ Intrusive pop-up ads & malware risks</p>
+                <p className="flex items-center gap-2 text-red-600 dark:text-red-400">❌ Forces redirects to suspicious sites</p>
+                <p className="flex items-center gap-2 text-red-600 dark:text-red-400">❌ No privacy protection (tracking enabled)</p>
+                <p className="flex items-center gap-2 text-red-600 dark:text-red-400">❌ Slow processing speeds for HD videos</p>
+              </CardContent>
+            </Card>
+
+            <Card className="border-primary/40 bg-primary/5 backdrop-blur-md shadow-xl scale-105">
+              <CardHeader>
+                <CardTitle className="text-primary flex items-center gap-2">
+                  Vid-Downloader-Pro
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4 text-sm">
+                <p className="flex items-center gap-2 text-green-600 dark:text-green-400 font-bold">✅ Clean, ad-free experience (No pop-ups)</p>
+                <p className="flex items-center gap-2 text-green-600 dark:text-green-400 font-bold">✅ Direct processing on secure servers</p>
+                <p className="flex items-center gap-2 text-green-600 dark:text-green-400 font-bold">✅ 100% Private - No user tracking</p>
+                <p className="flex items-center gap-2 text-green-600 dark:text-green-400 font-bold">✅ Ultra-fast 4K & MP3 extraction</p>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="mt-16 p-8 rounded-3xl bg-gradient-to-r from-primary/10 via-purple-500/10 to-transparent border border-white/10 text-center">
+            <h3 className="text-xl font-bold mb-4">Ready for a Better Experience?</h3>
+            <p className="text-sm text-muted-foreground mb-6">Join thousands of users who have switched to a more reliable way to save content.</p>
+            <Button 
+                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                className="btn-gradient px-8 py-6 rounded-full font-bold shadow-lg shadow-primary/20"
+            >
+                START DOWNLOADING NOW
+            </Button>
+          </div>
+        </div>
+      </section>
+
       <Footer />
-      <AdStickyFooter />
+      {/* <AdStickyFooter /> */}
     </div>
   );
 }
