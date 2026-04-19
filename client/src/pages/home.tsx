@@ -231,7 +231,7 @@ export default function Home() {
           >
             <motion.h1 
               variants={itemVariants}
-              className="text-5xl sm:text-6xl md:text-7xl font-bold text-white mb-6 tracking-tight"
+              className="text-4xl sm:text-6xl md:text-7xl font-bold text-white mb-6 tracking-tight"
             >
               Download Videos
               <span className="block text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-pink-300 to-primary-foreground drop-shadow-sm">
@@ -250,8 +250,8 @@ export default function Home() {
             {/* URL Input and Download Area */}
             <div className="lg:col-span-3 space-y-8">
               {/* URL Input Box */}
-              <Card className="glass-card shadow-2xl border-white/30">
-                <CardContent className="p-8 md:p-12">
+              <Card className="glass-card shadow-2xl border-white/30 overflow-hidden">
+                <CardContent className="p-4 sm:p-8 md:p-12">
                   <div className="space-y-6">
                     <div className="text-center">
                       <div className="w-16 h-16 mx-auto bg-primary/10 rounded-full flex items-center justify-center mb-4">

@@ -24,14 +24,14 @@ export function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-[100] w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <Link href="/">
             <div className="flex items-center space-x-3 cursor-pointer" data-testid="logo-link">
-              <img src={logoUrl} alt="VidDownloader Logo" className="w-12 h-12 hover:scale-105 transition-transform duration-300 drop-shadow-md" />
-              <span className="text-2xl font-extrabold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent tracking-tight">
+              <img src={logoUrl} alt="VidDownloader Logo" className="w-10 h-10 sm:w-12 sm:h-12 hover:scale-105 transition-transform duration-300 drop-shadow-md" />
+              <span className="text-xl sm:text-2xl font-extrabold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent tracking-tight">
                 VidDownloader
               </span>
             </div>
@@ -56,8 +56,9 @@ export function Header() {
           </nav>
 
           {/* Actions */}
-          <div className="flex items-center space-x-4">
-            <div className="flex items-center bg-secondary/50 p-1 rounded-full border border-border">
+          <div className="flex items-center space-x-2">
+            {/* Desktop Full Toggle */}
+            <div className="hidden lg:flex items-center bg-secondary/50 p-1 rounded-full border border-border">
               <Button
                 variant="ghost"
                 size="sm"
@@ -85,6 +86,17 @@ export function Header() {
                 LIGHT
               </Button>
             </div>
+
+            {/* Mobile Icon-only Toggle */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleTheme}
+              className="lg:hidden rounded-lg bg-secondary hover:bg-accent text-foreground w-10 h-10"
+              title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+            >
+              {theme === "dark" ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+            </Button>
 
             {/* Mobile Menu Button */}
             <Button

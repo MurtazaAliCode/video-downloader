@@ -70,7 +70,7 @@ export default function Status() {
                             </span>
                             <span className="text-sm font-bold uppercase tracking-wider">All Systems Operational</span>
                         </div>
-                        <h1 className="text-5xl md:text-6xl font-extrabold text-foreground mb-6 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                        <h1 className="text-3xl sm:text-5xl md:text-6xl font-extrabold text-foreground mb-6 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
                             Service Status & Feedback
                         </h1>
                         <p className="text-muted-foreground text-xl max-w-2xl mx-auto">

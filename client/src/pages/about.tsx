@@ -15,7 +15,7 @@ export default function About() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-20">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-16">
-            <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
+            <h1 className="text-3xl sm:text-5xl font-bold text-foreground mb-6">
               About VidDownloader
             </h1>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
@@ -129,7 +129,7 @@ export default function About() {
           {/* Stats Section */}
           <div className="mt-20 text-center">
             <h2 className="text-3xl font-bold mb-12">Trusted by Thousands</h2>
-            <div className="grid md:grid-cols-4 gap-8">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
               {[
                 { value: "50,000+", label: "Videos Processed" },
                 { value: "15,000+", label: "Happy Users" },
