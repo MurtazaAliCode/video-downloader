@@ -13,6 +13,7 @@ interface AdComponentProps {
  * and avoid global variable conflicts.
  */
 export default function AdComponent({ id, type, placeholderText }: AdComponentProps) {
+  return null; // TEMPORARY: Clean Launch Mode (Disable ads for moderation)
   const adRef = useRef<HTMLDivElement>(null);
 
   const exactWidth = type === "banner" ? 728 : type === "sidebar" ? 300 : undefined;

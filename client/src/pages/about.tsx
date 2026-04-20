@@ -106,8 +106,8 @@ export default function About() {
                   icon: "⚡"
                 },
                 {
-                  title: "Ad-Lite Experience",
-                  desc: "A clean, professional interface designed for user convenience without intrusive pop-ups.",
+                  title: "Ad-Free Experience",
+                  desc: "A clean, professional interface designed for user convenience without any intrusive advertisements.",
                   icon: "✨"
                 }
               ].map((feature, index) => (

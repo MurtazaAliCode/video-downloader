@@ -124,10 +124,8 @@ export default function Home() {
     if (qualityId === 'mp3') {
       setDownloadFormat('mp3');
       startDownload('high'); // Default audio quality
-    } else if (qualityId === 'high' || qualityId === 'highest') {
-      setDownloadFormat('mp4');
-      setSelectedQualityToUnlock(qualityId);
     } else {
+      // TEMPORARY: Clean Launch Mode (All downloads start directly)
       setDownloadFormat('mp4');
       startDownload(qualityId);
     }
@@ -174,16 +172,14 @@ export default function Home() {
     {
       id: 'highest',
       label: 'Ultra High (1080p)',
-      desc: 'Unlock with short ad',
+      desc: 'High resolution digital copy',
       icon: <Monitor className="w-5 h-5" />,
-      tag: 'Premium'
     },
     {
       id: 'high',
       label: 'High (720p)',
-      desc: 'Unlock with short ad',
+      desc: 'Standard HD quality',
       icon: <Tablet className="w-5 h-5" />,
-      tag: 'Popular'
     },
     {
       id: 'medium',
@@ -202,7 +198,6 @@ export default function Home() {
       label: 'MP3 Audio Only',
       desc: 'Extract high quality audio',
       icon: <Monitor className="w-5 h-5" />,
-      tag: 'New'
     },
   ];
 
