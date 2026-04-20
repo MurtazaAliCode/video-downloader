@@ -2,13 +2,27 @@ import { Link, useLocation } from "wouter";
 import { useTheme } from "@/components/ui/theme-provider";
 import { Button } from "@/components/ui/button";
 import { Moon, Sun, Menu } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import logoUrl from "@/assets/viddownloader-logo-new.png";
 
 export function Header() {
   const { theme, toggleTheme } = useTheme();
   const [location] = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 20) {
+        setIsScrolled(true);
+      } else {
+        setIsScrolled(false);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const navigation = [
     { name: "Home", href: "/" },
@@ -24,7 +38,11 @@ export function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-[100] w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className={`fixed top-0 left-0 right-0 z-[100] w-full transition-all duration-300 ${
+      isScrolled 
+        ? "bg-background/70 backdrop-blur-lg border-b border-white/10 shadow-lg" 
+        : "bg-background border-transparent"
+    }`}>
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}

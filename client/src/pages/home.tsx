@@ -205,7 +205,7 @@ export default function Home() {
 
         <div className="absolute inset-0 bg-background/10 backdrop-blur-[2px]"></div>
 
-        <div className="relative container mx-auto px-4 sm:px-6 lg:px-8 py-20">
+        <div className="relative container mx-auto px-4 sm:px-6 lg:px-8 py-20 pt-28 sm:pt-32">
           <motion.div 
             initial="hidden"
             animate="visible"
