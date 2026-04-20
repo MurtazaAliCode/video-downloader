@@ -246,7 +246,40 @@ router.get("/download/:jobId", async (req: Request, res: Response) => {
 
 // Endpoint: Submit contact message (Contact Us / Report)
 router.post("/contact", async (req: Request, res: Response) => {
-  // ... existing contact code
+  try {
+    const { name, email, subject, message } = req.body;
+
+    if (!name || !email || !subject || !message) {
+      return res.status(400).json({ message: "All fields are required." });
+    }
+
+    // 1. Save to database
+    const savedMessage = await storage.createContactMessage({
+      name,
+      email,
+      subject,
+      message
+    });
+
+    // 2. Send email notification to Admin
+    // We do this asynchronously so the user doesn't wait for the email to send
+    sendAdminNotification({ name, email, subject, message }).catch(err => {
+      console.error("Failed to send admin email:", err);
+    });
+
+    // 3. Send confirmation email to User
+    sendUserConfirmation({ name, email }).catch(err => {
+      console.error("Failed to send user confirmation email:", err);
+    });
+
+    return res.status(201).json({
+      message: "Message received! We'll get back to you soon.",
+      id: savedMessage.id
+    });
+  } catch (error) {
+    console.error("Error processing contact message:", error);
+    return res.status(500).json({ message: "Failed to process message." });
+  }
 });
 
 // --- USER REVIEWS & STATUS ENDPOINTS ---
