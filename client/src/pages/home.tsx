@@ -218,7 +218,7 @@ export default function Home() {
             >
               Download Videos
               <span className="block text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-pink-300 to-primary-foreground drop-shadow-sm">
-                in MP4 Format
+                in MP4 or MP3
               </span>
             </motion.h1>
             <motion.p 
@@ -313,7 +313,7 @@ export default function Home() {
                         data-testid="download-button"
                       >
                         <Download className="w-5 h-5 mr-2" />
-                        {isDownloading ? "Processing..." : "Download MP4"}
+                        {isDownloading ? "Processing..." : "Start Download"}
                       </Button>
                     </div>
                   </div>
@@ -332,7 +332,7 @@ export default function Home() {
                 <CardContent className="space-y-3">
                   {[
                     { title: "100% Free", desc: "No registration required", iconColor: "bg-green-500" },
-                    { title: "High Quality", desc: "Download in MP4 format", iconColor: "bg-blue-500" },
+                    { title: "High Quality", desc: "Supports MP4 & MP3 format", iconColor: "bg-blue-500" },
                     { title: "Fast Downloads", desc: "Direct download links", iconColor: "bg-purple-500" },
                     { title: "Safe & Secure", desc: "No malware or ads", iconColor: "bg-yellow-500" },
                   ].map((feature, index) => (
@@ -436,8 +436,8 @@ export default function Home() {
             {[
               {
                 title: "YouTube Downloads",
-                desc: "Download videos from YouTube in high quality MP4 format. Supports all video resolutions.",
-                features: ["HD/4K quality", "Fast downloads", "Direct MP4 format"],
+                desc: "Download videos and audio from YouTube in high quality MP4 or MP3 format.",
+                features: ["HD/4K MP4", "320kbps MP3", "Direct conversion"],
                 color: "red",
               },
               {
