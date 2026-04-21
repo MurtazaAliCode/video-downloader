@@ -94,6 +94,11 @@ export default function Home() {
     return () => clearTimeout(handler);
   }, [videoUrl]);
 
+  // Track page visit
+  useEffect(() => {
+    fetch('/api/track-visit', { method: 'POST' }).catch(err => console.error("Tracking error:", err));
+  }, []);
+
   const handleInitialClick = () => {
     if (!videoUrl.trim()) {
       toast({

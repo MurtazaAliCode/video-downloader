@@ -44,7 +44,8 @@ export const contactMessages = pgTable("contact_messages", {
 
 export const apiUsage = pgTable("api_usage", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  count: integer("count").notNull().default(0),
+  count: integer("count").notNull().default(0), // Total downloads
+  visitorCount: integer("visitor_count").notNull().default(0), // Total visits
   monthYear: text("month_year").notNull(), // format: "YYYY-MM"
   updatedAt: timestamp("updated_at").notNull().default(sql`now()`),
 });

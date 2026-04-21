@@ -19,12 +19,23 @@ router.get("/usage", async (_req: Request, res: Response) => {
     const usage = await storage.getApiUsage();
     return res.json({
       count: usage?.count || 0,
+      visitorCount: usage?.visitorCount || 0,
       monthYear: usage?.monthYear || new Date().toISOString().substring(0, 7),
       limit: 6000
     });
   } catch (error) {
     console.error("Error fetching API usage:", error);
     return res.status(500).json({ message: "Error fetching usage data." });
+  }
+});
+
+router.post("/track-visit", async (_req: Request, res: Response) => {
+  try {
+    await storage.incrementVisitorCount();
+    return res.json({ success: true });
+  } catch (error) {
+    console.error("Error tracking visit:", error);
+    return res.status(500).json({ message: "Error tracking visit." });
   }
 });
 

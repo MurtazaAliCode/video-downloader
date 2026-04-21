@@ -28,6 +28,7 @@ export interface IStorage {
   // API Usage Tracking
   getApiUsage(): Promise<ApiUsage | undefined>;
   incrementApiUsage(): Promise<void>;
+  incrementVisitorCount(): Promise<void>;
 
   // User Reviews
   createReview(review: InsertReview): Promise<Review>;
@@ -660,6 +661,25 @@ Start protecting your video content with professional watermarks using VidDownlo
       await db.insert(apiUsage).values({
         monthYear,
         count: 1,
+        visitorCount: 0,
+        updatedAt: new Date()
+      });
+    }
+  }
+
+  async incrementVisitorCount(): Promise<void> {
+    const monthYear = new Date().toISOString().substring(0, 7);
+    const [existing] = await db.select().from(apiUsage).where(eq(apiUsage.monthYear, monthYear));
+
+    if (existing) {
+      await db.update(apiUsage)
+        .set({ visitorCount: existing.visitorCount + 1, updatedAt: new Date() })
+        .where(eq(apiUsage.id, existing.id));
+    } else {
+      await db.insert(apiUsage).values({
+        monthYear,
+        count: 0,
+        visitorCount: 1,
         updatedAt: new Date()
       });
     }
