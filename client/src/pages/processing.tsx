@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { AdBanner, AdInContent, AdSocialBar, AdStickyFooter } from "@/components/layout/AdSlots";
+import AffiliateSmall from "@/components/layout/AffiliateSmall";
 import { ProgressBar } from "@/components/ui/progress-bar";
 import { DownloadLink } from "@/components/video/download-link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -84,7 +85,7 @@ export default function Processing({ params }: ProcessingPageProps) {
       <Header />
       <AdBanner />
       
-      <div className="container relative z-10 mx-auto px-4 py-8">
+      <div className="container relative z-10 mx-auto px-4 pt-32 pb-16">
         <div className="max-w-2xl mx-auto space-y-12">
           <div className="text-center space-y-4 animate-in fade-in slide-in-from-top-4 duration-1000">
             <h1 className="text-4xl md:text-5xl font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-gray-900 via-gray-700 to-gray-900 dark:from-white dark:via-gray-300 dark:to-white">
@@ -154,6 +155,11 @@ export default function Processing({ params }: ProcessingPageProps) {
                    />
                 </div>
                 
+                <div className="pt-4 flex flex-col items-center">
+                   <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-3">While you wait...</p>
+                   <AffiliateSmall type="vpn" />
+                </div>
+
                 <div className="flex justify-center gap-4">
                   <div className="flex items-center space-x-2 text-xs font-semibold text-muted-foreground bg-muted/40 px-3 py-1.5 rounded-full ring-1 ring-black/5 dark:ring-white/5">
                     <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>

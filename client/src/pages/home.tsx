@@ -3,6 +3,7 @@ import { useLocation } from "wouter";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { AdBanner, AdSidebar, AdInContent, AdSocialBar, AdStickyFooter, AdRecommended } from "@/components/layout/AdSlots";
+import AffiliateSection from "@/components/layout/AffiliateSection";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -414,16 +415,10 @@ export default function Home() {
         </DialogContent>
       </Dialog>
 
-      {/* <div className="container mx-auto px-4 max-w-4xl pt-8">
-        <AdInContent />
-      </div> */}
-
-      {/* <div className="container mx-auto px-4 max-w-4xl mt-12">
-        <div className="bg-muted p-3 rounded-lg flex flex-col items-center">
-           <small className="text-muted-foreground/60 uppercase text-[9px] font-bold mb-2">Recommended Service</small>
-           <AdRecommended />
-        </div>
-      </div> */}
+      {/* Recommended Creator Tools (Safe Monetization) */}
+      <div className="container mx-auto px-4 max-w-5xl py-20">
+        <AffiliateSection />
+      </div>
 
       {/* Features Section */}
       <section className="py-24 bg-background relative">
