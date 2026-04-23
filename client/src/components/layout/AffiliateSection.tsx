@@ -107,7 +107,7 @@ export default function AffiliateSection() {
                 <Button 
                   className="w-full group bg-accent hover:bg-accent/90"
                   variant="default"
-                  onClick={() => window.open('https://www.movavi.com/', '_blank')}
+                  onClick={() => window.open('https://www.mvvitrk.com/click?pid=6156&offer_id=1', '_blank')}
                 >
                   Try For Free
                   <ExternalLink className="w-4 h-4 ml-2 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />

@@ -218,7 +218,7 @@ export function DownloadLink({ jobId, fileName, platform, onProcessAnother }: Do
           {downloaded && (
             <div className="pt-2 animate-in fade-in zoom-in-95 duration-500 delay-300">
               <Button
-                onClick={() => window.open('https://www.movavi.com/', '_blank')}
+                onClick={() => window.open('https://www.mvvitrk.com/click?pid=6156&offer_id=1', '_blank')}
                 className="w-full py-7 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white text-lg font-bold shadow-xl border-0 h-auto group transition-all"
               >
                 <div className="flex items-center space-x-3">

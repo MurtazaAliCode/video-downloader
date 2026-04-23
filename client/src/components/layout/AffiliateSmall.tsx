@@ -23,7 +23,7 @@ export default function AffiliateSmall({ type, compact = false }: AffiliateSmall
     tagline: "Edit Reels & TikToks",
     icon: <Video className="w-8 h-8 text-white" />,
     gradient: "from-purple-600 to-pink-700",
-    url: "https://www.movavi.com/",
+    url: "https://www.mvvitrk.com/click?pid=6156&offer_id=1",
     cta: "Try Free Editor"
   };
 
