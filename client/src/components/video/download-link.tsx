@@ -217,16 +217,20 @@ export function DownloadLink({ jobId, fileName, platform, onProcessAnother }: Do
           {/* ✨ High-Conversion Affiliate: Edit Video */}
           {downloaded && (
             <div className="pt-2 animate-in fade-in zoom-in-95 duration-500 delay-300">
-              <Button
-                onClick={() => window.open('https://www.mvvitrk.com/click?pid=6156&offer_id=1', '_blank')}
-                className="w-full py-7 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white text-lg font-bold shadow-xl border-0 h-auto group transition-all"
+              <a 
+                href="https://www.mvvitrk.com/click?pid=6156&offer_id=1" 
+                target="_blank" 
+                rel="nofollow sponsored"
+                className="w-full"
               >
-                <div className="flex items-center space-x-3">
-                  <Video className="w-6 h-6 animate-pulse" />
-                  <span>Edit like a Pro (1-Click)</span>
-                </div>
-                <ExternalLink className="w-4 h-4 ml-2 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
-              </Button>
+                <Button className="w-full py-7 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white text-lg font-bold shadow-xl border-0 h-auto group transition-all">
+                  <div className="flex items-center space-x-3">
+                    <Video className="w-6 h-6 animate-pulse" />
+                    <span>Edit like a Pro (1-Click)</span>
+                  </div>
+                  <ExternalLink className="w-4 h-4 ml-2 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
+                </Button>
+              </a>
               <p className="text-[10px] text-muted-foreground mt-2 font-medium italic">
                 *Recommended for creating high-quality Reels & TikToks from your downloads
               </p>

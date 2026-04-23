@@ -45,15 +45,21 @@ export default function AffiliateSmall({ type, compact = false }: AffiliateSmall
             </div>
           </div>
           <div className="p-3">
-            <Button 
-              size="sm"
-              className="w-full h-8 text-xs font-bold group"
-              variant={isVpn ? "default" : "secondary"}
-              onClick={() => window.open(content.url, '_blank')}
+            <a 
+              href={content.url} 
+              target="_blank" 
+              rel="nofollow sponsored"
+              className="w-full"
             >
-              {content.cta}
-              <ExternalLink className="w-3 h-3 ml-2 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-            </Button>
+              <Button 
+                size="sm"
+                className="w-full h-8 text-xs font-bold group"
+                variant={isVpn ? "default" : "secondary"}
+              >
+                {content.cta}
+                <ExternalLink className="w-3 h-3 ml-2 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+              </Button>
+            </a>
           </div>
         </CardContent>
       </Card>

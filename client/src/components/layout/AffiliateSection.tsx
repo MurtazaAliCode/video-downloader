@@ -67,14 +67,17 @@ export default function AffiliateSection() {
                     <Zap className="w-4 h-4 mr-2 text-primary" /> Multi-device support (PC & Mobile)
                   </li>
                 </ul>
-                <Button 
-                  className="w-full group"
-                  variant="default"
-                  onClick={() => window.open('https://nordvpn.com/', '_blank')}
+                <a 
+                  href="https://nordvpn.com/" 
+                  target="_blank" 
+                  rel="nofollow sponsored"
+                  className="w-full"
                 >
-                  Get Exclusive Deal
-                  <ExternalLink className="w-4 h-4 ml-2 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
-                </Button>
+                  <Button className="w-full group" variant="default">
+                    Get Exclusive Deal
+                    <ExternalLink className="w-4 h-4 ml-2 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+                  </Button>
+                </a>
               </div>
             </CardContent>
           </Card>
@@ -104,14 +107,17 @@ export default function AffiliateSection() {
                     <Zap className="w-4 h-4 mr-2 text-accent" /> Export in 4K resolution
                   </li>
                 </ul>
-                <Button 
-                  className="w-full group bg-accent hover:bg-accent/90"
-                  variant="default"
-                  onClick={() => window.open('https://www.mvvitrk.com/click?pid=6156&offer_id=1', '_blank')}
+                <a 
+                  href="https://www.mvvitrk.com/click?pid=6156&offer_id=1" 
+                  target="_blank" 
+                  rel="nofollow sponsored"
+                  className="w-full"
                 >
-                  Try For Free
-                  <ExternalLink className="w-4 h-4 ml-2 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
-                </Button>
+                  <Button className="w-full group bg-accent hover:bg-accent/90" variant="default">
+                    Try For Free
+                    <ExternalLink className="w-4 h-4 ml-2 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+                  </Button>
+                </a>
               </div>
             </CardContent>
           </Card>
