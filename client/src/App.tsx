@@ -20,11 +20,6 @@ import CookiePolicy from "@/pages/cookie-policy";
 import Disclaimer from "@/pages/disclaimer";
 import FeatureRequests from "@/pages/feature-requests";
 import Status from "@/pages/status";
-import Compression from "@/pages/features/compression";
-import Conversion from "@/pages/features/conversion";
-import Trimming from "@/pages/features/trimming";
-import Audio from "@/pages/features/audio";
-import Watermarks from "@/pages/features/watermarks";
 
 function Router() {
   return (
@@ -43,11 +38,6 @@ function Router() {
       <Route path="/disclaimer" component={Disclaimer} />
       <Route path="/feature-requests" component={FeatureRequests} />
       <Route path="/status" component={Status} />
-      <Route path="/features/compression" component={Compression} />
-      <Route path="/features/conversion" component={Conversion} />
-      <Route path="/features/trimming" component={Trimming} />
-      <Route path="/features/audio" component={Audio} />
-      <Route path="/features/watermarks" component={Watermarks} />
       <Route component={NotFound} />
     </Switch>
   );
