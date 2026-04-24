@@ -218,7 +218,7 @@ export function DownloadLink({ jobId, fileName, platform, onProcessAnother }: Do
           {downloaded && (
             <div className="pt-2 animate-in fade-in zoom-in-95 duration-500 delay-300">
               <a 
-                href="https://www.mvvitrk.com/click?pid=6156&offer_id=1" 
+                href="https://www.mvvitrk.com/click?pid=6156&offer_id=9" 
                 target="_blank" 
                 rel="nofollow sponsored"
                 className="w-full"

@@ -12,11 +12,11 @@ export default function AffiliateSmall({ type, compact = false }: AffiliateSmall
   const isVpn = type === "vpn";
   
   const content = isVpn ? {
-    title: "NordVPN",
+    title: "PureVPN",
     tagline: "Stay Private & Secure",
     icon: <ShieldCheck className="w-8 h-8 text-white" />,
-    gradient: "from-blue-600 to-indigo-700",
-    url: "https://nordvpn.com/",
+    gradient: "from-[#602D91] to-[#3B1B5A]",
+    url: "https://www.purevpn.com/",
     cta: "Secure My Connection"
   } : {
     title: "Movavi Video Editor",

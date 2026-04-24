@@ -43,37 +43,37 @@ export default function AffiliateSection() {
       </div>
 
       <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-        {/* NordVPN Card */}
+        {/* PureVPN Card */}
         <motion.div variants={itemVariants}>
           <Card className="overflow-hidden border-primary/20 bg-card/50 backdrop-blur-sm group hover:border-primary/40 transition-all duration-300">
             <CardContent className="p-0">
-              <div className="bg-gradient-to-br from-blue-600 to-indigo-700 p-6 flex flex-col items-center text-white relative overflow-hidden">
+              <div className="bg-gradient-to-br from-[#602D91] to-[#3B1B5A] p-6 flex flex-col items-center text-white relative overflow-hidden">
                 <div className="absolute top-0 right-0 p-3 opacity-20 group-hover:scale-110 transition-transform duration-500">
                   <Lock className="w-20 h-20" />
                 </div>
                 <ShieldCheck className="w-12 h-12 mb-4 drop-shadow-lg" />
-                <h3 className="text-xl font-bold mb-1">NordVPN</h3>
-                <span className="text-xs font-semibold bg-white/20 px-2 py-0.5 rounded-full mb-4">BEST FOR PRIVACY</span>
+                <h3 className="text-xl font-bold mb-1">PureVPN</h3>
+                <span className="text-xs font-semibold bg-white/20 px-2 py-0.5 rounded-full mb-4">ULTIMATE PRIVACY</span>
               </div>
               <div className="p-6">
                 <ul className="space-y-2 mb-6">
                   <li className="flex items-center text-sm text-muted-foreground">
-                    <Zap className="w-4 h-4 mr-2 text-primary" /> Stay private while downloading
+                    <Zap className="w-4 h-4 mr-2 text-primary" /> 100% Private & No-Log Policy
                   </li>
                   <li className="flex items-center text-sm text-muted-foreground">
-                    <Zap className="w-4 h-4 mr-2 text-primary" /> Bypass geo-blocks instantly
+                    <Zap className="w-4 h-4 mr-2 text-primary" /> Fastest speeds for video streaming
                   </li>
                   <li className="flex items-center text-sm text-muted-foreground">
-                    <Zap className="w-4 h-4 mr-2 text-primary" /> Multi-device support (PC & Mobile)
+                    <Zap className="w-4 h-4 mr-2 text-primary" /> Works on 10+ devices at once
                   </li>
                 </ul>
                 <a 
-                  href="https://nordvpn.com/" 
+                  href="https://www.purevpn.com/" 
                   target="_blank" 
                   rel="nofollow sponsored"
                   className="w-full"
                 >
-                  <Button className="w-full group" variant="default">
+                  <Button className="w-full group bg-[#602D91] hover:bg-[#4E2476] text-white" variant="default">
                     Get Exclusive Deal
                     <ExternalLink className="w-4 h-4 ml-2 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
                   </Button>
@@ -122,6 +122,12 @@ export default function AffiliateSection() {
             </CardContent>
           </Card>
         </motion.div>
+      </div>
+
+      <div className="mt-12 text-center">
+        <p className="text-[10px] text-muted-foreground/60 max-w-lg mx-auto leading-relaxed">
+          Affiliate Disclosure: Some of the links on this page are affiliate links. If you click through and make a purchase, we may receive a commission at no extra cost to you. We only recommend products we trust.
+        </p>
       </div>
     </motion.section>
   );
