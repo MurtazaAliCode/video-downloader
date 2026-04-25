@@ -5,11 +5,18 @@ export function PWAInstallPrompt() {
   const [showPrompt, setShowPrompt] = useState(false);
 
   useEffect(() => {
-    // Check if the app is running in standalone mode (already installed)
-    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone;
-    
-    // Check if the user has dismissed the prompt previously
-    const hasDismissed = localStorage.getItem("pwa-prompt-dismissed");
+    let isStandalone = false;
+    let hasDismissed = false;
+
+    try {
+      // Check if the app is running in standalone mode
+      isStandalone = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone;
+      
+      // Check if the user has dismissed the prompt previously
+      hasDismissed = !!localStorage.getItem("pwa-prompt-dismissed");
+    } catch (e) {
+      console.warn("Browser restrictions prevented PWA checks", e);
+    }
 
     if (!isStandalone && !hasDismissed) {
       // Small delay to not overwhelm the user immediately
@@ -22,7 +29,11 @@ export function PWAInstallPrompt() {
 
   const dismissPrompt = () => {
     setShowPrompt(false);
-    localStorage.setItem("pwa-prompt-dismissed", "true");
+    try {
+      localStorage.setItem("pwa-prompt-dismissed", "true");
+    } catch (e) {
+      console.warn("Could not save PWA prompt preference");
+    }
   };
 
   if (!showPrompt) return null;
