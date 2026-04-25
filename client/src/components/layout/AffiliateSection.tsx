@@ -108,7 +108,7 @@ export default function AffiliateSection() {
                   </li>
                 </ul>
                 <a 
-                  href="https://www.mvvitrk.com/click?pid=6156&offer_id=9&sub1=viddownloader" 
+                  href="https://www.mvvitrk.com/click?pid=6156&offer_id=9&sub1=vid-downloader-pro" 
                   target="_blank" 
                   rel="nofollow sponsored"
                   className="w-full"
