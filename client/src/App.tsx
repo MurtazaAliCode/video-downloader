@@ -50,6 +50,8 @@ function GlobalAds() {
   return <AdSocialBar />;
 }
 
+import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
@@ -58,6 +60,7 @@ function App() {
           <Toaster />
           <GlobalAds />
           <Router />
+          <PWAInstallPrompt />
         </TooltipProvider>
       </ThemeProvider>
     </QueryClientProvider>
