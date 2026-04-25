@@ -33,7 +33,10 @@ export default function AffiliateSmall({ type, compact = false }: AffiliateSmall
       animate={{ opacity: 1, scale: 1 }}
       className={`w-full ${compact ? "max-w-xs" : "max-w-sm"}`}
     >
-      <Card className="overflow-hidden border-white/10 bg-card/30 backdrop-blur-md hover:border-white/20 transition-all">
+      <Card className="relative overflow-hidden border-white/10 bg-card/30 backdrop-blur-md hover:border-white/20 transition-all">
+        <div className="absolute top-0 right-0 bg-black/40 text-white/80 text-[8px] uppercase tracking-widest px-2 py-0.5 rounded-bl-lg font-bold z-10">
+          Sponsored
+        </div>
         <CardContent className="p-0">
           <div className={`bg-gradient-to-r ${content.gradient} p-4 flex items-center space-x-4`}>
             <div className="bg-white/20 p-2 rounded-xl">

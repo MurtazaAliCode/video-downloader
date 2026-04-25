@@ -156,7 +156,7 @@ export default function Processing({ params }: ProcessingPageProps) {
                 </div>
                 
                 <div className="pt-4 flex flex-col items-center">
-                   <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-3">While you wait...</p>
+                   <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-3">Sponsored Advertisement</p>
                    <AffiliateSmall type="vpn" />
                 </div>
 
