@@ -16,7 +16,7 @@ export default function AffiliateSmall({ type, compact = false }: AffiliateSmall
     tagline: "Stay Private & Secure",
     icon: <ShieldCheck className="w-8 h-8 text-white" />,
     gradient: "from-[#602D91] to-[#3B1B5A]",
-    url: "https://www.purevpn.com/",
+    url: "https://billing.purevpn.com/aff.php?aff=49387687",
     cta: "Secure My Connection"
   } : {
     title: "Movavi Video Editor",

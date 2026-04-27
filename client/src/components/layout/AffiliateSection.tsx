@@ -68,7 +68,7 @@ export default function AffiliateSection() {
                   </li>
                 </ul>
                 <a 
-                  href="https://www.purevpn.com/" 
+                  href="https://billing.purevpn.com/aff.php?aff=49387687" 
                   target="_blank" 
                   rel="nofollow sponsored"
                   className="w-full"
