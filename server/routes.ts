@@ -373,6 +373,26 @@ router.get("/reviews/admin", async (req: Request, res: Response) => {
   }
 });
 
+// --- AFFILIATE LINK CLOAKING (For Google Safety) ---
+router.get("/out/:service", (req: Request, res: Response) => {
+  const { service } = req.params;
+  
+  const affiliateLinks: Record<string, string> = {
+    'purevpn': 'https://billing.purevpn.com/aff.php?aff=49387687',
+    'movavi': 'https://www.mvvitrk.com/click?pid=6156&offer_id=9&sub1=vid-downloader-pro'
+  };
+
+  const target = affiliateLinks[service];
+  if (target) {
+    // We use a 302 (Found) instead of 301 (Permanent) for affiliate links
+    // This looks more natural to bots
+    console.log(`🔗 Cloaked Redirect: ${service} -> ${target}`);
+    return res.redirect(302, target);
+  }
+
+  return res.redirect(302, '/');
+});
+
 export const registerRoutes = (app: Application) => {
   app.use('/api', router);
   return app;

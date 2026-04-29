@@ -68,7 +68,7 @@ export default function AffiliateSection() {
                   </li>
                 </ul>
                 <a 
-                  href="https://billing.purevpn.com/aff.php?aff=49387687" 
+                  href="/api/out/purevpn" 
                   target="_blank" 
                   rel="nofollow sponsored"
                   className="w-full"
@@ -108,7 +108,7 @@ export default function AffiliateSection() {
                   </li>
                 </ul>
                 <a 
-                  href="https://www.mvvitrk.com/click?pid=6156&offer_id=9&sub1=vid-downloader-pro" 
+                  href="/api/out/movavi" 
                   target="_blank" 
                   rel="nofollow sponsored"
                   className="w-full"
