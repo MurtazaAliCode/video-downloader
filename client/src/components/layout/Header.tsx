@@ -43,7 +43,7 @@ export function Header() {
         ? "bg-background/70 backdrop-blur-lg border-b border-white/10 shadow-lg" 
         : "bg-background border-transparent"
     }`}>
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="w-full container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <Link href="/">

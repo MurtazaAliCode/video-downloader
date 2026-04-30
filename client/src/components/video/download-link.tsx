@@ -179,7 +179,7 @@ export function DownloadLink({ jobId, fileName, platform, onProcessAnother }: Do
           <Button
             onClick={() => handleDownload(true)}
             disabled={isDownloading}
-            className={`w-full py-8 text-xl font-bold transition-all duration-300 shadow-xl border-0 h-auto ${downloaded
+            className={`w-full py-6 sm:py-8 text-lg sm:text-xl font-bold transition-all duration-300 shadow-xl border-0 h-auto ${downloaded
                 ? 'bg-green-500 hover:bg-green-600 text-white'
                 : 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white'
               } hover:scale-[1.02] active:scale-95 disabled:grayscale`}
@@ -217,11 +217,11 @@ export function DownloadLink({ jobId, fileName, platform, onProcessAnother }: Do
 
 
           {/* Secondary Actions */}
-          <div className="grid grid-cols-2 gap-3 pt-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
             <Button
               onClick={handlePreview}
               variant="outline"
-              className="py-6 font-semibold border-white/20 bg-white/10 hover:bg-white/20 dark:bg-black/20 backdrop-blur-md transition-all"
+              className="py-4 sm:py-6 font-semibold border-white/20 bg-white/10 hover:bg-white/20 dark:bg-black/20 backdrop-blur-md transition-all text-sm sm:text-base"
             >
               <Play className="w-4 h-4 mr-2" />
               Preview Video

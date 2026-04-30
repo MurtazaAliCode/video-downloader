@@ -50,10 +50,11 @@ export default function Home() {
 
 
   const detectPlatform = (url: string) => {
-    if (url.includes('youtube.com') || url.includes('youtu.be')) return 'youtube';
-    if (url.includes('facebook.com') || url.includes('fb.watch')) return 'facebook';
-    if (url.includes('instagram.com')) return 'instagram';
-    if (url.includes('tiktok.com')) return 'tiktok';
+    const u = url.toLowerCase();
+    if (u.includes('youtube.com') || u.includes('youtu.be')) return 'youtube';
+    if (u.includes('facebook.com') || u.includes('fb.watch')) return 'facebook';
+    if (u.includes('instagram.com')) return 'instagram';
+    if (u.includes('tiktok.com') || u.includes('vt.tiktok.com') || u.includes('vm.tiktok.com')) return 'tiktok';
     return 'unknown';
   };
 
@@ -90,7 +91,7 @@ export default function Home() {
       } else {
         setMetadata(null);
       }
-    }, 1000);
+    }, 500);
 
     return () => clearTimeout(handler);
   }, [videoUrl]);
@@ -201,7 +202,7 @@ export default function Home() {
       {/* <AdBanner /> */}
 
       {/* Hero Section */}
-      <section className="min-h-screen dark:gradient-bg-dark gradient-bg relative overflow-hidden flex items-center">
+      <section className="min-h-screen w-full dark:gradient-bg-dark gradient-bg relative overflow-hidden flex items-center justify-center">
         {/* Animated Background Blobs */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl animate-blob"></div>
@@ -211,7 +212,7 @@ export default function Home() {
 
         <div className="absolute inset-0 bg-background/10 backdrop-blur-[2px]"></div>
 
-        <div className="relative container mx-auto px-4 sm:px-6 lg:px-8 py-20 pt-28 sm:pt-32">
+        <div className="relative w-full container mx-auto px-4 sm:px-6 lg:px-8 py-20 pt-28 sm:pt-32">
           <motion.div 
             initial="hidden"
             animate="visible"
@@ -239,8 +240,8 @@ export default function Home() {
             {/* URL Input and Download Area */}
             <div className="lg:col-span-3 space-y-8">
               {/* URL Input Box */}
-              <Card className="glass-card shadow-2xl border-white/30 overflow-hidden">
-                <CardContent className="p-4 sm:p-8 md:p-12">
+              <Card className="glass-card shadow-2xl border-white/30 overflow-hidden w-full mx-0">
+                <CardContent className="p-3 sm:p-8 md:p-12">
                   <div className="space-y-6">
                     <div className="text-center">
                       <div className="w-16 h-16 mx-auto bg-primary/10 rounded-full flex items-center justify-center mb-4">
@@ -272,23 +273,25 @@ export default function Home() {
                         <motion.div 
                           initial={{ opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}
-                          className="flex flex-col sm:flex-row items-center gap-4 p-4 rounded-xl border border-white/20 bg-white/5 backdrop-blur-md"
+                          className="flex flex-col sm:flex-row items-center gap-4 p-4 rounded-xl border border-white/20 bg-white/5 backdrop-blur-md overflow-hidden"
                         >
-                          <img 
-                            src={metadata.thumbnail} 
-                            alt={metadata.title} 
-                            className="w-full sm:w-32 h-20 object-cover rounded-lg shadow-md"
-                          />
-                          <div className="flex-1 text-center sm:text-left overflow-hidden">
-                            <h4 className="font-bold text-white truncate">{metadata.title}</h4>
-                            <p className="text-xs text-white/60 mt-1 uppercase tracking-wider">{metadata.duration ? `Duration: ${metadata.duration}` : 'Connected'}</p>
+                          <div className="w-full sm:w-32 shrink-0 flex justify-center">
+                            <img 
+                              src={metadata.thumbnail} 
+                              alt={metadata.title} 
+                              className="w-full max-w-[280px] sm:max-w-none aspect-video sm:h-20 object-cover rounded-lg shadow-md"
+                            />
+                          </div>
+                          <div className="w-full min-w-0 flex-1 text-center sm:text-left overflow-hidden">
+                            <h4 className="font-bold text-white truncate text-sm sm:text-base px-2">{metadata.title}</h4>
+                            <p className="text-[10px] sm:text-xs text-white/60 mt-1 uppercase tracking-wider">{metadata.duration ? `Duration: ${metadata.duration}` : 'Connected'}</p>
                           </div>
                         </motion.div>
                       )}
 
                       <div className="text-center">
                         <p className="text-sm text-muted-foreground mb-4 uppercase tracking-widest font-semibold opacity-60">Compatible Platforms</p>
-                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-xl mx-auto">
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 w-full sm:max-w-xl mx-auto">
                           {[
                             { name: "YouTube", logo: youtubeLogo, color: "hover:bg-red-500/10 hover:border-red-500/30" },
                             { name: "Facebook", logo: facebookLogo, color: "hover:bg-blue-500/10 hover:border-blue-500/30" },
@@ -315,7 +318,7 @@ export default function Home() {
                       <Button
                         onClick={handleInitialClick}
                         disabled={isDownloading || !videoUrl.trim()}
-                        className="w-full btn-gradient text-primary-foreground py-6 text-lg font-semibold hover:scale-[1.02] transition-all"
+                        className="w-full btn-gradient text-primary-foreground py-6 sm:py-7 text-base sm:text-lg font-semibold hover:scale-[1.02] transition-all"
                         data-testid="download-button"
                       >
                         <Download className="w-5 h-5 mr-2" />
@@ -328,7 +331,7 @@ export default function Home() {
             </div>
 
             {/* Sidebar with Ads and Features */}
-            <div className="lg:col-span-1 space-y-6">
+            <div className="lg:col-span-1 space-y-6 w-full">
               {/* <AdSidebar /> */}
 
               <Card className="glass-card border-white/20">
@@ -383,7 +386,7 @@ export default function Home() {
 
       {/* Quality Selection Dialog */}
       <Dialog open={isQualityDialogOpen} onOpenChange={setIsQualityDialogOpen}>
-        <DialogContent className="sm:max-w-md glass-card backdrop-blur-2xl border-white/20 shadow-2xl">
+        <DialogContent className="w-[95vw] sm:max-w-md glass-card backdrop-blur-2xl border-white/20 shadow-2xl p-4 sm:p-6">
           <DialogHeader>
             <DialogTitle className="text-2xl font-bold flex items-center gap-2 text-white">
               <Sparkles className="w-6 h-6 text-yellow-400 animate-pulse" />
@@ -395,19 +398,19 @@ export default function Home() {
               <button
                 key={opt.id}
                 onClick={() => handleQualitySelection(opt.id)}
-                className="flex items-center justify-between p-4 rounded-2xl border border-white/10 hover:border-white/40 hover:bg-white/10 transition-all group text-left"
+                className="flex items-center justify-between p-3 sm:p-4 rounded-2xl border border-white/10 hover:border-white/40 hover:bg-white/10 transition-all group text-left gap-3"
               >
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center text-white group-hover:scale-110 transition-transform">
+                <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-white/10 flex items-center justify-center text-white shrink-0 group-hover:scale-110 transition-transform">
                     {opt.icon}
                   </div>
-                  <div>
-                    <p className="font-bold text-white">{opt.label}</p>
-                    <p className="text-xs text-white/60">{opt.desc}</p>
+                  <div className="min-w-0 flex-1">
+                    <p className="font-bold text-white text-sm sm:text-base truncate">{opt.label}</p>
+                    <p className="text-[10px] sm:text-xs text-white/60 truncate">{opt.desc}</p>
                   </div>
                 </div>
-                <div className="text-white/20 group-hover:text-white/60 transition-colors">
-                  <Download className="w-5 h-5" />
+                <div className="text-white/20 group-hover:text-white/60 transition-colors shrink-0">
+                  <Download className="w-4 h-4 sm:w-5 h-5" />
                 </div>
               </button>
             ))}

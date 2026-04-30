@@ -131,7 +131,7 @@ export default function Processing({ params }: ProcessingPageProps) {
             </Card>
           ) : (
             <Card className="border-0 bg-white/40 dark:bg-black/40 backdrop-blur-xl ring-1 ring-white/20 dark:ring-white/10 shadow-2xl overflow-hidden animate-in zoom-in-95 duration-500">
-              <CardHeader className="text-center pt-12 pb-4">
+              <CardHeader className="text-center pt-8 sm:pt-12 pb-2 sm:pb-4">
                 <div className="relative w-24 h-24 mx-auto mb-8">
                   <div className="absolute inset-0 bg-primary/20 rounded-full animate-ping"></div>
                   <div className="relative bg-gradient-to-br from-primary to-blue-600 w-24 h-24 rounded-3xl flex items-center justify-center shadow-2xl">
@@ -143,7 +143,7 @@ export default function Processing({ params }: ProcessingPageProps) {
                   Fetching high-speed buffers from CDN...
                 </p>
               </CardHeader>
-              <CardContent className="space-y-8 px-10 pb-12">
+              <CardContent className="space-y-6 sm:space-y-8 px-4 sm:px-10 pb-8 sm:pb-12">
                 <div className="space-y-2">
                    <div className="flex justify-between text-xs font-bold uppercase tracking-widest text-muted-foreground">
                      <span>Optimization</span>
