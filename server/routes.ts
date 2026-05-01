@@ -127,7 +127,7 @@ router.get("/download/:jobId", async (req: Request, res: Response) => {
   const job = await storage.getJob(jobId);
 
   if (!job) {
-    console.warn(`❌ Job not found: ${jobId}`);
+    console.warn(`❌ Job not found in DB: ${jobId}`);
     return res.status(404).json({ message: "Job not found." });
   }
 
@@ -261,15 +261,19 @@ router.get("/download/:jobId", async (req: Request, res: Response) => {
       // Try to see if it exists with a different extension (common yt-dlp issue)
       const baseDir = path.dirname(job.outputPath);
       const baseName = path.basename(job.outputPath, path.extname(job.outputPath));
-      const files = fs.readdirSync(baseDir);
-      const match = files.find(f => f.startsWith(baseName));
       
-      if (match) {
-        const actualPath = path.join(baseDir, match);
-        console.log(`💡 Found alternative file: ${actualPath}`);
-        return res.download(actualPath, `${job.title || 'video'}${path.extname(match)}`);
+      if (fs.existsSync(baseDir)) {
+        const files = fs.readdirSync(baseDir);
+        const match = files.find(f => f.startsWith(baseName));
+        
+        if (match) {
+          const actualPath = path.join(baseDir, match);
+          console.log(`💡 Found alternative file: ${actualPath}`);
+          return res.download(actualPath, `${job.title || 'video'}${path.extname(match)}`);
+        }
       }
 
+      console.error(`❌ No matching file found for ${baseName} in ${baseDir}`);
       return res.status(404).json({ message: "Downloaded file not found on server. It may have been cleaned up." });
     }
 
@@ -280,7 +284,7 @@ router.get("/download/:jobId", async (req: Request, res: Response) => {
     console.log(`🚀 Serving local file: ${job.outputPath} as ${filename}`);
     res.download(job.outputPath, filename, (err) => {
       if (err) {
-        console.error(`Error serving file for ${jobId}:`, err);
+        console.error(`❌ Error serving file for ${jobId}: ${err.message}`);
         if (!res.headersSent) res.status(500).send("Could not download the file.");
       }
     });
