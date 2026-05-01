@@ -123,11 +123,20 @@ router.get("/status/:jobId", async (req: Request, res: Response) => {
 // Endpoint: Serve the final file
 router.get("/download/:jobId", async (req: Request, res: Response) => {
   const { jobId } = req.params;
+  console.log(`📥 Download request for Job ID: ${jobId}`);
   const job = await storage.getJob(jobId);
 
-  if (!job || job.status !== 'completed') {
+  if (!job) {
+    console.warn(`❌ Job not found: ${jobId}`);
+    return res.status(404).json({ message: "Job not found." });
+  }
+
+  if (job.status !== 'completed') {
+    console.warn(`⚠️ Job not completed: ${jobId} (Status: ${job.status})`);
     return res.status(404).json({ message: "File not ready or job expired." });
   }
+
+  console.log(`✅ Job found: ${jobId}, Format: ${job.downloadFormat}, Mode: ${job.downloadUrl ? 'RapidAPI' : 'yt-dlp'}`);
 
   try {
     // RapidAPI mode: stream from CDN with Content-Disposition: attachment (force download)
@@ -241,10 +250,35 @@ router.get("/download/:jobId", async (req: Request, res: Response) => {
 
     // yt-dlp mode: serve local file
     if (!job.outputPath) {
-      return res.status(404).json({ message: "File not found." });
+      console.warn(`❌ No output path for Job ${jobId}`);
+      return res.status(404).json({ message: "Download file path missing. Please try again." });
     }
 
-    res.download(job.outputPath, `${job.title || 'video'}.${job.downloadFormat}`, (err) => {
+    // Check if file actually exists
+    if (!fs.existsSync(job.outputPath)) {
+      console.error(`❌ File not found on disk: ${job.outputPath} for Job ${jobId}`);
+      
+      // Try to see if it exists with a different extension (common yt-dlp issue)
+      const baseDir = path.dirname(job.outputPath);
+      const baseName = path.basename(job.outputPath, path.extname(job.outputPath));
+      const files = fs.readdirSync(baseDir);
+      const match = files.find(f => f.startsWith(baseName));
+      
+      if (match) {
+        const actualPath = path.join(baseDir, match);
+        console.log(`💡 Found alternative file: ${actualPath}`);
+        return res.download(actualPath, `${job.title || 'video'}${path.extname(match)}`);
+      }
+
+      return res.status(404).json({ message: "Downloaded file not found on server. It may have been cleaned up." });
+    }
+
+    const isMp3 = job.downloadFormat === 'mp3';
+    const safeTitle = (job.title || 'video').replace(/[^\w\s-]/g, '').trim().substring(0, 80) || 'video';
+    const filename = `${safeTitle}.${isMp3 ? 'mp3' : 'mp4'}`;
+
+    console.log(`🚀 Serving local file: ${job.outputPath} as ${filename}`);
+    res.download(job.outputPath, filename, (err) => {
       if (err) {
         console.error(`Error serving file for ${jobId}:`, err);
         if (!res.headersSent) res.status(500).send("Could not download the file.");

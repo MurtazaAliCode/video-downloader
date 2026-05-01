@@ -659,6 +659,8 @@ async function downloadViaYtDlp(
         options['extract-audio'] = true;
         options['audio-format'] = 'mp3';
         options['audio-quality'] = '0'; // Best quality
+    } else {
+        options['merge-output-format'] = 'mp4';
     }
 
     // Use cookies if the file exists
