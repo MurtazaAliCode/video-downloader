@@ -700,10 +700,19 @@ export async function downloadVideoWithYtDlp(
         const platform = getPlatformType(videoUrl);
         console.log(`🎯 Platform detected: ${platform}`);
 
+        // Check RapidAPI Quota
+        const usage = await storage.getApiUsage();
+        const QUOTA_LIMIT = 5800; // Hard stop at 5800 to avoid overage on 6000 limit
+        const quotaExceeded = usage && usage.count >= QUOTA_LIMIT;
+        
+        if (quotaExceeded) {
+            console.warn(`⚠️ API Quota Reached (${usage?.count}/${QUOTA_LIMIT}). Forcing local downloader to avoid costs.`);
+        }
+
         // ============================================
         // YOUTUBE / TIKTOK → RapidAPI primary, yt-dlp fallback
         // ============================================
-        if (platform === 'youtube' || platform === 'tiktok') {
+        if ((platform === 'youtube' || platform === 'tiktok') && !quotaExceeded) {
             console.log(`🚀 ${platform}: Trying RapidAPI first...`);
             try {
                 onProgress?.(5);
@@ -765,16 +774,18 @@ export async function downloadVideoWithYtDlp(
             }
 
             // Try 3: RapidAPI (Emergency Fallback for IG/FB)
-            console.log(`🚀 ${platform}: Falling back to RapidAPI (Cost-enabled mode)...`);
-            try {
-                onProgress?.(5);
-                const rapidResult = await downloadViaRapidAPI(videoUrl, outputPath, downloadFormat, onProgress, quality);
-                if (rapidResult.success) {
-                    console.log(`✅ ${platform}: RapidAPI worked!`);
-                    return rapidResult;
+            if (!quotaExceeded) {
+                console.log(`🚀 ${platform}: Falling back to RapidAPI (Cost-enabled mode)...`);
+                try {
+                    onProgress?.(5);
+                    const rapidResult = await downloadViaRapidAPI(videoUrl, outputPath, downloadFormat, onProgress, quality);
+                    if (rapidResult.success) {
+                        console.log(`✅ ${platform}: RapidAPI worked!`);
+                        return rapidResult;
+                    }
+                } catch (rapidErr) {
+                    console.error(`❌ ${platform}: RapidAPI also failed: ${rapidErr instanceof Error ? rapidErr.message : 'unknown'}`);
                 }
-            } catch (rapidErr) {
-                console.error(`❌ ${platform}: RapidAPI also failed: ${rapidErr instanceof Error ? rapidErr.message : 'unknown'}`);
             }
 
             throw new Error(`All methods failed for ${platform} (yt-dlp + DirectScraper + RapidAPI).`);
