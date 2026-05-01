@@ -147,7 +147,8 @@ router.get("/download/:jobId", async (req: Request, res: Response) => {
 
         // Clean filename
         const safeTitle = (job.title || 'video').replace(/[^\w\s-]/g, '').trim().substring(0, 80) || 'video';
-        const filename = `${safeTitle}.mp4`;
+        const isMp3 = job.downloadFormat === 'mp3';
+        const filename = `${safeTitle}.${isMp3 ? 'mp3' : 'mp4'}`;
 
         // Better referer for bypassing blocks
         let referer = `https://${cdnUrl.hostname}/`;
@@ -184,7 +185,8 @@ router.get("/download/:jobId", async (req: Request, res: Response) => {
           if (statusCode === 200 || statusCode === 206) {
             // Success: stream with download headers
             res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-            res.setHeader('Content-Type', fileRes.headers['content-type'] || 'video/mp4');
+            const defaultContentType = isMp3 ? 'audio/mpeg' : 'video/mp4';
+            res.setHeader('Content-Type', fileRes.headers['content-type'] || defaultContentType);
             const contentLength = fileRes.headers['content-length'];
             if (contentLength) {
               res.setHeader('Content-Length', contentLength);

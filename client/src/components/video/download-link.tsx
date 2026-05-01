@@ -7,10 +7,11 @@ interface DownloadLinkProps {
   jobId: string;
   fileName: string;
   platform?: string;
+  downloadFormat?: string;
   onProcessAnother: () => void;
 }
 
-export function DownloadLink({ jobId, fileName, platform, onProcessAnother }: DownloadLinkProps) {
+export function DownloadLink({ jobId, fileName, platform, downloadFormat = 'mp4', onProcessAnother }: DownloadLinkProps) {
   const [isDownloading, setIsDownloading] = useState(false);
   const [downloaded, setDownloaded] = useState(false);
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
@@ -25,7 +26,8 @@ export function DownloadLink({ jobId, fileName, platform, onProcessAnother }: Do
     setError(null);
 
     const apiDownloadUrl = `/api/download/${jobId}`;
-    const targetFileName = `${fileName || 'video'}.mp4`;
+    const extension = downloadFormat === 'mp3' ? 'mp3' : 'mp4';
+    const targetFileName = `${fileName || 'video'}.${extension}`;
 
     try {
       // First, try the proxy download via our server
@@ -112,16 +114,16 @@ export function DownloadLink({ jobId, fileName, platform, onProcessAnother }: Do
             </div>
 
             <CardTitle className="text-3xl font-extrabold tracking-tight mb-2 bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-400">
-              {downloaded ? 'Ready to Watch!' : 'Download Ready'}
+              {downloaded ? (downloadFormat === 'mp3' ? 'Ready to Listen!' : 'Ready to Watch!') : 'Download Ready'}
             </CardTitle>
             <p className="text-muted-foreground text-sm font-medium">
               {downloaded
                 ? (
                   <>
-                    Your video has been saved successfully.
+                    Your {downloadFormat === 'mp3' ? 'audio' : 'video'} has been saved successfully.
                     {platform === 'youtube' && (
                       <span className="block mt-1 text-xs text-blue-500 font-bold">
-                        (Click the 3-dots ⋮ on video to download)
+                        (Click the 3-dots ⋮ on {downloadFormat === 'mp3' ? 'audio' : 'video'} to download)
                       </span>
                     )}
                   </>
@@ -142,7 +144,7 @@ export function DownloadLink({ jobId, fileName, platform, onProcessAnother }: Do
                 }`}>
                 <p className={`text-sm font-bold ${platform === 'youtube' ? 'text-blue-700 dark:text-blue-400' : 'text-green-700 dark:text-green-400'
                   }`}>
-                  ✅ Video Processed Successfully!
+                  ✅ {downloadFormat === 'mp3' ? 'Audio' : 'Video'} Processed Successfully!
                 </p>
 
                 {platform === 'youtube' && (

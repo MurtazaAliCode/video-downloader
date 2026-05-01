@@ -655,6 +655,12 @@ async function downloadViaYtDlp(
         'no-part': true,
     };
 
+    if (downloadFormat === 'mp3') {
+        options['extract-audio'] = true;
+        options['audio-format'] = 'mp3';
+        options['audio-quality'] = '0'; // Best quality
+    }
+
     // Use cookies if the file exists
     try {
         await fs.access(cookiesPath);

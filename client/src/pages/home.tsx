@@ -128,22 +128,23 @@ export default function Home() {
   const handleQualitySelection = (qualityId: string) => {
     if (qualityId === 'mp3') {
       setDownloadFormat('mp3');
-      startDownload('high'); // Default audio quality
+      startDownload('high', 'mp3'); // Pass format directly
     } else {
-      // TEMPORARY: Clean Launch Mode (All downloads start directly)
       setDownloadFormat('mp4');
-      startDownload(qualityId);
+      startDownload(qualityId, 'mp4'); // Pass format directly
     }
   };
 
-  const startDownload = async (selectedQuality: string) => {
+  const startDownload = async (selectedQuality: string, currentFormat?: string) => {
     setIsQualityDialogOpen(false);
     setIsDownloading(true);
+
+    const formatToUse = currentFormat || downloadFormat;
 
     try {
       const response = await apiRequest('POST', '/api/download-video', {
         url: videoUrl,
-        format: downloadFormat,
+        format: formatToUse,
         platform: detectedPlatform,
         options: { quality: selectedQuality }
       });
