@@ -10,7 +10,7 @@ import { storage } from '../storage';
 // =====================================================
 // Binary setup for yt-dlp
 // =====================================================
-const binPath = path.resolve(process.cwd(), 'yt-dlp');
+const binPath = path.resolve(process.cwd(), process.platform === 'win32' ? 'yt-dlp.exe' : 'yt-dlp');
 const cookiesPath = path.resolve(process.cwd(), 'cookies.txt');
 const ytdlp = process.env.NODE_ENV === 'production' ? create(binPath) : youtubedl;
 
@@ -702,11 +702,11 @@ export async function downloadVideoWithYtDlp(
 
         // Check RapidAPI Quota
         const usage = await storage.getApiUsage();
-        const QUOTA_LIMIT = 5800; // Hard stop at 5800 to avoid overage on 6000 limit
+        const QUOTA_LIMIT = 95; // Limit set to 95 for Free Plan (100 limit) to avoid overage
         const quotaExceeded = usage && usage.count >= QUOTA_LIMIT;
         
         if (quotaExceeded) {
-            console.warn(`⚠️ API Quota Reached (${usage?.count}/${QUOTA_LIMIT}). Forcing local downloader to avoid costs.`);
+            console.warn(`⚠️ API Quota Reached (${usage?.count}/${QUOTA_LIMIT}). Forcing local downloader (yt-dlp) to avoid costs.`);
         }
 
         // ============================================
