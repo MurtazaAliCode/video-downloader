@@ -366,9 +366,9 @@ export default function Home() {
                 <CardContent className="space-y-6">
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-6">
                     {[
-                      { value: "100,000+", label: "Videos Downloaded", sub: "Global users" },
-                      { value: "25,000+", label: "Happy Users", sub: "Daily active" },
-                      { value: "MP4", label: "Output Format", sub: "High compatibility" },
+                      { value: "MP4 & MP3", label: "Output Formats", sub: "High compatibility" },
+                      { value: "4 Platforms", label: "Supported Sites", sub: "YT, TikTok, FB, IG" },
+                      { value: "Free", label: "Always", sub: "No registration" },
                     ].map((stat, index) => (
                       <div key={index} className="text-center relative py-2">
                         <div className="text-3xl font-extrabold text-foreground dark:text-white drop-shadow-md">{stat.value}</div>

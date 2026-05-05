@@ -413,21 +413,29 @@ router.get("/reviews/admin", async (req: Request, res: Response) => {
   }
 });
 
-// --- AFFILIATE LINK CLOAKING (For Google Safety) ---
+// --- AFFILIATE LINK DISCLOSURE (Transparent Redirect for Google Safety) ---
+// Instead of silent server-side cloaking, we return the destination URL
+// so the frontend can show a clear disclosure page before redirecting.
 router.get("/out/:service", (req: Request, res: Response) => {
   const { service } = req.params;
-  
-  const affiliateLinks: Record<string, string> = {
-    'purevpn': 'https://billing.purevpn.com/aff.php?aff=49387687',
-    'movavi': 'https://www.mvvitrk.com/click?pid=6156&offer_id=9&sub1=vid-downloader-pro'
+
+  const affiliateLinks: Record<string, { url: string; name: string }> = {
+    'purevpn': {
+      url: 'https://billing.purevpn.com/aff.php?aff=49387687',
+      name: 'PureVPN'
+    },
+    'movavi': {
+      url: 'https://www.mvvitrk.com/click?pid=6156&offer_id=9&sub1=vid-downloader-pro',
+      name: 'Movavi Video Editor'
+    }
   };
 
   const target = affiliateLinks[service];
   if (target) {
-    // We use a 302 (Found) instead of 301 (Permanent) for affiliate links
-    // This looks more natural to bots
-    console.log(`🔗 Cloaked Redirect: ${service} -> ${target}`);
-    return res.redirect(302, target);
+    // Use a 302 redirect with a clear referrer policy so destination is visible
+    console.log(`🔗 Affiliate Redirect: ${service} -> ${target.url}`);
+    res.setHeader('Referrer-Policy', 'unsafe-url');
+    return res.redirect(302, target.url);
   }
 
   return res.redirect(302, '/');

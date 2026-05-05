@@ -134,16 +134,18 @@ export default function Privacy() {
                 <CardTitle>Third-Party Services</CardTitle>
               </CardHeader>
               <CardContent className="prose dark:prose-invert max-w-none">
-                <h3>AdSense</h3>
+                <h3>Affiliate Links</h3>
                 <p>
-                  We use Google AdSense to display advertisements. AdSense may use cookies and similar technologies 
-                  to provide relevant ads. You can control ad personalization through your Google account settings.
+                  We display affiliate links for third-party tools (such as VPN services and video editors). 
+                  These links are clearly labeled with an affiliate disclosure. We do not use ad networks 
+                  or display pop-up advertisements. Clicking an affiliate link takes you to the vendor's website 
+                  and we may earn a commission if you make a purchase, at no extra cost to you.
                 </p>
-                
+
                 <h3>Hosting and Infrastructure</h3>
                 <p>
-                  Our service is hosted on secure cloud infrastructure. While we choose reputable providers, 
-                  we ensure they meet our privacy and security standards.
+                  Our service is hosted on secure cloud infrastructure (Render.com). While we choose reputable 
+                  providers, we ensure they meet our privacy and security standards.
                 </p>
               </CardContent>
             </Card>

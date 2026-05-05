@@ -68,9 +68,9 @@ export default function AffiliateSection() {
                   </li>
                 </ul>
                 <a 
-                  href="/api/out/purevpn" 
+                  href="https://billing.purevpn.com/aff.php?aff=49387687" 
                   target="_blank" 
-                  rel="nofollow sponsored"
+                  rel="nofollow noopener sponsored"
                   className="w-full"
                 >
                   <Button className="w-full group bg-[#602D91] hover:bg-[#4E2476] text-white" variant="default">
@@ -108,9 +108,9 @@ export default function AffiliateSection() {
                   </li>
                 </ul>
                 <a 
-                  href="/api/out/movavi" 
+                  href="https://www.movavi.com/video-editor/" 
                   target="_blank" 
-                  rel="nofollow sponsored"
+                  rel="nofollow noopener sponsored"
                   className="w-full"
                 >
                   <Button className="w-full group bg-accent hover:bg-accent/90" variant="default">

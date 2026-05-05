@@ -173,7 +173,7 @@ export function Footer() {
           <div className="flex items-center space-x-3 mb-4 md:mb-0">
             <ShieldAlert className="w-5 h-5 text-primary/40" />
             <p className="text-[11px] leading-relaxed text-muted-foreground max-w-2xl">
-              <span className="font-bold text-foreground/70">DISCLAIMER:</span> VidDownloader does not host or store any videos on its servers. We only provide a technical service to link to publicly available media. We do not track user downloads or store personal information. Not affiliated with YouTube, TikTok, or Facebook.
+              <span className="font-bold text-foreground/70">DISCLAIMER:</span> VidDownloader is an independent tool not affiliated with YouTube, TikTok, Facebook, or Instagram. Downloaded files are temporarily processed on our servers (auto-deleted within 12 hours) to deliver them to you. We do not sell or share your data. Use is subject to our <a href="/terms" className="underline hover:text-primary transition-colors">Terms of Service</a>.
             </p>
           </div>
           <div className="flex items-center space-x-4">
