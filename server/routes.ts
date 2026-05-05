@@ -13,6 +13,16 @@ import { fetchVideoMetadata } from "./utils/videoDownloader.js";
 // Setup Express Router
 export const router = Router();
 
+// --- CRITICAL SEO FILES FALLBACK ---
+// Explicitly serve robots.txt and sitemap.xml to avoid 404s on some hosting platforms
+router.get("/robots.txt", (_req, res) => {
+  res.sendFile(path.resolve(process.cwd(), "client/public/robots.txt"));
+});
+
+router.get("/sitemap.xml", (_req, res) => {
+  res.sendFile(path.resolve(process.cwd(), "client/public/sitemap.xml"));
+});
+
 // Endpoint: Start download process
 router.get("/usage", async (_req: Request, res: Response) => {
   try {
