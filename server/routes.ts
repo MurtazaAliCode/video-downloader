@@ -146,7 +146,8 @@ router.get("/download/:jobId", async (req: Request, res: Response) => {
     return res.status(404).json({ message: "File not ready or job expired." });
   }
 
-  console.log(`✅ Job found: ${jobId}, Format: ${job.downloadFormat}, Mode: ${job.downloadUrl ? 'RapidAPI' : 'yt-dlp'}`);
+  const isCdnMode = job.downloadUrl && job.downloadUrl.startsWith('http');
+  console.log(`✅ Job found: ${jobId}, Format: ${job.downloadFormat}, Mode: ${isCdnMode ? 'RapidAPI/Direct' : 'yt-dlp/Local'}`);
 
   try {
     // RapidAPI mode: stream from CDN with Content-Disposition: attachment (force download)

@@ -8,13 +8,15 @@ interface DownloadLinkProps {
   fileName: string;
   platform?: string;
   downloadFormat?: string;
+  downloadUrl?: string | null;
   onProcessAnother: () => void;
 }
 
-export function DownloadLink({ jobId, fileName, platform, downloadFormat = 'mp4', onProcessAnother }: DownloadLinkProps) {
+export function DownloadLink({ jobId, fileName, platform, downloadFormat = 'mp4', downloadUrl: dbDownloadUrl, onProcessAnother }: DownloadLinkProps) {
   const [isDownloading, setIsDownloading] = useState(false);
   const [downloaded, setDownloaded] = useState(false);
-  const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
+  // Priority: Use downloadUrl from DB if provided and starts with http
+  const [downloadUrl, setDownloadUrl] = useState<string | null>(dbDownloadUrl && dbDownloadUrl.startsWith('http') ? dbDownloadUrl : null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [hasTriedFallback, setHasTriedFallback] = useState(false);
@@ -92,7 +94,8 @@ export function DownloadLink({ jobId, fileName, platform, downloadFormat = 'mp4'
   }, []);
 
   const handlePreview = () => {
-    window.open(`/api/download/${jobId}`, '_blank');
+    const previewTarget = (dbDownloadUrl && dbDownloadUrl.startsWith('http')) ? dbDownloadUrl : `/api/download/${jobId}`;
+    window.open(previewTarget, '_blank');
   };
 
   return (

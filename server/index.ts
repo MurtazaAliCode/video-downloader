@@ -88,6 +88,12 @@ app.use((req, res, next) => {
     // Yahan aapki saari routes load hoti hain (routes.ts se)
     registerRoutes(app);
 
+    // Explicit API 404 Handler: Prevents /api/* requests from falling through to frontend index.html
+    app.use("/api/*", (req, res) => {
+      log(`404 Not Found on API: ${req.method} ${req.originalUrl}`);
+      res.status(404).json({ message: `API route not found: ${req.originalUrl}` });
+    });
+
     // CRITICAL: Static serving (catch-all) MUST be AFTER API routes
     if (app.get("env") !== "development") {
       serveStatic(app);
