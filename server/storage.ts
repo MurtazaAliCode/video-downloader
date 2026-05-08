@@ -654,15 +654,16 @@ By following these simple rules, you can enjoy your favorite videos safely and l
       }
     ];
 
-    const existing = await db.select().from(blogPosts).limit(1);
-    if (existing.length > 0) return;
-
     for (const post of posts) {
-      await db.insert(blogPosts).values({
-        ...post,
-        author: post.author || 'VidDownloader Team',
-        published: post.published ?? true,
-      });
+      const [existing] = await db.select().from(blogPosts).where(eq(blogPosts.slug, post.slug)).limit(1);
+      if (!existing) {
+        await db.insert(blogPosts).values({
+          ...post,
+          author: post.author || 'VidDownloader Team',
+          published: post.published ?? true,
+        });
+        console.log(`Seeded blog post: ${post.slug}`);
+      }
     }
   }
 
