@@ -142,10 +142,15 @@ export default function BlogIndex() {
                 <CardContent className="p-6">
                   <h3 className="font-bold text-foreground mb-4">Download Guides</h3>
                   <ul className="space-y-2 text-sm">
-                    {["YouTube to MP4 Guide", "TikTok No Watermark", "HD Video Quality Tips", "Legal & Safety Basics"].map((topic) => (
-                      <li key={topic}>
-                        <Link href="/blog" className="text-primary hover:underline">
-                          {topic}
+                    {[
+                      { title: "YouTube to MP4 Guide", slug: "youtube-to-mp4-guide" },
+                      { title: "TikTok No Watermark", slug: "tiktok-no-watermark" },
+                      { title: "HD Video Quality Tips", slug: "hd-video-quality-tips" },
+                      { title: "Legal & Safety Basics", slug: "legal-safety-basics" }
+                    ].map((topic) => (
+                      <li key={topic.slug}>
+                        <Link href={`/blog/${topic.slug}`} className="text-primary hover:underline">
+                          {topic.title}
                         </Link>
                       </li>
                     ))}
