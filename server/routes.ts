@@ -23,6 +23,31 @@ router.get("/sitemap.xml", (_req, res) => {
   res.sendFile(path.resolve(process.cwd(), "client/public/sitemap.xml"));
 });
 
+// --- BLOG API ROUTES ---
+router.get("/blog", async (_req: Request, res: Response) => {
+  try {
+    const posts = await storage.getBlogPosts();
+    return res.json(posts);
+  } catch (error) {
+    console.error("Error fetching blog posts:", error);
+    return res.status(500).json({ message: "Error fetching blog posts." });
+  }
+});
+
+router.get("/blog/:slug", async (req: Request, res: Response) => {
+  const { slug } = req.params;
+  try {
+    const post = await storage.getBlogPost(slug);
+    if (!post) {
+      return res.status(404).json({ message: "Blog post not found." });
+    }
+    return res.json(post);
+  } catch (error) {
+    console.error(`Error fetching blog post ${slug}:`, error);
+    return res.status(500).json({ message: "Error fetching blog post." });
+  }
+});
+
 // Endpoint: Start download process
 router.get("/usage", async (_req: Request, res: Response) => {
   try {
