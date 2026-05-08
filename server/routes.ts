@@ -133,7 +133,8 @@ router.get("/status/:jobId", async (req: Request, res: Response) => {
 // Endpoint: Serve the final file
 router.get("/download/:jobId", async (req: Request, res: Response) => {
   const { jobId } = req.params;
-  console.log(`📥 Download request for Job ID: ${jobId}`);
+  const { preview } = req.query;
+  console.log(`📥 ${preview === 'true' ? 'Preview' : 'Download'} request for Job ID: ${jobId}`);
   const job = await storage.getJob(jobId);
 
   if (!job) {
@@ -203,8 +204,9 @@ router.get("/download/:jobId", async (req: Request, res: Response) => {
           const { statusCode } = fileRes;
           
           if (statusCode === 200 || statusCode === 206) {
-            // Success: stream with download headers
-            res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+            // Success: stream with appropriate disposition
+            const disposition = preview === 'true' ? 'inline' : `attachment; filename="${filename}"`;
+            res.setHeader('Content-Disposition', disposition);
             const defaultContentType = isMp3 ? 'audio/mpeg' : 'video/mp4';
             res.setHeader('Content-Type', fileRes.headers['content-type'] || defaultContentType);
             const contentLength = fileRes.headers['content-length'];
@@ -212,7 +214,7 @@ router.get("/download/:jobId", async (req: Request, res: Response) => {
               res.setHeader('Content-Length', contentLength);
             }
             
-            console.log(`📡 Streaming job ${jobId} (${contentLength || 'unknown'} bytes) as attachment`);
+            console.log(`📡 Streaming job ${jobId} (${contentLength || 'unknown'} bytes) as ${preview === 'true' ? 'inline' : 'attachment'}`);
             fileRes.pipe(res);
 
           } else if ([301, 302, 307, 308].includes(statusCode)) {
@@ -292,7 +294,13 @@ router.get("/download/:jobId", async (req: Request, res: Response) => {
     const safeTitle = (job.title || 'video').replace(/[^\w\s-]/g, '').trim().substring(0, 80) || 'video';
     const filename = `${safeTitle}.${isMp3 ? 'mp3' : 'mp4'}`;
 
-    console.log(`🚀 Serving local file: ${job.outputPath} as ${filename}`);
+    console.log(`🚀 Serving local file: ${job.outputPath} as ${filename} (Mode: ${preview === 'true' ? 'inline' : 'attachment'})`);
+    
+    if (preview === 'true') {
+      res.setHeader('Content-Disposition', 'inline');
+      return res.sendFile(path.resolve(job.outputPath));
+    }
+
     res.download(job.outputPath, filename, (err) => {
       if (err) {
         console.error(`❌ Error serving file for ${jobId}: ${err.message}`);
@@ -443,9 +451,9 @@ router.get("/out/:service", (req: Request, res: Response) => {
 
   const target = affiliateLinks[service];
   if (target) {
-    // Use a 302 redirect with a clear referrer policy so destination is visible
+    // Use a 302 redirect with a strict referrer policy for safety
     console.log(`🔗 Affiliate Redirect: ${service} -> ${target.url}`);
-    res.setHeader('Referrer-Policy', 'unsafe-url');
+    res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
     return res.redirect(302, target.url);
   }
 

@@ -94,7 +94,8 @@ export function DownloadLink({ jobId, fileName, platform, downloadFormat = 'mp4'
   }, []);
 
   const handlePreview = () => {
-    const previewTarget = (dbDownloadUrl && dbDownloadUrl.startsWith('http')) ? dbDownloadUrl : `/api/download/${jobId}`;
+    const baseUrl = (dbDownloadUrl && dbDownloadUrl.startsWith('http')) ? dbDownloadUrl : `/api/download/${jobId}`;
+    const previewTarget = `${baseUrl}${baseUrl.includes('?') ? '&' : '?'}preview=true`;
     window.open(previewTarget, '_blank');
   };
 
@@ -166,18 +167,7 @@ export function DownloadLink({ jobId, fileName, platform, downloadFormat = 'mp4'
               </div>
 
               {/* Platform Specific Instruction for YouTube/TikTok (Consolidated) */}
-              {platform === 'youtube' && (
-                <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-4 shadow-sm">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-yellow-500/20 flex items-center justify-center shrink-0">
-                      <AlertTriangle className="w-5 h-5 text-yellow-600 dark:text-yellow-400 font-bold" />
-                    </div>
-                    <div className="text-left text-[13px] font-bold text-yellow-800 dark:text-yellow-400 leading-tight">
-                      <p>Important: Normal download might be blocked. **Always use "Preview Video" mode.**</p>
-                    </div>
-                  </div>
-                </div>
-              )}
+
             </div>
           )}
 

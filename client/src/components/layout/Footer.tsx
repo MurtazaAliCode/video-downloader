@@ -78,7 +78,7 @@ export function Footer() {
 
           {/* Product Links */}
           <div>
-            <h3 className="font-bold text-card-foreground mb-4 uppercase text-xs tracking-widest">Tools</h3>
+            <h3 className="font-bold text-card-foreground mb-4 uppercase text-xs tracking-widest">Features</h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li>
                 <Link href="/">

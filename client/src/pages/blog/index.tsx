@@ -140,11 +140,11 @@ export default function BlogIndex() {
               <AdSidebar />
               <Card>
                 <CardContent className="p-6">
-                  <h3 className="font-bold text-foreground mb-4">Popular Topics</h3>
+                  <h3 className="font-bold text-foreground mb-4">Download Guides</h3>
                   <ul className="space-y-2 text-sm">
-                    {["Compression", "Format Conversion", "Audio Extraction", "Watermarking"].map((topic) => (
+                    {["YouTube to MP4 Guide", "TikTok No Watermark", "HD Video Quality Tips", "Legal & Safety Basics"].map((topic) => (
                       <li key={topic}>
-                        <Link href="#" className="text-primary hover:underline">
+                        <Link href="/blog" className="text-primary hover:underline">
                           {topic}
                         </Link>
                       </li>
