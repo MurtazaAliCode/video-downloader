@@ -2,7 +2,6 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
-import { AdBanner, AdSidebar } from "@/components/layout/AdSlots";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Calendar, Download } from "lucide-react";
@@ -14,7 +13,6 @@ import guide2 from "@/assets/guied_2.png";
 import guide3 from "@/assets/guied_3.png";
 import guide4 from "@/assets/guied_4.png";
 
-// === TUTORIAL DATA (USING IMPORTED IMAGES) ===
 const downloadGuideSteps = [
   {
     image: guide1,
@@ -37,7 +35,13 @@ const downloadGuideSteps = [
     desc: "Once the quality is selected, click the 'Download MP4' button. Your video will start downloading immediately!",
   },
 ];
-// ===========================================
+
+const downloadGuides = [
+  { title: "YouTube to MP4 Guide", slug: "youtube-to-mp4-guide" },
+  { title: "TikTok No Watermark", slug: "tiktok-no-watermark" },
+  { title: "HD Video Quality Tips", slug: "hd-video-quality-tips" },
+  { title: "Legal & Safety Basics", slug: "legal-safety-basics" },
+];
 
 export default function BlogIndex() {
   const { data: posts, isLoading } = useQuery<BlogPost[]>({
@@ -55,16 +59,15 @@ export default function BlogIndex() {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <AdBanner />
 
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-20">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
             <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
-              Video Editing Tips & Tutorials
+              Video Download Guides & Tutorials
             </h1>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Learn how to get the most out of your videos with our comprehensive guides
+              Learn how to download videos from YouTube, TikTok, Instagram and more with our step-by-step guides
             </p>
           </div>
 
@@ -72,7 +75,7 @@ export default function BlogIndex() {
             {/* Blog Posts Column */}
             <div className="lg:col-span-3">
 
-              {/* === FEATURED DOWNLOAD GUIDE CARD === */}
+              {/* Featured Download Guide Card */}
               <Card className="mb-8 overflow-hidden shadow-xl border border-primary/20">
                 <CardContent className="p-6 md:p-8">
                   <div className="flex items-center space-x-3 mb-6">
@@ -82,7 +85,6 @@ export default function BlogIndex() {
                     </h2>
                   </div>
 
-                  {/* Image Card Grid */}
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     {downloadGuideSteps.map((step, index) => (
                       <div key={index} className="space-y-2">
@@ -104,8 +106,8 @@ export default function BlogIndex() {
                   </div>
                 </CardContent>
               </Card>
-              {/* ======================================================= */}
 
+              {/* Blog Articles */}
               {isLoading ? (
                 <div className="grid md:grid-cols-2 gap-8">
                   {[...Array(4)].map((_, i) => (
@@ -126,9 +128,11 @@ export default function BlogIndex() {
                       <p className="text-muted-foreground text-sm line-clamp-3 mb-4">
                         {post.excerpt}
                       </p>
-                      <Button variant="link" className="p-0 h-auto font-medium text-primary">
-                        Read more <ArrowRight className="w-4 h-4 ml-1" />
-                      </Button>
+                      <Link href={`/blog/${post.slug}`}>
+                        <Button variant="link" className="p-0 h-auto font-medium text-primary">
+                          Read more <ArrowRight className="w-4 h-4 ml-1" />
+                        </Button>
+                      </Link>
                     </article>
                   ))}
                 </div>
@@ -137,17 +141,11 @@ export default function BlogIndex() {
 
             {/* Sidebar */}
             <div className="lg:col-span-1 space-y-6">
-              <AdSidebar />
               <Card>
                 <CardContent className="p-6">
                   <h3 className="font-bold text-foreground mb-4">Download Guides</h3>
                   <ul className="space-y-2 text-sm">
-                    {[
-                      { title: "YouTube to MP4 Guide", slug: "youtube-to-mp4-guide" },
-                      { title: "TikTok No Watermark", slug: "tiktok-no-watermark" },
-                      { title: "HD Video Quality Tips", slug: "hd-video-quality-tips" },
-                      { title: "Legal & Safety Basics", slug: "legal-safety-basics" }
-                    ].map((topic) => (
+                    {downloadGuides.map((topic) => (
                       <li key={topic.slug}>
                         <Link href={`/blog/${topic.slug}`} className="text-primary hover:underline">
                           {topic.title}

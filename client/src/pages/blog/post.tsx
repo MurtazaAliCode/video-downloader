@@ -2,7 +2,6 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
-import { AdInContent, AdSidebar } from "@/components/layout/AdSlots";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Calendar, Clock, User } from "lucide-react";
@@ -14,11 +13,27 @@ interface BlogPostPageProps {
   };
 }
 
+const relatedGuides = [
+  { title: "YouTube to MP4 Guide", slug: "youtube-to-mp4-guide" },
+  { title: "TikTok No Watermark", slug: "tiktok-no-watermark" },
+  { title: "HD Video Quality Tips", slug: "hd-video-quality-tips" },
+  { title: "Legal & Safety Basics", slug: "legal-safety-basics" },
+  { title: "How to Compress Video Online", slug: "how-to-compress-video-online" },
+  { title: "Best Formats for Social Media", slug: "best-formats-for-social-media" },
+  { title: "Trim Videos Without Software", slug: "trim-videos-without-software" },
+  { title: "Extract Audio from Video Free", slug: "extract-audio-from-video-free" },
+];
+
 export default function BlogPostPage({ params }: BlogPostPageProps) {
   const { slug } = params;
   
   const { data: post, isLoading, error } = useQuery<BlogPost>({
     queryKey: ['/api/blog', slug],
+    queryFn: async () => {
+      const res = await fetch(`/api/blog/${slug}`);
+      if (!res.ok) throw new Error('Post not found');
+      return res.json();
+    },
     enabled: !!slug,
   });
 
@@ -29,6 +44,9 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
       day: 'numeric',
     }).format(new Date(date));
   };
+
+  // Related guides excluding current post
+  const related = relatedGuides.filter(g => g.slug !== slug).slice(0, 4);
 
   if (isLoading) {
     return (
@@ -71,8 +89,22 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
     );
   }
 
-  const contentParts = post.content.split('\n\n');
-  const midpoint = Math.floor(contentParts.length / 2);
+  // Render markdown-like content cleanly
+  const renderContent = (content: string) => {
+    return content.split('\n').map((line, i) => {
+      if (line.startsWith('## ')) return <h2 key={i} className="text-2xl font-bold text-foreground mt-8 mb-3">{line.replace('## ', '')}</h2>;
+      if (line.startsWith('### ')) return <h3 key={i} className="text-xl font-semibold text-foreground mt-6 mb-2">{line.replace('### ', '')}</h3>;
+      if (line.startsWith('# ')) return null; // Skip h1, it's already in the header
+      if (line.startsWith('- **')) {
+        const parts = line.replace('- **', '').split('**:');
+        return <li key={i} className="ml-4 mb-1 text-muted-foreground"><strong className="text-foreground">{parts[0]}</strong>: {parts[1]}</li>;
+      }
+      if (line.startsWith('- ')) return <li key={i} className="ml-4 mb-1 text-muted-foreground">{line.replace('- ', '')}</li>;
+      if (/^\d+\. /.test(line)) return <li key={i} className="ml-4 mb-1 list-decimal text-muted-foreground">{line.replace(/^\d+\. /, '')}</li>;
+      if (line.trim() === '') return <br key={i} />;
+      return <p key={i} className="text-muted-foreground leading-relaxed mb-3">{line}</p>;
+    });
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -114,16 +146,7 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
 
             {/* Article Body */}
             <div className="prose prose-lg dark:prose-invert max-w-none">
-              <div className="whitespace-pre-wrap">
-                {contentParts.slice(0, midpoint).join('\n\n')}
-              </div>
-              
-              {/* In-content Ad */}
-              <AdInContent />
-              
-              <div className="whitespace-pre-wrap">
-                {contentParts.slice(midpoint).join('\n\n')}
-              </div>
+              {renderContent(post.content)}
             </div>
 
             {/* Article Footer */}
@@ -144,47 +167,25 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
 
           {/* Sidebar */}
           <div className="lg:col-span-1 space-y-6">
-            <AdSidebar />
             
-            {/* Related Articles */}
+            {/* Related Guides - Real Links */}
             <Card>
               <CardContent className="p-6">
-                <h3 className="font-semibold text-card-foreground mb-4">Related Articles</h3>
-                <div className="space-y-4">
-                  {[
-                    "Best Video Formats for Social Media",
-                    "Trim Videos Without Software", 
-                    "Extract Audio from Video Free",
-                  ].map((title, index) => (
-                    <a
-                      key={index}
-                      href="#"
-                      className="block text-sm text-muted-foreground hover:text-primary transition-colors"
+                <h3 className="font-semibold text-card-foreground mb-4">Download Guides</h3>
+                <div className="space-y-3">
+                  {related.map((guide) => (
+                    <Link
+                      key={guide.slug}
+                      href={`/blog/${guide.slug}`}
+                      className="block text-sm text-muted-foreground hover:text-primary transition-colors py-1 border-b border-border last:border-0"
                     >
-                      {title}
-                    </a>
+                      {guide.title}
+                    </Link>
                   ))}
                 </div>
               </CardContent>
             </Card>
 
-            {/* Table of Contents */}
-            <Card>
-              <CardContent className="p-6">
-                <h3 className="font-semibold text-card-foreground mb-4">Table of Contents</h3>
-                <div className="space-y-2 text-sm">
-                  {post.content.match(/^#+ .+/gm)?.slice(0, 5).map((heading, index) => (
-                    <a
-                      key={index}
-                      href="#"
-                      className="block text-muted-foreground hover:text-primary transition-colors pl-2 border-l-2 border-transparent hover:border-primary"
-                    >
-                      {heading.replace(/^#+\s/, '')}
-                    </a>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
           </div>
         </div>
       </article>
