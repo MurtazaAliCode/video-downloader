@@ -13,34 +13,6 @@ import { fetchVideoMetadata } from "./utils/videoDownloader.js";
 // Setup Express Router
 export const router = Router();
 
-// Explicitly serve robots.txt and sitemap.xml to avoid 404s
-router.get("/robots.txt", (_req, res) => {
-  const paths = [
-    path.resolve(process.cwd(), "client/public/robots.txt"),
-    path.resolve(process.cwd(), "dist/public/robots.txt"),
-    path.resolve(import.meta.dirname, "../client/public/robots.txt"),
-    path.resolve(import.meta.dirname, "../dist/public/robots.txt")
-  ];
-  
-  for (const p of paths) {
-    if (fs.existsSync(p)) return res.sendFile(p);
-  }
-  res.status(404).send("robots.txt not found");
-});
-
-router.get("/sitemap.xml", (_req, res) => {
-  const paths = [
-    path.resolve(process.cwd(), "client/public/sitemap.xml"),
-    path.resolve(process.cwd(), "dist/public/sitemap.xml"),
-    path.resolve(import.meta.dirname, "../client/public/sitemap.xml"),
-    path.resolve(import.meta.dirname, "../dist/public/sitemap.xml")
-  ];
-  
-  for (const p of paths) {
-    if (fs.existsSync(p)) return res.sendFile(p);
-  }
-  res.status(404).send("sitemap.xml not found");
-});
 
 // --- BLOG API ROUTES ---
 router.get("/blog", async (_req: Request, res: Response) => {
@@ -505,6 +477,32 @@ router.get("/out/:service", (req: Request, res: Response) => {
 });
 
 export const registerRoutes = (app: Application) => {
+  // Register SEO files DIRECTLY on app (not under /api prefix!)
+  // This ensures /sitemap.xml and /robots.txt work correctly
+  const seoFilePaths = (filename: string) => [
+    path.resolve(process.cwd(), `client/public/${filename}`),
+    path.resolve(process.cwd(), `dist/public/${filename}`),
+    path.resolve(import.meta.dirname, `../client/public/${filename}`),
+    path.resolve(import.meta.dirname, `../dist/public/${filename}`),
+  ];
+
+  app.get('/robots.txt', (_req, res) => {
+    for (const p of seoFilePaths('robots.txt')) {
+      if (fs.existsSync(p)) return res.sendFile(p);
+    }
+    res.type('text').send('User-agent: *\nAllow: /\nSitemap: https://vid-downloader-pro.com/sitemap.xml');
+  });
+
+  app.get('/sitemap.xml', (_req, res) => {
+    for (const p of seoFilePaths('sitemap.xml')) {
+      if (fs.existsSync(p)) {
+        res.setHeader('Content-Type', 'application/xml');
+        return res.sendFile(p);
+      }
+    }
+    res.status(404).send('sitemap.xml not found');
+  });
+
   app.use('/api', router);
   return app;
 };
