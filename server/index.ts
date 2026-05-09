@@ -1,11 +1,7 @@
 import "dotenv/config";
 import express, { type Request, Response, NextFunction } from "express";
-import http from "http"; // Import http module
-import cors from "cors"; // CORS middleware import
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
-// FIXED: Local imports mein .js extension add karna zaroori hai
+import http from "http";
+import cors from "cors";
 import { registerRoutes } from "./routes.js";
 import { setupVite, serveStatic, log } from "./vite.js";
 
@@ -84,47 +80,56 @@ app.use((req, res, next) => {
 
 (async () => {
   try {
-    // HEALTH CHECK: Render needs this to see the server is alive
+    // HEALTH CHECK
     app.get("/health", (_req, res) => res.status(200).send("OK"));
 
     // ==============================================================
-    // SEO FILES: Must be registered FIRST before any catch-all
-    // These must NOT go in /api router - they must be at root level
+    // SEO FILES: Inline content - NO file reading = 100% reliable
+    // Must be registered BEFORE registerRoutes and serveStatic
     // ==============================================================
-    const __dirname_server = path.dirname(fileURLToPath(import.meta.url));
-    const findFile = (filename: string): string | null => {
-      const candidates = [
-        path.resolve(process.cwd(), "dist", "public", filename),
-        path.resolve(process.cwd(), "client", "public", filename),
-        path.resolve(__dirname_server, "..", "dist", "public", filename),
-        path.resolve(__dirname_server, "..", "client", "public", filename),
-      ];
-      return candidates.find(p => fs.existsSync(p)) || null;
-    };
+    const ROBOTS_TXT = `User-agent: *
+Allow: /
+Sitemap: https://vid-downloader-pro.com/sitemap.xml`;
+
+    const SITEMAP_XML = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://vid-downloader-pro.com/</loc><lastmod>2026-05-09</lastmod><changefreq>daily</changefreq><priority>1.0</priority></url>
+  <url><loc>https://vid-downloader-pro.com/about</loc><lastmod>2026-05-09</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://vid-downloader-pro.com/contact</loc><lastmod>2026-05-09</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://vid-downloader-pro.com/status</loc><lastmod>2026-05-09</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+  <url><loc>https://vid-downloader-pro.com/feature-requests</loc><lastmod>2026-05-09</lastmod><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://vid-downloader-pro.com/report</loc><lastmod>2026-05-09</lastmod><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://vid-downloader-pro.com/privacy</loc><lastmod>2026-05-09</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://vid-downloader-pro.com/terms</loc><lastmod>2026-05-09</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://vid-downloader-pro.com/dmca</loc><lastmod>2026-05-09</lastmod><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://vid-downloader-pro.com/cookie-policy</loc><lastmod>2026-05-09</lastmod><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://vid-downloader-pro.com/disclaimer</loc><lastmod>2026-05-09</lastmod><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://vid-downloader-pro.com/blog</loc><lastmod>2026-05-09</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://vid-downloader-pro.com/blog/youtube-to-mp4-guide</loc><lastmod>2026-05-09</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://vid-downloader-pro.com/blog/tiktok-no-watermark</loc><lastmod>2026-05-09</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://vid-downloader-pro.com/blog/hd-video-quality-tips</loc><lastmod>2026-05-09</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://vid-downloader-pro.com/blog/legal-safety-basics</loc><lastmod>2026-05-09</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://vid-downloader-pro.com/blog/how-to-compress-video-online</loc><lastmod>2026-05-09</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://vid-downloader-pro.com/blog/best-formats-for-social-media</loc><lastmod>2026-05-09</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://vid-downloader-pro.com/blog/trim-videos-without-software</loc><lastmod>2026-05-09</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://vid-downloader-pro.com/blog/extract-audio-from-video-free</loc><lastmod>2026-05-09</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://vid-downloader-pro.com/blog/add-watermark-to-videos</loc><lastmod>2026-05-09</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+</urlset>`;
 
     app.get("/sitemap.xml", (_req, res) => {
-      const filePath = findFile("sitemap.xml");
-      if (filePath) {
-        res.setHeader("Content-Type", "application/xml; charset=utf-8");
-        return res.sendFile(filePath);
-      }
-      log("sitemap.xml not found in any path");
-      res.status(404).type("text").send("sitemap.xml not found");
+      res.setHeader("Content-Type", "application/xml; charset=utf-8");
+      res.status(200).send(SITEMAP_XML);
     });
 
     app.get("/robots.txt", (_req, res) => {
-      const filePath = findFile("robots.txt");
-      if (filePath) {
-        res.setHeader("Content-Type", "text/plain; charset=utf-8");
-        return res.sendFile(filePath);
-      }
-      res.type("text").send("User-agent: *\nAllow: /\nSitemap: https://vid-downloader-pro.com/sitemap.xml");
+      res.setHeader("Content-Type", "text/plain; charset=utf-8");
+      res.status(200).send(ROBOTS_TXT);
     });
 
-    // Yahan aapki saari routes load hoti hain (routes.ts se)
+    // API Routes
     registerRoutes(app);
 
-    // Explicit API 404 Handler: Prevents /api/* requests from falling through to frontend index.html
+    // API 404 Handler
     app.use("/api/*", (req, res) => {
       log(`404 Not Found on API: ${req.method} ${req.originalUrl}`);
       res.status(404).json({ message: `API route not found: ${req.originalUrl}` });
