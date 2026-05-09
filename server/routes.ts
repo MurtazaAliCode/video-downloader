@@ -13,14 +13,33 @@ import { fetchVideoMetadata } from "./utils/videoDownloader.js";
 // Setup Express Router
 export const router = Router();
 
-// --- CRITICAL SEO FILES FALLBACK ---
-// Explicitly serve robots.txt and sitemap.xml to avoid 404s on some hosting platforms
+// Explicitly serve robots.txt and sitemap.xml to avoid 404s
 router.get("/robots.txt", (_req, res) => {
-  res.sendFile(path.resolve(process.cwd(), "client/public/robots.txt"));
+  const paths = [
+    path.resolve(process.cwd(), "client/public/robots.txt"),
+    path.resolve(process.cwd(), "dist/public/robots.txt"),
+    path.resolve(import.meta.dirname, "../client/public/robots.txt"),
+    path.resolve(import.meta.dirname, "../dist/public/robots.txt")
+  ];
+  
+  for (const p of paths) {
+    if (fs.existsSync(p)) return res.sendFile(p);
+  }
+  res.status(404).send("robots.txt not found");
 });
 
 router.get("/sitemap.xml", (_req, res) => {
-  res.sendFile(path.resolve(process.cwd(), "client/public/sitemap.xml"));
+  const paths = [
+    path.resolve(process.cwd(), "client/public/sitemap.xml"),
+    path.resolve(process.cwd(), "dist/public/sitemap.xml"),
+    path.resolve(import.meta.dirname, "../client/public/sitemap.xml"),
+    path.resolve(import.meta.dirname, "../dist/public/sitemap.xml")
+  ];
+  
+  for (const p of paths) {
+    if (fs.existsSync(p)) return res.sendFile(p);
+  }
+  res.status(404).send("sitemap.xml not found");
 });
 
 // --- BLOG API ROUTES ---
