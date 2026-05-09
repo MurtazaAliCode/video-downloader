@@ -2,6 +2,9 @@ import "dotenv/config";
 import express, { type Request, Response, NextFunction } from "express";
 import http from "http"; // Import http module
 import cors from "cors"; // CORS middleware import
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 // FIXED: Local imports mein .js extension add karna zaroori hai
 import { registerRoutes } from "./routes.js";
 import { setupVite, serveStatic, log } from "./vite.js";
@@ -83,6 +86,40 @@ app.use((req, res, next) => {
   try {
     // HEALTH CHECK: Render needs this to see the server is alive
     app.get("/health", (_req, res) => res.status(200).send("OK"));
+
+    // ==============================================================
+    // SEO FILES: Must be registered FIRST before any catch-all
+    // These must NOT go in /api router - they must be at root level
+    // ==============================================================
+    const __dirname_server = path.dirname(fileURLToPath(import.meta.url));
+    const findFile = (filename: string): string | null => {
+      const candidates = [
+        path.resolve(process.cwd(), "dist", "public", filename),
+        path.resolve(process.cwd(), "client", "public", filename),
+        path.resolve(__dirname_server, "..", "dist", "public", filename),
+        path.resolve(__dirname_server, "..", "client", "public", filename),
+      ];
+      return candidates.find(p => fs.existsSync(p)) || null;
+    };
+
+    app.get("/sitemap.xml", (_req, res) => {
+      const filePath = findFile("sitemap.xml");
+      if (filePath) {
+        res.setHeader("Content-Type", "application/xml; charset=utf-8");
+        return res.sendFile(filePath);
+      }
+      log("sitemap.xml not found in any path");
+      res.status(404).type("text").send("sitemap.xml not found");
+    });
+
+    app.get("/robots.txt", (_req, res) => {
+      const filePath = findFile("robots.txt");
+      if (filePath) {
+        res.setHeader("Content-Type", "text/plain; charset=utf-8");
+        return res.sendFile(filePath);
+      }
+      res.type("text").send("User-agent: *\nAllow: /\nSitemap: https://vid-downloader-pro.com/sitemap.xml");
+    });
 
     // Yahan aapki saari routes load hoti hain (routes.ts se)
     registerRoutes(app);
