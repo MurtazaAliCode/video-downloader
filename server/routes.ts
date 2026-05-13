@@ -370,12 +370,21 @@ router.post("/contact", async (req: Request, res: Response) => {
 
 // --- USER REVIEWS & STATUS ENDPOINTS ---
 
-// Fetch reviews (paginated, only approved by default)
+// Fetch reviews (paginated, with filtering)
 router.get("/reviews", async (req: Request, res: Response) => {
   try {
     const limit = parseInt(req.query.limit as string) || 10;
     const offset = parseInt(req.query.offset as string) || 0;
-    const reviews = await storage.getReviews(limit, offset, true);
+    const minRating = req.query.minRating ? parseInt(req.query.minRating as string) : undefined;
+    const all = req.query.all === 'true';
+
+    // If 'all' is true, we don't filter by rating (unless minRating is also provided)
+    // If 'all' is false (default), we show only approved OR high-rated reviews
+    const reviews = await storage.getReviews(limit, offset, {
+      onlyApproved: !all,
+      minRating: all ? undefined : (minRating || 4)
+    });
+    
     return res.json(reviews);
   } catch (error) {
     console.error("Error fetching reviews:", error);

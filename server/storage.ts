@@ -1,7 +1,7 @@
 import { jobs, blogPosts, contactMessages, apiUsage, reviews, type Job, type InsertJob, type BlogPost, type InsertBlogPost, type ContactMessage, type InsertContactMessage, type ApiUsage, type Review, type InsertReview } from "../shared/schema.js";
 import { randomUUID } from "crypto";
 import { db } from "./db.js";
-import { eq, lt, desc, and } from "drizzle-orm";
+import { eq, lt, desc, and, sql } from "drizzle-orm";
 
 export interface IStorage {
   // Jobs
@@ -32,7 +32,7 @@ export interface IStorage {
 
   // User Reviews
   createReview(review: InsertReview): Promise<Review>;
-  getReviews(limit: number, offset: number, onlyApproved?: boolean): Promise<Review[]>;
+  getReviews(limit: number, offset: number, options?: { onlyApproved?: boolean; minRating?: number }): Promise<Review[]>;
   approveReview(id: string): Promise<void>;
   deleteReview(id: string): Promise<void>;
 }
@@ -804,11 +804,23 @@ By following these simple rules, you can enjoy your favorite videos safely and l
     return review;
   }
 
-  async getReviews(limit: number, offset: number, onlyApproved: boolean = true): Promise<Review[]> {
+  async getReviews(limit: number, offset: number, options: { onlyApproved?: boolean; minRating?: number } = { onlyApproved: true }): Promise<Review[]> {
     const query = db.select().from(reviews);
     
-    if (onlyApproved) {
-      query.where(eq(reviews.isApproved, true));
+    const conditions = [];
+    
+    // Logic: If minRating is provided, we might want to show high-rated reviews even if not approved
+    // But if onlyApproved is strictly true, we only show approved ones.
+    if (options.onlyApproved && !options.minRating) {
+      conditions.push(eq(reviews.isApproved, true));
+    } else if (options.minRating) {
+      // Show if EITHER approved OR has high rating
+      // This allows 'good' reviews to show up automatically as requested
+      conditions.push(sql`${reviews.isApproved} = true OR ${reviews.rating} >= ${options.minRating}`);
+    }
+
+    if (conditions.length > 0) {
+      query.where(and(...conditions));
     }
 
     return await query

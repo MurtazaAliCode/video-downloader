@@ -18,10 +18,16 @@ export default function Status() {
     const [hover, setHover] = useState(0);
     const [name, setName] = useState("");
     const [comment, setComment] = useState("");
+    const [showAll, setShowAll] = useState(false);
 
     // Fetch Reviews
     const { data: reviews, isLoading } = useQuery<Review[]>({
-        queryKey: ["/api/reviews"],
+        queryKey: ["/api/reviews", { all: showAll }],
+        queryFn: async () => {
+            const res = await fetch(`/api/reviews?all=${showAll}`);
+            if (!res.ok) throw new Error("Failed to fetch reviews");
+            return res.json();
+        },
         refetchInterval: 30000,
     });
 
@@ -149,18 +155,18 @@ export default function Status() {
                                             </p>
                                         </div>
 
-                                        <div className="space-y-4">
+                                         <div className="space-y-4">
                                             <Input
                                                 placeholder="Your Name (Optional)"
                                                 value={name}
                                                 onChange={(e) => setName(e.target.value)}
-                                                className="bg-background/50 border-border/50 focus:border-primary/50"
+                                                className="bg-white dark:bg-zinc-900 border-border/50 focus:border-primary/50 text-black dark:text-white placeholder:text-muted-foreground/60"
                                             />
                                             <Textarea
                                                 placeholder="Tell us about your experience..."
                                                 value={comment}
                                                 onChange={(e) => setComment(e.target.value)}
-                                                className="min-h-[120px] bg-background/50 border-border/50 focus:border-primary/50"
+                                                className="min-h-[120px] bg-white dark:bg-zinc-900 border-border/50 focus:border-primary/50 text-black dark:text-white placeholder:text-muted-foreground/60"
                                                 required
                                             />
                                         </div>
@@ -180,11 +186,28 @@ export default function Status() {
 
                     {/* Community Reviews Feed */}
                     <div>
-                        <div className="flex items-center justify-between mb-8">
-                            <h2 className="text-3xl font-bold text-foreground">Community Wall</h2>
-                            <div className="flex items-center gap-2 text-primary font-medium">
-                                <CheckCircle className="w-4 h-4" />
-                                <span className="text-sm">Verified Reviews</span>
+                        <div className="flex flex-col sm:flex-row items-center justify-between mb-8 gap-4">
+                            <div>
+                                <h2 className="text-3xl font-bold text-foreground">Community Wall</h2>
+                                <p className="text-sm text-muted-foreground mt-1">What our users think about us</p>
+                            </div>
+                            <div className="flex items-center bg-muted/30 p-1 rounded-xl border border-border/50">
+                                <Button 
+                                    variant={!showAll ? "default" : "ghost"} 
+                                    size="sm" 
+                                    onClick={() => setShowAll(false)}
+                                    className="rounded-lg px-4"
+                                >
+                                    Featured
+                                </Button>
+                                <Button 
+                                    variant={showAll ? "default" : "ghost"} 
+                                    size="sm" 
+                                    onClick={() => setShowAll(true)}
+                                    className="rounded-lg px-4"
+                                >
+                                    All Reviews
+                                </Button>
                             </div>
                         </div>
 
