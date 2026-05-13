@@ -104,6 +104,7 @@ Sitemap: https://vid-downloader-pro.com/sitemap.xml`;
   <url><loc>https://vid-downloader-pro.com/dmca</loc><lastmod>2026-05-09</lastmod><changefreq>monthly</changefreq><priority>0.5</priority></url>
   <url><loc>https://vid-downloader-pro.com/cookie-policy</loc><lastmod>2026-05-09</lastmod><changefreq>monthly</changefreq><priority>0.5</priority></url>
   <url><loc>https://vid-downloader-pro.com/disclaimer</loc><lastmod>2026-05-09</lastmod><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://vid-downloader-pro.com/admin-reviews</loc><lastmod>2026-05-13</lastmod><changefreq>monthly</changefreq><priority>0.4</priority></url>
   <url><loc>https://vid-downloader-pro.com/blog</loc><lastmod>2026-05-09</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
   <url><loc>https://vid-downloader-pro.com/blog/youtube-to-mp4-guide</loc><lastmod>2026-05-09</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://vid-downloader-pro.com/blog/tiktok-no-watermark</loc><lastmod>2026-05-09</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
