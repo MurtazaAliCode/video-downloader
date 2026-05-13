@@ -62,8 +62,31 @@ export default function Status() {
         mutation.mutate({ name, rating, comment });
     };
 
+    // Calculate Average Rating for SEO Schema
+    const avgRating = reviews && reviews.length > 0 
+        ? (reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length).toFixed(1)
+        : "5.0";
+    const reviewCount = reviews?.length || 0;
+
     return (
         <div className="min-h-screen bg-background">
+            {/* SEO Schema.org Markup */}
+            <script type="application/ld+json">
+                {JSON.stringify({
+                    "@context": "https://schema.org",
+                    "@type": "SoftwareApplication",
+                    "name": "VidDownloader Pro",
+                    "operatingSystem": "Windows, macOS, Android, iOS",
+                    "applicationCategory": "MultimediaApplication",
+                    "aggregateRating": {
+                        "@type": "AggregateRating",
+                        "ratingValue": avgRating,
+                        "ratingCount": reviewCount || 1,
+                        "bestRating": "5",
+                        "worstRating": "1"
+                    }
+                })}
+            </script>
             <Header />
             <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-20">
                 <div className="max-w-4xl mx-auto">

@@ -20,6 +20,7 @@ import CookiePolicy from "@/pages/cookie-policy";
 import Disclaimer from "@/pages/disclaimer";
 import FeatureRequests from "@/pages/feature-requests";
 import Status from "@/pages/status";
+import AdminReviews from "@/pages/admin-reviews";
 
 function Router() {
   return (
@@ -38,6 +39,7 @@ function Router() {
       <Route path="/disclaimer" component={Disclaimer} />
       <Route path="/feature-requests" component={FeatureRequests} />
       <Route path="/status" component={Status} />
+      <Route path="/admin-reviews" component={AdminReviews} />
       <Route component={NotFound} />
     </Switch>
   );
