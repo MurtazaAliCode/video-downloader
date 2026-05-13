@@ -74,7 +74,7 @@ export default function AdminReviews() {
     return (
         <div className="min-h-screen bg-background flex flex-col">
             <Header />
-            <div className="container mx-auto px-4 py-12 flex-1">
+            <div className="container mx-auto px-4 py-12 pt-24 flex-1">
                 <div className="flex items-center justify-between mb-8">
                     <h1 className="text-3xl font-bold">Manage Reviews</h1>
                     <span className="px-3 py-1 bg-green-500/10 text-green-500 rounded-full text-xs font-bold border border-green-500/20">

@@ -809,14 +809,15 @@ By following these simple rules, you can enjoy your favorite videos safely and l
     
     const conditions = [];
     
-    // Logic: If minRating is provided, we might want to show high-rated reviews even if not approved
-    // But if onlyApproved is strictly true, we only show approved ones.
-    if (options.onlyApproved && !options.minRating) {
+    // Logic: If onlyApproved is true, we ONLY show approved reviews.
+    // This gives the user full control over the 'Featured' list.
+    if (options.onlyApproved) {
       conditions.push(eq(reviews.isApproved, true));
-    } else if (options.minRating) {
-      // Show if EITHER approved OR has high rating
-      // This allows 'good' reviews to show up automatically as requested
-      conditions.push(sql`${reviews.isApproved} = true OR ${reviews.rating} >= ${options.minRating}`);
+    }
+
+    // Optional: further filter by minRating if provided
+    if (options.minRating) {
+      conditions.push(sql`${reviews.rating} >= ${options.minRating}`);
     }
 
     if (conditions.length > 0) {
