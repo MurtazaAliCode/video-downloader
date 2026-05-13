@@ -73,6 +73,14 @@
     <priority>0.5</priority>
   </url>
 
+  <!-- Admin Dashboard (Private - Request by User) -->
+  <url>
+    <loc>https://vid-downloader-pro.com/admin-reviews</loc>
+    <lastmod>2026-05-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.4</priority>
+  </url>
+
   <!-- Blog Index -->
   <url>
     <loc>https://vid-downloader-pro.com/blog</loc>
