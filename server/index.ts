@@ -2,6 +2,8 @@ import "dotenv/config";
 import express, { type Request, Response, NextFunction } from "express";
 import http from "http";
 import cors from "cors";
+import fs from "fs";
+import path from "path";
 import { registerRoutes } from "./routes.js";
 import { setupVite, serveStatic, log } from "./vite.js";
 
@@ -127,6 +129,31 @@ Sitemap: https://vid-downloader-pro.com/sitemap.xml`;
     app.get("/robots.txt", (_req, res) => {
       res.setHeader("Content-Type", "text/plain; charset=utf-8");
       res.status(200).send(ROBOTS_TXT);
+    });
+
+    // Custom Cache-Busting static ad server to instantly override browser cached security blocks
+    app.get("/ads/:filename", (req, res) => {
+      const filename = req.params.filename;
+      
+      // Sanitization to prevent path traversal
+      if (!/^[a-zA-Z0-9\._\-]+$/.test(filename)) {
+        return res.status(400).send("Invalid filename");
+      }
+      
+      let filePath = path.resolve(process.cwd(), "client/public/ads", filename);
+      if (!fs.existsSync(filePath)) {
+        filePath = path.resolve(process.cwd(), "dist/public/ads", filename);
+      }
+      
+      if (fs.existsSync(filePath)) {
+        res.setHeader("Content-Type", "text/html; charset=utf-8");
+        // Instruct browser to completely bypass cache and read fresh security headers
+        res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+        res.setHeader("Pragma", "no-cache");
+        res.setHeader("Expires", "0");
+        return res.sendFile(filePath);
+      }
+      res.status(404).send("Ad template not found");
     });
 
     // API Routes
