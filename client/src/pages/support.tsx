@@ -206,18 +206,7 @@ export default function Support() {
                 <h4 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-4 text-center">Sponsored Content</h4>
                 <div className="flex justify-center w-full min-h-[140px] overflow-hidden rounded-xl bg-muted/5 border border-white/5">
                   <iframe
-                    srcDoc={`
-                      <!DOCTYPE html>
-                      <html>
-                        <head>
-                          <style>body { margin: 0; padding: 0; overflow: hidden; display: flex; justify-content: center; align-items: center; }</style>
-                        </head>
-                        <body>
-                          <div id="container-29fe2d5304bd54293737dac53bdf19de" style="width: 100%; min-height: 100px;"></div>
-                          <script async="async" data-cfasync="false" src="https://pl29050240.effectivecpmnetwork.com/29fe2d5304bd54293737dac53bdf19de/invoke.js"></script>
-                        </body>
-                      </html>
-                    `}
+                    src="/ads/native-banner.html"
                     style={{ width: '100%', height: '140px', border: 'none' }}
                     title="Native Ad Banner"
                   />
@@ -234,26 +223,7 @@ export default function Support() {
                 <h4 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-4">Sponsor Zone</h4>
                 <div className="w-[300px] h-[250px] bg-muted/5 border border-white/5 rounded-lg flex items-center justify-center overflow-hidden">
                   <iframe
-                    srcDoc={`
-                      <!DOCTYPE html>
-                      <html>
-                        <head>
-                          <style>body { margin: 0; padding: 0; overflow: hidden; display: flex; justify-content: center; align-items: center; }</style>
-                        </head>
-                        <body>
-                          <script type="text/javascript">
-                            atOptions = {
-                              'key' : '3d467363c99234ac0985c4e819cf1f2b',
-                              'format' : 'iframe',
-                              'height' : 250,
-                              'width' : 300,
-                              'params' : {}
-                            };
-                          </script>
-                          <script type="text/javascript" src="https://www.highperformanceformat.com/3d467363c99234ac0985c4e819cf1f2b/invoke.js"></script>
-                        </body>
-                      </html>
-                    `}
+                    src="/ads/banner-300x250.html"
                     style={{ width: '300px', height: '250px', border: 'none' }}
                     title="Square Banner Ad"
                   />
@@ -515,26 +485,7 @@ export default function Support() {
               <h4 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-4">Sponsor Leaderboard</h4>
               <div className="w-[728px] h-[90px] bg-muted/5 border border-white/5 rounded-lg flex items-center justify-center overflow-hidden">
                 <iframe
-                  srcDoc={`
-                    <!DOCTYPE html>
-                    <html>
-                      <head>
-                        <style>body { margin: 0; padding: 0; overflow: hidden; display: flex; justify-content: center; align-items: center; }</style>
-                      </head>
-                      <body>
-                        <script type="text/javascript">
-                          atOptions = {
-                            'key' : '17fabec5c7b61662844da4c1bb680fea',
-                            'format' : 'iframe',
-                            'height' : 90,
-                            'width' : 728,
-                            'params' : {}
-                          };
-                        </script>
-                        <script type="text/javascript" src="https://www.highperformanceformat.com/17fabec5c7b61662844da4c1bb680fea/invoke.js"></script>
-                      </body>
-                    </html>
-                  `}
+                  src="/ads/banner-728x90.html"
                   style={{ width: '728px', height: '90px', border: 'none' }}
                   title="Leaderboard Banner Ad"
                 />
