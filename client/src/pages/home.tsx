@@ -46,8 +46,8 @@ export default function Home() {
   const [detectedPlatform, setDetectedPlatform] = useState<string>("");
   const [metadata, setMetadata] = useState<{ title: string, thumbnail: string, duration?: string } | null>(null);
   const [isFetchingMetadata, setIsFetchingMetadata] = useState(false);
-
-
+  const [isValidUrl, setIsValidUrl] = useState<boolean | null>(null);
+  const [validationMessage, setValidationMessage] = useState<string>("");
 
   const detectPlatform = (url: string) => {
     const u = url.toLowerCase();
@@ -71,27 +71,47 @@ export default function Home() {
     }
   };
 
-  // Automatic metadata fetching
+  // Automatic metadata fetching and link validation
   useEffect(() => {
+    if (!videoUrl.trim()) {
+      setMetadata(null);
+      setIsValidUrl(null);
+      setValidationMessage("");
+      return;
+    }
+
     const handler = setTimeout(async () => {
-      if (videoUrl && validateUrl(videoUrl).valid) {
+      const validation = validateUrl(videoUrl);
+      if (validation.valid) {
         setIsFetchingMetadata(true);
+        setIsValidUrl(null); // Reset during check
+        setValidationMessage("");
         try {
           const res = await fetch(`/api/fetch-metadata?url=${encodeURIComponent(videoUrl)}`);
           const data = await res.json();
           if (data.success) {
             setMetadata(data);
+            setIsValidUrl(true);
+            setValidationMessage("");
+          } else {
+            setMetadata(null);
+            setIsValidUrl(false);
+            setValidationMessage("Failed to fetch video details. Verify if link is public.");
           }
         } catch (err) {
           console.error("Metadata fetch error:", err);
           setMetadata(null);
+          setIsValidUrl(false);
+          setValidationMessage("Could not connect to service. Try again.");
         } finally {
           setIsFetchingMetadata(false);
         }
       } else {
         setMetadata(null);
+        setIsValidUrl(false);
+        setValidationMessage(validation.message || "Invalid URL.");
       }
-    }, 500);
+    }, 600); // Debounce to allow typing
 
     return () => clearTimeout(handler);
   }, [videoUrl]);
@@ -265,30 +285,40 @@ export default function Home() {
                         data-testid="video-url-input"
                       />
 
-                      {/* Metadata Preview Card */}
+                      {/* Responsive Dynamic Link Verification Badge */}
                       {isFetchingMetadata ? (
-                        <div className="w-full h-24 bg-white/5 rounded-xl animate-pulse flex items-center justify-center border border-white/10">
-                          <p className="text-sm text-muted-foreground">Fetching video details...</p>
+                        <div className="w-full py-4 bg-white/5 rounded-xl border border-white/10 animate-pulse flex items-center justify-center">
+                          <p className="text-sm text-muted-foreground font-semibold">🔍 Verifying video link...</p>
                         </div>
-                      ) : metadata && (
+                      ) : isValidUrl === true ? (
                         <motion.div 
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          className="flex flex-col sm:flex-row items-center gap-4 p-4 rounded-xl border border-white/20 bg-white/5 backdrop-blur-md overflow-hidden"
+                          initial={{ opacity: 0, scale: 0.95 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          className="flex items-center justify-center gap-3 p-4 rounded-xl border border-green-500/30 bg-green-500/10 backdrop-blur-md text-green-400 w-full overflow-hidden"
                         >
-                          <div className="w-full sm:w-32 shrink-0 flex justify-center">
-                            <img 
-                              src={metadata.thumbnail} 
-                              alt={metadata.title} 
-                              className="w-full max-w-[280px] sm:max-w-none aspect-video sm:h-20 object-cover rounded-lg shadow-md"
-                            />
+                          <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center text-white shrink-0 shadow-md">
+                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path>
+                            </svg>
                           </div>
-                          <div className="w-full min-w-0 flex-1 text-center sm:text-left overflow-hidden">
-                            <h4 className="font-bold text-white truncate text-sm sm:text-base px-2">{metadata.title}</h4>
-                            <p className="text-[10px] sm:text-xs text-white/60 mt-1 uppercase tracking-wider">{metadata.duration ? `Duration: ${metadata.duration}` : 'Connected'}</p>
-                          </div>
+                          <span className="text-xs sm:text-sm font-bold truncate">
+                            Video linked successfully! Ready to download.
+                          </span>
                         </motion.div>
-                      )}
+                      ) : isValidUrl === false ? (
+                        <motion.div 
+                          initial={{ opacity: 0, scale: 0.95 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          className="flex items-center justify-center gap-3 p-4 rounded-xl border border-red-500/30 bg-red-500/10 backdrop-blur-md text-red-400 w-full overflow-hidden"
+                        >
+                          <div className="w-5 h-5 rounded-full bg-red-500 flex items-center justify-center text-white shrink-0 shadow-md">
+                            <span className="font-extrabold text-[12px] leading-none">!</span>
+                          </div>
+                          <span className="text-xs sm:text-sm font-bold truncate">
+                            {validationMessage}
+                          </span>
+                        </motion.div>
+                      ) : null}
 
                       <div className="text-center">
                         <p className="text-sm text-muted-foreground mb-4 uppercase tracking-widest font-semibold opacity-60">Compatible Platforms</p>

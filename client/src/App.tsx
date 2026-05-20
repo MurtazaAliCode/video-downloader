@@ -21,6 +21,7 @@ import Disclaimer from "@/pages/disclaimer";
 import FeatureRequests from "@/pages/feature-requests";
 import Status from "@/pages/status";
 import AdminReviews from "@/pages/admin-reviews";
+import Support from "@/pages/support";
 
 function Router() {
   return (
@@ -40,6 +41,7 @@ function Router() {
       <Route path="/feature-requests" component={FeatureRequests} />
       <Route path="/status" component={Status} />
       <Route path="/admin-reviews" component={AdminReviews} />
+      <Route path="/support" component={Support} />
       <Route component={NotFound} />
     </Switch>
   );

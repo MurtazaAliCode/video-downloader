@@ -113,6 +113,11 @@ export function Footer() {
             <h3 className="font-bold text-card-foreground mb-4 uppercase text-xs tracking-widest">Support</h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li>
+                <Link href="/support">
+                  <a className="hover:text-primary transition-colors font-bold text-accent">Support Us ❤️</a>
+                </Link>
+              </li>
+              <li>
                 <Link href="/contact">
                   <a className="hover:text-primary transition-colors">Contact Us</a>
                 </Link>

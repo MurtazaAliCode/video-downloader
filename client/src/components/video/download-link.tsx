@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from "react";
+import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Download, CheckCircle, Loader2, Play, FolderOpen, AlertTriangle, ExternalLink, Video } from "lucide-react";
+import { Download, CheckCircle, Loader2, Play, FolderOpen, AlertTriangle, ExternalLink, Video, Heart } from "lucide-react";
 
 interface DownloadLinkProps {
   jobId: string;
@@ -231,6 +232,17 @@ export function DownloadLink({ jobId, fileName, platform, downloadFormat = 'mp4'
               Next Video
             </Button>
           </div>
+
+          {/* Support Our Mission Call-to-Action */}
+          <Link href="/support">
+            <Button
+              className="w-full mt-4 py-5 bg-gradient-to-r from-red-500/10 via-pink-500/10 to-primary/10 hover:from-red-500/20 hover:via-pink-500/20 hover:to-primary/20 border border-red-500/20 hover:border-red-500/30 text-foreground text-xs sm:text-sm font-extrabold transition-all duration-300 rounded-xl flex items-center justify-center gap-2 group relative overflow-hidden shadow-sm hover:shadow-md cursor-pointer"
+            >
+              <span className="absolute -inset-0.5 bg-gradient-to-r from-red-500 to-pink-500 rounded-xl blur opacity-0 group-hover:opacity-10 transition duration-500"></span>
+              <Heart className="w-4 h-4 text-red-500 fill-current animate-pulse group-hover:scale-125 transition-transform" />
+              <span>SUPPORT OUR FREE SERVERS ❤️</span>
+            </Button>
+          </Link>
         </CardContent>
       </Card>
 
