@@ -17,7 +17,7 @@ export default defineConfig({
       injectRegister: 'auto',
       includeAssets: ['logo.png', 'robots.txt'],
       workbox: {
-        navigateFallbackDenylist: [/^\/sitemap\.xml$/, /^\/robots\.txt$/, /^\/api/, /^\/ads/],
+        navigateFallbackDenylist: [/^\/sitemap\.xml$/, /^\/robots\.txt$/, /^\/api/, /^\/partners/],
       },
       manifest: {
         name: 'VidDownloader Pro',

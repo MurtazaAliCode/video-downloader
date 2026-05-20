@@ -198,7 +198,7 @@ export default function Support() {
                 <h4 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-4 text-center">Sponsored Content</h4>
                 <div className="flex justify-center w-full min-h-[140px] overflow-hidden rounded-xl bg-muted/5 border border-white/5">
                   <iframe
-                    src="/ads/native-banner.html"
+                    src="/partners/sponsored-widget.html"
                     style={{ width: '100%', height: '140px', border: 'none' }}
                     title="Native Ad Banner"
                   />
@@ -215,7 +215,7 @@ export default function Support() {
                 <h4 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-4">Sponsor Zone</h4>
                 <div className="w-[300px] h-[250px] bg-muted/5 border border-white/5 rounded-lg flex items-center justify-center overflow-hidden">
                   <iframe
-                    src="/ads/banner-300x250.html"
+                    src="/partners/sidebar-widget.html"
                     style={{ width: '300px', height: '250px', border: 'none' }}
                     title="Square Banner Ad"
                   />
@@ -477,7 +477,7 @@ export default function Support() {
               <h4 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-4">Sponsor Leaderboard</h4>
               <div className="w-[728px] h-[90px] bg-muted/5 border border-white/5 rounded-lg flex items-center justify-center overflow-hidden">
                 <iframe
-                  src="/ads/banner-728x90.html"
+                  src="/partners/leaderboard-widget.html"
                   style={{ width: '728px', height: '90px', border: 'none' }}
                   title="Leaderboard Banner Ad"
                 />

@@ -131,8 +131,8 @@ Sitemap: https://vid-downloader-pro.com/sitemap.xml`;
       res.status(200).send(ROBOTS_TXT);
     });
 
-    // Custom Cache-Busting static ad server to instantly override browser cached security blocks
-    app.get("/ads/:filename", (req, res) => {
+    // Custom Cache-Busting static adblocker-proof partner server to instantly override browser cached security blocks
+    app.get("/partners/:filename", (req, res) => {
       const filename = req.params.filename;
       
       // Sanitization to prevent path traversal
@@ -140,9 +140,9 @@ Sitemap: https://vid-downloader-pro.com/sitemap.xml`;
         return res.status(400).send("Invalid filename");
       }
       
-      let filePath = path.resolve(process.cwd(), "client/public/ads", filename);
+      let filePath = path.resolve(process.cwd(), "client/public/partners", filename);
       if (!fs.existsSync(filePath)) {
-        filePath = path.resolve(process.cwd(), "dist/public/ads", filename);
+        filePath = path.resolve(process.cwd(), "dist/public/partners", filename);
       }
       
       if (fs.existsSync(filePath)) {
@@ -153,7 +153,7 @@ Sitemap: https://vid-downloader-pro.com/sitemap.xml`;
         res.setHeader("Expires", "0");
         return res.sendFile(filePath);
       }
-      res.status(404).send("Ad template not found");
+      res.status(404).send("Partner widget not found");
     });
 
     // API Routes
