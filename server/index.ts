@@ -115,6 +115,7 @@ Sitemap: https://vid-downloader-pro.com/sitemap.xml`;
   <url><loc>https://vid-downloader-pro.com/blog/trim-videos-without-software</loc><lastmod>2026-05-09</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://vid-downloader-pro.com/blog/extract-audio-from-video-free</loc><lastmod>2026-05-09</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://vid-downloader-pro.com/blog/add-watermark-to-videos</loc><lastmod>2026-05-09</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://vid-downloader-pro.com/support</loc><lastmod>2026-05-20</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
 </urlset>`;
 
     app.get("/sitemap.xml", (_req, res) => {
