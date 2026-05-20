@@ -28,15 +28,16 @@ app.use((_req, res, next) => {
   res.setHeader('X-XSS-Protection', '1; mode=block');
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
   
-  // CSP: Only allow content from trusted sources
+  // CSP: Allow trusted content + safe display ad networks/CDNs
   res.setHeader('Content-Security-Policy', 
     "default-src 'self'; " +
-    "script-src 'self' 'unsafe-inline' https://replit.com; " + // Removed unsafe-eval for production safety
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https:; " + 
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
     "font-src 'self' https://fonts.gstatic.com data:; " +
     "img-src 'self' data: https: blob:; " +
     "media-src 'self' https: blob:; " +
-    "connect-src 'self' https: wss:;" // Added wss for websocket safety
+    "frame-src 'self' https: data: about:; " +
+    "connect-src 'self' https: wss:;"
   );
 
   // HSTS (Only if using HTTPS)
