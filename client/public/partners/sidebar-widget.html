@@ -8,6 +8,7 @@
 </head>
 <body>
   <script type="text/javascript">
+    window.adLoaded = false;
     atOptions = {
       'key' : '3d467363c99234ac0985c4e819cf1f2b',
       'format' : 'iframe',
@@ -16,6 +17,29 @@
       'params' : {}
     };
   </script>
-  <script type="text/javascript" src="https://www.highperformanceformat.com/3d467363c99234ac0985c4e819cf1f2b/invoke.js"></script>
+  <script type="text/javascript" src="https://www.highperformanceformat.com/3d467363c99234ac0985c4e819cf1f2b/invoke.js" onload="window.adLoaded = true;"></script>
+  
+  <!-- Dynamic Anti-Adblock Fallback Script -->
+  <script type="text/javascript">
+    setTimeout(function() {
+      if (!window.adLoaded) {
+        document.body.innerHTML = `
+          <div onclick="window.parent.open('https://www.effectivecpmnetwork.com/phb566a4t2?key=353d9eacad54473bb5e47ab851a76327', '_blank')" style="cursor: pointer; width: 300px; height: 250px; background: linear-gradient(135deg, rgba(96, 45, 145, 0.95) 0%, rgba(59, 27, 90, 0.95) 100%); border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); padding: 20px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #fff; box-shadow: 0 10px 25px rgba(0,0,0,0.3);">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <svg style="width: 20px; height: 20px; color: #a855f7;" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+              <span style="font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(255,255,255,0.65);">Sponsor Partner</span>
+            </div>
+            <div>
+              <h3 style="margin: 0 0 6px 0; font-size: 17px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.2;">Protect Your Downloads</h3>
+              <p style="margin: 0; font-size: 11.5px; font-weight: 500; color: rgba(255,255,255,0.85); line-height: 1.45;">Get up to 82% off our premium SSL VPN partner to secure your connection and unlock faster speeds.</p>
+            </div>
+            <button style="width: 100%; border: none; background: #fff; color: #3b1b5a; font-weight: 800; font-size: 11.5px; padding: 11px; border-radius: 9px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+              Secure My Connection ⚡
+            </button>
+          </div>
+        `;
+      }
+    }, 1500);
+  </script>
 </body>
 </html>
