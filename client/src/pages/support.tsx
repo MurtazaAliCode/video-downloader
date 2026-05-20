@@ -1,10 +1,11 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import { Heart, Sparkles, ShieldCheck, Video, ExternalLink, Zap, Lock, DollarSign, Gift } from "lucide-react";
+import { Heart, Sparkles, ShieldCheck, Video, ExternalLink, Zap, Lock, DollarSign, Gift, Star } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 // Framer motion variants
 const containerVariants = {
@@ -27,6 +28,61 @@ const itemVariants = {
 };
 
 export default function Support() {
+  const { toast } = useToast();
+  const [rating, setRating] = useState(5);
+  const [hoverRating, setHoverRating] = useState<number | null>(null);
+  const [name, setName] = useState("");
+  const [comment, setComment] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+
+  const handleReviewSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!comment.trim()) {
+      toast({
+        variant: "destructive",
+        title: "Required Field",
+        description: "Please enter a comment for your review.",
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const res = await fetch("/api/reviews", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: name.trim() || "Anonymous Supporter",
+          rating,
+          comment: comment.trim(),
+        }),
+      });
+
+      if (res.ok) {
+        setSubmitted(true);
+        toast({
+          title: "Thank You ❤️",
+          description: "Your rating was submitted! It will appear after a quick quality check.",
+        });
+        setName("");
+        setComment("");
+      } else {
+        throw new Error("Failed to submit");
+      }
+    } catch (err) {
+      console.error(err);
+      toast({
+        variant: "destructive",
+        title: "Submission Error",
+        description: "Could not submit review. Please try again.",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
   
   // Dynamic Script Loader for Adsterra Popunder & Social Bar (Mounted on `/support` only)
   useEffect(() => {
@@ -331,8 +387,126 @@ export default function Support() {
                   </a>
                 </div>
               </Card>
-
             </div>
+          </div>
+
+          {/* Interactive Supporter Review Widget */}
+          <div className="max-w-3xl mx-auto mt-16 mb-8 px-4">
+            <Card className="glass-card shadow-2xl border-white/20 overflow-hidden relative group">
+              <div className="absolute -inset-0.5 bg-gradient-to-r from-yellow-500/10 to-pink-500/10 rounded-2xl blur opacity-25"></div>
+              
+              <CardHeader className="relative text-center pb-2 pt-8">
+                <div className="inline-flex items-center space-x-2 bg-yellow-500/10 border border-yellow-500/20 px-3 py-1 rounded-full mb-3 animate-in fade-in zoom-in-95 duration-500">
+                  <Star className="w-3.5 h-3.5 text-yellow-500 fill-current animate-pulse" />
+                  <span className="text-[10px] font-bold text-yellow-500 uppercase tracking-widest">Share Your Experience</span>
+                </div>
+                <CardTitle className="text-2xl sm:text-3xl font-extrabold text-card-foreground">
+                  Drop Us a Star Rating! ⭐
+                </CardTitle>
+                <p className="text-xs sm:text-sm text-muted-foreground max-w-md mx-auto mt-2">
+                  Happy with VidDownloader? Rate us! Your feedback will be managed securely and featured on our home page after moderation.
+                </p>
+              </CardHeader>
+
+              <CardContent className="relative p-6 sm:p-10">
+                {submitted ? (
+                  <motion.div 
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="text-center py-8 space-y-4"
+                  >
+                    <div className="w-16 h-16 bg-green-500/15 rounded-full flex items-center justify-center mx-auto text-green-400 border border-green-500/30">
+                      <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7"></path>
+                      </svg>
+                    </div>
+                    <h4 className="text-xl font-bold text-green-400">Review Submitted Successfully!</h4>
+                    <p className="text-sm text-muted-foreground max-w-sm mx-auto">
+                      Thank you so much for your kind support. Once approved by our team, your review will showcase automatically on the front page.
+                    </p>
+                    <Button 
+                      onClick={() => setSubmitted(false)}
+                      variant="outline" 
+                      className="mt-2 border-white/20 bg-white/5 hover:bg-white/10"
+                    >
+                      Write Another Review
+                    </Button>
+                  </motion.div>
+                ) : (
+                  <form onSubmit={handleReviewSubmit} className="space-y-6">
+                    {/* Star Selector */}
+                    <div className="flex flex-col items-center space-y-2">
+                      <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Select Star Count</label>
+                      <div className="flex items-center gap-1">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <button
+                            key={star}
+                            type="button"
+                            onClick={() => setRating(star)}
+                            onMouseEnter={() => setHoverRating(star)}
+                            onMouseLeave={() => setHoverRating(null)}
+                            className="p-1 transition-transform hover:scale-125 focus:outline-none"
+                          >
+                            <Star 
+                              className={`w-8 h-8 sm:w-10 sm:h-10 transition-colors ${
+                                star <= (hoverRating ?? rating) 
+                                  ? "text-yellow-400 fill-current drop-shadow-md" 
+                                  : "text-white/20 fill-none"
+                              }`} 
+                            />
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="grid sm:grid-cols-2 gap-4">
+                      {/* Name input */}
+                      <div className="space-y-2">
+                        <label htmlFor="supporter-name" className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Your Name</label>
+                        <input
+                          id="supporter-name"
+                          type="text"
+                          value={name}
+                          onChange={(e) => setName(e.target.value)}
+                          placeholder="e.g. John Doe (Optional)"
+                          className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-primary/50 transition-colors placeholder:text-white/20"
+                        />
+                      </div>
+                      
+                      {/* Star selection indicator text */}
+                      <div className="space-y-2 flex flex-col justify-end">
+                        <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Selected Rating</span>
+                        <div className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-semibold text-yellow-400 flex items-center gap-2">
+                          ⭐ {rating} Out of 5 Stars
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Comment text */}
+                    <div className="space-y-2">
+                      <label htmlFor="supporter-comment" className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Your Experience / Feedback</label>
+                      <textarea
+                        id="supporter-comment"
+                        rows={3}
+                        required
+                        value={comment}
+                        onChange={(e) => setComment(e.target.value)}
+                        placeholder="Love the downloader! Quick, easy, and completely free server..."
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-primary/50 transition-colors placeholder:text-white/20 resize-none"
+                      />
+                    </div>
+
+                    <Button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className="w-full bg-gradient-to-r from-yellow-500 to-pink-500 hover:from-yellow-600 hover:to-pink-600 text-white font-bold py-6 text-base rounded-xl transition-all duration-300 shadow-xl cursor-pointer"
+                    >
+                      {isSubmitting ? "Submitting Review..." : "Submit My Rating ❤️"}
+                    </Button>
+                  </form>
+                )}
+              </CardContent>
+            </Card>
           </div>
 
           {/* Banner 728x90 (Horizontal Leaderboard at the bottom - Isolated Iframe) */}
