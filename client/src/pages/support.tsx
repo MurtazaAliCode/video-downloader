@@ -84,16 +84,9 @@ export default function Support() {
     }
   };
   
-  // Dynamic Script Loader for Adsterra Popunder & Social Bar (Mounted on `/support` only)
+  // Dynamic Script Loader for Adsterra Social Bar (Mounted on `/support` only)
   useEffect(() => {
-    // ---- A. Adsterra Popunder Script ----
-    const popunderScript = document.createElement("script");
-    popunderScript.type = "text/javascript";
-    popunderScript.src = "https://pl29050241.effectivecpmnetwork.com/ec/a1/0d/eca10d8b4eada957b38f8cbebe427b29.js";
-    popunderScript.async = true;
-    document.body.appendChild(popunderScript);
-
-    // ---- B. Adsterra Social Bar Script ----
+    // ---- Adsterra Social Bar Script (Safe, non-intrusive) ----
     const socialBarScript = document.createElement("script");
     socialBarScript.type = "text/javascript";
     socialBarScript.src = "https://pl29050243.effectivecpmnetwork.com/a6/80/2f/a6802f5cfc02b7c8d4821933c0525799.js";
@@ -104,7 +97,6 @@ export default function Support() {
     return () => {
       console.log("🧹 Cleaning up Adsterra background scripts...");
       try {
-        if (document.body.contains(popunderScript)) document.body.removeChild(popunderScript);
         if (document.body.contains(socialBarScript)) document.body.removeChild(socialBarScript);
       } catch (err) {
         console.error("Script cleanup warning:", err);
