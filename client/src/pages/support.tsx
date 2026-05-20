@@ -34,6 +34,13 @@ export default function Support() {
   const [name, setName] = useState("");
   const [comment, setComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [sidebarLoaded, setSidebarLoaded] = useState(false);
+  const [sponsoredLoaded, setSponsoredLoaded] = useState(false);
+  const [leaderboardLoaded, setLeaderboardLoaded] = useState(false);
+
+  const [useSidebarFallback, setUseSidebarFallback] = useState(false);
+  const [useSponsoredFallback, setUseSponsoredFallback] = useState(false);
+  const [useLeaderboardFallback, setUseLeaderboardFallback] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
   const handleReviewSubmit = async (e: React.FormEvent) => {
@@ -84,23 +91,37 @@ export default function Support() {
     }
   };
   
-  // Dynamic Script Loader for Adsterra Social Bar (Mounted on `/support` only)
+  // Dynamic Handshake Listener to detect Adblock / DNS Blocking & Unmount Broken Iframes
   useEffect(() => {
-    // ---- Adsterra Social Bar Script (Safe, non-intrusive) ----
-    const socialBarScript = document.createElement("script");
-    socialBarScript.type = "text/javascript";
-    socialBarScript.src = "https://pl29050243.effectivecpmnetwork.com/a6/80/2f/a6802f5cfc02b7c8d4821933c0525799.js";
-    socialBarScript.async = true;
-    document.body.appendChild(socialBarScript);
-
-    // CLEANUP HANDLER (Runs automatically when navigating away from /support)
-    return () => {
-      console.log("🧹 Cleaning up Adsterra background scripts...");
-      try {
-        if (document.body.contains(socialBarScript)) document.body.removeChild(socialBarScript);
-      } catch (err) {
-        console.error("Script cleanup warning:", err);
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data && event.data.type === 'AD_TEMPLATE_LOADED') {
+        const key = event.data.key;
+        if (key === 'sidebar') setSidebarLoaded(true);
+        if (key === 'sponsored') setSponsoredLoaded(true);
+        if (key === 'leaderboard') setLeaderboardLoaded(true);
       }
+    };
+
+    window.addEventListener('message', handleMessage);
+
+    const timer = setTimeout(() => {
+      setSidebarLoaded(current => {
+        if (!current) setUseSidebarFallback(true);
+        return current;
+      });
+      setSponsoredLoaded(current => {
+        if (!current) setUseSponsoredFallback(true);
+        return current;
+      });
+      setLeaderboardLoaded(current => {
+        if (!current) setUseLeaderboardFallback(true);
+        return current;
+      });
+    }, 1800);
+
+    return () => {
+      window.removeEventListener('message', handleMessage);
+      clearTimeout(timer);
     };
   }, []);
 
@@ -197,11 +218,34 @@ export default function Support() {
               <Card className="glass-card border-white/10 p-4">
                 <h4 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-4 text-center">Sponsored Content</h4>
                 <div className="flex justify-center w-full min-h-[140px] overflow-hidden rounded-xl bg-muted/5 border border-white/5">
-                  <iframe
-                    src="/partners/sponsored-widget.html"
-                    style={{ width: '100%', height: '140px', border: 'none' }}
-                    title="Native Ad Banner"
-                  />
+                  {useSponsoredFallback ? (
+                    <div 
+                      onClick={handleSmartlinkClick} 
+                      className="cursor-pointer w-full h-[140px] bg-gradient-to-r from-blue-900/30 to-slate-900/30 border border-white/10 rounded-xl p-6 flex items-center justify-between hover:scale-[1.01] transition-all duration-300 relative group overflow-hidden"
+                    >
+                      <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                      <div className="flex items-center gap-4 relative z-10">
+                        <div className="w-12 h-12 rounded-xl bg-blue-500/15 flex items-center justify-center border border-blue-500/30 shadow-md">
+                          <Gift className="w-6 h-6 text-blue-400" />
+                        </div>
+                        <div className="flex flex-col text-left max-w-[70%]">
+                          <h5 className="font-extrabold text-sm text-white tracking-tight">Sponsored Native Offer</h5>
+                          <p className="text-[11px] text-white/60 font-medium leading-relaxed mt-0.5 line-clamp-2">
+                            Access premium sponsor deals, unlock exclusive converting discounts, and support our server infrastructure.
+                          </p>
+                        </div>
+                      </div>
+                      <Button className="bg-blue-500 hover:bg-blue-600 text-white font-bold text-xs py-5 px-6 rounded-xl shadow-lg relative z-10 transition-transform duration-200 active:scale-95">
+                        Explore Offer ⚡
+                      </Button>
+                    </div>
+                  ) : (
+                    <iframe
+                      src="/partners/sponsored-widget.html"
+                      style={{ width: '100%', height: '140px', border: 'none' }}
+                      title="Native Ad Banner"
+                    />
+                  )}
                 </div>
               </Card>
 
@@ -214,11 +258,33 @@ export default function Support() {
               <Card className="glass-card border-white/20 p-4 overflow-hidden flex flex-col items-center justify-center min-h-[320px]">
                 <h4 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-4">Sponsor Zone</h4>
                 <div className="w-[300px] h-[250px] bg-muted/5 border border-white/5 rounded-lg flex items-center justify-center overflow-hidden">
-                  <iframe
-                    src="/partners/sidebar-widget.html"
-                    style={{ width: '300px', height: '250px', border: 'none' }}
-                    title="Square Banner Ad"
-                  />
+                  {useSidebarFallback ? (
+                    <div 
+                      onClick={handleSmartlinkClick} 
+                      className="cursor-pointer w-[300px] h-[250px] bg-gradient-to-br from-indigo-900/40 to-purple-950/40 border border-white/10 rounded-xl p-5 flex flex-col justify-between hover:scale-[1.02] transition-all duration-300 relative group overflow-hidden"
+                    >
+                      <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                      <div className="flex items-center gap-2 relative z-10 text-left">
+                        <Lock className="w-5 h-5 text-purple-400" />
+                        <span className="text-[10px] font-bold text-white/50 uppercase tracking-widest">Sponsor Partner</span>
+                      </div>
+                      <div className="text-left relative z-10 mt-2">
+                        <h5 className="font-extrabold text-base text-white tracking-tight leading-snug">Protect Your Downloads</h5>
+                        <p className="text-[11.5px] text-white/60 font-medium leading-relaxed mt-1">
+                          Get up to 82% off our premium SSL VPN partner to secure your connection and unlock faster speeds.
+                        </p>
+                      </div>
+                      <Button className="w-full bg-white hover:bg-white/95 text-indigo-950 font-extrabold text-xs py-5 rounded-xl shadow-lg relative z-10 transition-transform duration-200 active:scale-95 mt-2">
+                        Secure My Connection ⚡
+                      </Button>
+                    </div>
+                  ) : (
+                    <iframe
+                      src="/partners/sidebar-widget.html"
+                      style={{ width: '300px', height: '250px', border: 'none' }}
+                      title="Square Banner Ad"
+                    />
+                  )}
                 </div>
               </Card>
 
@@ -476,11 +542,34 @@ export default function Support() {
             <Card className="glass-card border-white/10 p-4 w-full flex flex-col items-center justify-center overflow-hidden">
               <h4 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-4">Sponsor Leaderboard</h4>
               <div className="w-[728px] h-[90px] bg-muted/5 border border-white/5 rounded-lg flex items-center justify-center overflow-hidden">
-                <iframe
-                  src="/partners/leaderboard-widget.html"
-                  style={{ width: '728px', height: '90px', border: 'none' }}
-                  title="Leaderboard Banner Ad"
-                />
+                {useLeaderboardFallback ? (
+                  <div 
+                    onClick={handleSmartlinkClick} 
+                    className="cursor-pointer w-[728px] h-[90px] bg-gradient-to-r from-slate-900/30 to-violet-950/30 border border-white/10 rounded-xl px-8 py-3 flex items-center justify-between hover:scale-[1.01] transition-all duration-300 relative group overflow-hidden"
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-r from-violet-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                    <div className="flex items-center gap-4 relative z-10 text-left">
+                      <div className="w-10 h-10 rounded-full bg-yellow-500/15 flex items-center justify-center border border-yellow-500/30 shadow-md">
+                        <Star className="w-5 h-5 text-yellow-400" />
+                      </div>
+                      <div className="flex flex-col">
+                        <h5 className="font-extrabold text-sm text-white tracking-tight leading-snug">Help Keep VidDownloader 100% Free</h5>
+                        <p className="text-[11px] text-white/50 font-medium leading-relaxed mt-0.5">
+                          Support our high-speed server bandwidth by completing a quick visit to our trusted partner deal.
+                        </p>
+                      </div>
+                    </div>
+                    <Button className="bg-gradient-to-r from-yellow-500 to-pink-500 hover:from-yellow-600 hover:to-pink-600 text-white font-extrabold text-xs py-5 px-6 rounded-xl shadow-lg relative z-10 transition-transform duration-200 active:scale-95">
+                      Support Free Servers ⚡
+                    </Button>
+                  </div>
+                ) : (
+                  <iframe
+                    src="/partners/leaderboard-widget.html"
+                    style={{ width: '728px', height: '90px', border: 'none' }}
+                    title="Leaderboard Banner Ad"
+                  />
+                )}
               </div>
             </Card>
           </div>
