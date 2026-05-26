@@ -8,6 +8,9 @@
 </head>
 <body>
   <script type="text/javascript">
+    // Handshake to notify React parent that file loaded successfully
+    window.parent.postMessage({ type: 'AD_TEMPLATE_LOADED', key: 'leaderboard' }, '*');
+    
     window.adLoaded = false;
     atOptions = {
       'key' : '17fabec5c7b61662844da4c1bb680fea',

@@ -10,6 +10,9 @@
   <div id="container-29fe2d5304bd54293737dac53bdf19de" style="width: 100%; min-height: 100px;"></div>
   
   <script type="text/javascript">
+    // Handshake to notify React parent that file loaded successfully
+    window.parent.postMessage({ type: 'AD_TEMPLATE_LOADED', key: 'sponsored' }, '*');
+    
     window.adLoaded = false;
   </script>
   <script async="async" data-cfasync="false" src="https://pl29050240.effectivecpmnetwork.com/29fe2d5304bd54293737dac53bdf19de/invoke.js" onload="window.adLoaded = true;"></script>

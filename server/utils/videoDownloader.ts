@@ -847,7 +847,7 @@ export async function fetchVideoMetadata(videoUrl: string): Promise<{ title: str
         const ffmpegPath = await getFfmpegPath();
         if (ffmpegPath) options['ffmpeg-location'] = ffmpegPath;
 
-        const info = await ytdlp(videoUrl, options);
+        const info: any = await ytdlp(videoUrl, options);
         return {
             title: info.title || 'Video',
             thumbnail: info.thumbnail || '',

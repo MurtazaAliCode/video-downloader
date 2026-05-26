@@ -450,7 +450,7 @@ router.get("/reviews/admin", async (req: Request, res: Response) => {
   }
 
   try {
-    const reviews = await storage.getReviews(100, 0, false);
+    const reviews = await storage.getReviews(100, 0, { onlyApproved: false });
     return res.json(reviews);
   } catch (error) {
     return res.status(500).json({ message: "Error fetching admin reviews." });
