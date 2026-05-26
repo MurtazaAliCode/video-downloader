@@ -220,8 +220,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-background text-foreground selection:bg-primary selection:text-white">
       <Header />
-      <AdSocialBar />
-      <AdBanner />
+      {/* <AdBanner /> */}
 
       {/* Hero Section */}
       <section className="min-h-screen w-full dark:gradient-bg-dark gradient-bg relative overflow-hidden flex items-center justify-center">
@@ -364,7 +363,7 @@ export default function Home() {
 
             {/* Sidebar with Ads and Features */}
             <div className="lg:col-span-1 space-y-6 w-full">
-              <AdSidebar />
+              {/* <AdSidebar /> */}
 
               <Card className="glass-card border-white/20">
                 <CardHeader>
@@ -586,7 +585,7 @@ export default function Home() {
       </section>
 
       <Footer />
-      <AdStickyFooter />
+      {/* <AdStickyFooter /> */}
     </div>
   );
 }
