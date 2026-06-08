@@ -5,18 +5,16 @@ FROM node:20-slim AS builder
 
 WORKDIR /app
 
-# Copy package files first (cache optimization)
+# Copy package files first
 COPY package.json package-lock.json ./
 
-# Install ALL deps (devDeps needed for build)
+# Install ALL deps
 RUN npm ci --include=dev
 
 # Copy source files
 COPY . .
 
-# Build:
-# 1. Vite builds React → dist/public/
-# 2. esbuild compiles server → dist/index.js
+# Build frontend & backend
 RUN YOUTUBE_DL_SKIP_DOWNLOAD=true npx vite build && \
     npx esbuild server/index.ts \
       --platform=node \
@@ -26,13 +24,13 @@ RUN YOUTUBE_DL_SKIP_DOWNLOAD=true npx vite build && \
       --outdir=dist
 
 # =====================================================
-# Stage 2: Runtime — Lean production image
+# Stage 2: Runtime — Hugging Face Spec (Port 7860 + User 1000)
 # =====================================================
 FROM node:20-slim AS runtime
 
 WORKDIR /app
 
-# Install system tools: ffmpeg, curl, etc.
+# Install system tools
 RUN apt-get update && apt-get install -y \
     ffmpeg \
     curl \
@@ -45,34 +43,37 @@ RUN curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp \
     -o /app/yt-dlp && \
     chmod +x /app/yt-dlp
 
-# Create symlinks so code finds ffmpeg at ./ffmpeg
+# Create symlinks for ffmpeg
 RUN ln -sf /usr/bin/ffmpeg /app/ffmpeg && \
     ln -sf /usr/bin/ffprobe /app/ffprobe
 
-# Copy package.json for production install
+# Copy package.json for production
 COPY package.json package-lock.json ./
 
-# Install production deps only
+# Install production deps
 RUN npm ci --omit=dev
 
 # Copy built server from builder
 COPY --from=builder /app/dist ./dist
 
-# Copy shared schema (needed at runtime by drizzle)
+# Copy shared schema
 COPY --from=builder /app/shared ./shared
 
-# Copy cookies.txt (YouTube auth - optional)
-# If cookies.txt doesn't exist, it's skipped gracefully
+# Copy cookies.txt (optional)
 COPY --from=builder /app/cookies.txt* ./
 
-# Create downloads folder
-RUN mkdir -p /app/downloads
+# Create downloads folder and set ownership to 'node' user (UID 1000)
+RUN mkdir -p /app/downloads && \
+    chown -R node:node /app
 
-# Environment
+# Switch to non-root 'node' user (Hugging Face requirement)
+USER node
+
+# Environment (Hugging Face expects port 7860)
 ENV NODE_ENV=production
-ENV PORT=8080
+ENV PORT=7860
 
-EXPOSE 8080
+EXPOSE 7860
 
 # Start server
 CMD ["node", "dist/index.js"]
