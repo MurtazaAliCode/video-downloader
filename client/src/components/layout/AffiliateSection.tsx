@@ -83,41 +83,17 @@ export default function AffiliateSection() {
           </Card>
         </motion.div>
 
-        {/* Movavi Card */}
+        {/* Sponsor Banner Card */}
         <motion.div variants={itemVariants}>
-          <Card className="overflow-hidden border-accent/20 bg-card/50 backdrop-blur-sm group hover:border-accent/40 transition-all duration-300">
-            <CardContent className="p-0">
-              <div className="bg-gradient-to-br from-purple-600 to-pink-700 p-6 flex flex-col items-center text-white relative overflow-hidden">
-                <div className="absolute top-0 right-0 p-3 opacity-20 group-hover:scale-110 transition-transform duration-500">
-                  <Video className="w-20 h-20" />
-                </div>
-                <Video className="w-12 h-12 mb-4 drop-shadow-lg" />
-                <h3 className="text-xl font-bold mb-1">Movavi Editor</h3>
-                <span className="text-xs font-semibold bg-white/20 px-2 py-0.5 rounded-full mb-4">BEST FOR CREATORS</span>
-              </div>
-              <div className="p-6">
-                <ul className="space-y-2 mb-6">
-                  <li className="flex items-center text-sm text-muted-foreground">
-                    <Zap className="w-4 h-4 mr-2 text-accent" /> Edit TikToks & Reels in minutes
-                  </li>
-                  <li className="flex items-center text-sm text-muted-foreground">
-                    <Zap className="w-4 h-4 mr-2 text-accent" /> Add professional effects & transitions
-                  </li>
-                  <li className="flex items-center text-sm text-muted-foreground">
-                    <Zap className="w-4 h-4 mr-2 text-accent" /> Export in 4K resolution
-                  </li>
-                </ul>
-                <a 
-                  href="https://www.movavi.com/video-editor/" 
-                  target="_blank" 
-                  rel="nofollow noopener sponsored"
-                  className="w-full"
-                >
-                  <Button className="w-full group bg-accent hover:bg-accent/90" variant="default">
-                    Try For Free
-                    <ExternalLink className="w-4 h-4 ml-2 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
-                  </Button>
-                </a>
+          <Card className="overflow-hidden border-accent/20 bg-card/50 backdrop-blur-sm group hover:border-accent/40 transition-all duration-300 flex flex-col justify-center items-center h-full min-h-[415px] shadow-lg">
+            <CardContent className="p-6 flex flex-col items-center justify-center w-full h-full">
+              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-4">Sponsored Advertisement</span>
+              <div className="w-[300px] h-[250px] bg-muted/5 border border-white/5 rounded-lg flex items-center justify-center overflow-hidden">
+                <iframe
+                  src="/partners/sidebar-widget.html"
+                  style={{ width: '300px', height: '250px', border: 'none' }}
+                  title="Square Banner Ad"
+                />
               </div>
             </CardContent>
           </Card>

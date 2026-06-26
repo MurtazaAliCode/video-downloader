@@ -19,12 +19,12 @@ export default function AffiliateSmall({ type, compact = false }: AffiliateSmall
     url: "https://billing.purevpn.com/aff.php?aff=49387687",
     cta: "Secure My Connection"
   } : {
-    title: "Movavi Video Editor",
-    tagline: "Edit Reels & TikToks",
-    icon: <Video className="w-8 h-8 text-white" />,
+    title: "Sponsor Offer",
+    tagline: "Support Our Website",
+    icon: <ShieldCheck className="w-8 h-8 text-white" />,
     gradient: "from-purple-600 to-pink-700",
-    url: "https://www.mvvitrk.com/click?pid=6156&offer_id=9",
-    cta: "Try Free Editor"
+    url: "https://www.effectivecpmnetwork.com/phb566a4t2?key=353d9eacad54473bb5e47ab851a76327",
+    cta: "Explore Deal"
   };
 
   return (

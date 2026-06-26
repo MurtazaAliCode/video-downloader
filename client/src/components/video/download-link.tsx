@@ -24,66 +24,39 @@ export function DownloadLink({ jobId, fileName, platform, downloadFormat = 'mp4'
   const autoDownloadedRef = useRef(false);
 
   const handleDownload = async (isManual = false) => {
-    if (isDownloading && !isManual) return;
     setIsDownloading(true);
     setError(null);
 
     const apiDownloadUrl = `/api/download/${jobId}`;
-    const extension = downloadFormat === 'mp3' ? 'mp3' : 'mp4';
-    const targetFileName = `${fileName || 'video'}.${extension}`;
 
     try {
-      // First, try the proxy download via our server
-      console.log('🚀 Attempting download via proxy...');
-      const response = await fetch(apiDownloadUrl);
-
-      // If we get a redirect (301, 302) or a block (403), handle it
-      if (response.redirected) {
-        console.log('↩️ Server redirected to direct URL. User browser will handle it.');
-        window.location.href = response.url;
-        setDownloaded(true);
-        setIsDownloading(false);
-        return;
+      console.log('🚀 Triggering direct download...', { isManual });
+      
+      if (isManual) {
+        // For manual click, open in a new tab to guarantee the browser initiates download
+        window.open(apiDownloadUrl, '_blank');
+      } else {
+        // For automatic on-mount download, use a hidden iframe to prevent popup blocks and empty tabs
+        const iframe = document.createElement('iframe');
+        iframe.style.display = 'none';
+        iframe.src = apiDownloadUrl;
+        document.body.appendChild(iframe);
+        
+        setTimeout(() => {
+          if (document.body.contains(iframe)) {
+            document.body.removeChild(iframe);
+          }
+        }, 15000);
       }
-
-      if (!response.ok) {
-        console.warn(`Proxy failed with status ${response.status}`);
-        // If it's a 403, we should have been redirected by the server already. 
-        // If not, we'll try a manual fallback in the catch block.
-        throw new Error('primary_failed');
-      }
-
-      const blob = await response.blob();
-      const blobUrl = window.URL.createObjectURL(blob);
-
-      const link = document.createElement('a');
-      link.href = blobUrl;
-      link.download = targetFileName;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-
-      setTimeout(() => window.URL.revokeObjectURL(blobUrl), 10000);
 
       setDownloaded(true);
       setIsDownloading(false);
 
     } catch (err: any) {
-      console.warn('Primary download failed, attempting browser-direct fallback...', err);
-
-      // Fallback: Just let the browser handle the redirect directly
-      const mirrorLink = document.createElement('a');
-      mirrorLink.href = apiDownloadUrl;
-      mirrorLink.target = '_blank'; // Open in new tab to avoid losing current page if it's a direct file
-      document.body.appendChild(mirrorLink);
-      mirrorLink.click();
-      document.body.removeChild(mirrorLink);
-
-      setHasTriedFallback(true);
-      setTimeout(() => {
-        setDownloaded(true);
-        setIsDownloading(false);
-      }, 2000);
+      console.warn('Download trigger failed, falling back to direct navigation...', err);
+      window.location.href = apiDownloadUrl;
+      setDownloaded(true);
+      setIsDownloading(false);
     }
   };
 
